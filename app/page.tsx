@@ -103,6 +103,7 @@ export default function Home() {
   const gameIdRef = useRef<string | null>(null);
   const sessionRef = useRef<{ token: string; user: SessionUser } | null>(null);
   const gameRef = useRef<State | null>(null);
+  const ownSlotRef = useRef<number | null>(null); // always-current copy of ownSlot (async animations must not read a stale closure)
   const reconnectTimerRef = useRef<number | null>(null);
   const pingTimerRef = useRef<number | null>(null);
   const moveTimerRef = useRef<number | null>(null);
@@ -156,6 +157,8 @@ export default function Home() {
     };
   };
   const setAuthoritativeGame = (next: State | null) => { gameRef.current = next; setGame(next); };
+  // Player-relative colour for flying orbs: you = green, opponent = red. Reads the ref, never a stale closure.
+  const flightColor = (slot: number) => ownSlotRef.current === null ? COLORS[slot % 2] : slot === ownSlotRef.current ? COLORS[0] : COLORS[1];
   // ---- Reaction animation -------------------------------------------------------------------
   // Moves are queued so two reactions can never play over each other. Each job owns its own
   // private "display board" that nothing else touches until the job finishes.
@@ -222,7 +225,7 @@ export default function Home() {
       const duration = Math.max(110, TIMING.flight * speed);
       await Promise.all(transfers.map((t) => {
         const n = perSource.get(t.from) ?? 0; perSource.set(t.from, n + 1);
-        const handle = layer && grid ? launchOrb(layer, grid, t, colorForSlot(t.player), n * TIMING.stagger * speed, duration) : null;
+        const handle = layer && grid ? launchOrb(layer, grid, t, flightColor(t.player), n * TIMING.stagger * speed, duration) : null;
         return (handle ? handle.finished : sleep(duration)).then(async () => {
           if (!alive()) return;
           frames[t.to] = { owner: t.player, orb_count: frames[t.to].orb_count + 1 };
@@ -331,7 +334,7 @@ export default function Home() {
         const messageType = String(message.type ?? '').toLowerCase();
         const payload = message.payload ?? {};
         if (messageType === 'connection_ack') {
-          setOwnSlot(payload.player_slot ?? null);
+          ownSlotRef.current = payload.player_slot ?? null; setOwnSlot(payload.player_slot ?? null);
           if (typeof payload.player_slot === 'number') setPlayerConnected((current) => current.map((connected, slot) => slot === payload.player_slot ? true : connected));
         }
         if (messageType === 'state_snapshot' && payload.state) {
@@ -340,7 +343,7 @@ export default function Home() {
           setPlayerClocks([people.find((p: { player_slot: number }) => p.player_slot === 0)?.time_remaining_ms ?? 0, people.find((p: { player_slot: number }) => p.player_slot === 1)?.time_remaining_ms ?? 0]);
           setPlayerConnected([people.find((p: { player_slot: number }) => p.player_slot === 0)?.connected ?? false, people.find((p: { player_slot: number }) => p.player_slot === 1)?.connected ?? false]);
           const mySlot = people.find((p: { user_id: string }) => p.user_id === sessionRef.current?.user.id)?.player_slot ?? null;
-          setOwnSlot(mySlot);
+          ownSlotRef.current = mySlot; setOwnSlot(mySlot);
           const next = normalizeState(payload.state); setAuthoritativeGame(next);
           setStage(payload.status === 'FINISHED' || next.status.kind === 'won' ? 'finished' : 'game');
           lastSequenceRef.current = Math.max(lastSequenceRef.current, Number(payload.turn_number ?? next.turn_number));
@@ -482,6 +485,7 @@ export default function Home() {
   const winner = game?.status.kind === 'won' ? (game.status.winner ?? null) : null;
   const current = game?.players[game.current_player_index]?.id ?? 0;
   const isYourTurn = ownSlot !== null && current === ownSlot;
+  ownSlotRef.current = ownSlot;
   const colorForSlot = (slot: number) => ownSlot === null
     ? COLORS[slot % 2]
     : slot === ownSlot ? COLORS[0] : COLORS[1];
