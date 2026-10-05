@@ -29,8 +29,11 @@ const neighbours = (i: number, w: number, h: number) => {
   return out;
 };
 const sleep = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
-// Global speed of the reaction animation. 1 = original pace, 1.5 = 50% faster.
-const TEMPO = 2.4;
+// Reaction timing in milliseconds, per wave (one burst -> flight -> landing). Edit these to taste.
+//   charge : cells about to burst shake/glow     flight : one orb travelling cell to cell
+//   stagger: delay between orbs leaving one cell  settle : pause after landing before the next wave
+// Long chains automatically run faster (x0.8 from wave 4, x0.65 from wave 9).
+const TIMING = { intro: 90, charge: 80, flight: 170, stagger: 14, settle: 30 };
 const nextPaint = () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
 
 // Flies one orb between the REAL on-screen centres of two cells. Geometry is read from the DOM,
@@ -182,7 +185,7 @@ export default function Home() {
     if (placed !== null) { frames[placed].owner = placement.player; frames[placed].orb_count += 1; }
     push();
     setWave({ charge: [], burst: [], receive: placed !== null ? [{ cell: placed, player: placement.player }] : [] });
-    await sleep((rawSteps.length ? 240 : 420) / TEMPO); if (!alive()) return;
+    await sleep(rawSteps.length ? TIMING.intro : 220); if (!alive()) return;
 
     for (const [stepIndex, step] of rawSteps.entries()) {
       const speed = stepIndex < 3 ? 1 : stepIndex < 8 ? 0.8 : 0.65; // long chains speed up a little
@@ -200,7 +203,7 @@ export default function Home() {
 
       // 1. CHARGE: the cells about to burst shake and glow while their orbs are still inside.
       setWave({ charge: explosions, burst: [], receive: [] });
-      await sleep((280 * speed) / TEMPO); if (!alive()) return;
+      await sleep(TIMING.charge * speed); if (!alive()) return;
 
       // 2. LAUNCH: orbs leave the source cells (the board is updated now, not at the end).
       const bursts = explosions.map((cell) => ({ cell, player: frames[cell].owner ?? 0 }));
@@ -216,10 +219,10 @@ export default function Home() {
       const layer = flightLayerRef.current, grid = gridRef.current;
       const landed: { cell: number; player: number }[] = [];
       const perSource = new Map<number, number>();
-      const duration = Math.max(170, (640 * speed) / TEMPO);
+      const duration = Math.max(110, TIMING.flight * speed);
       await Promise.all(transfers.map((t) => {
         const n = perSource.get(t.from) ?? 0; perSource.set(t.from, n + 1);
-        const handle = layer && grid ? launchOrb(layer, grid, t, colorForSlot(t.player), (n * 45 * speed) / TEMPO, duration) : null;
+        const handle = layer && grid ? launchOrb(layer, grid, t, colorForSlot(t.player), n * TIMING.stagger * speed, duration) : null;
         return (handle ? handle.finished : sleep(duration)).then(async () => {
           if (!alive()) return;
           frames[t.to] = { owner: t.player, orb_count: frames[t.to].orb_count + 1 };
@@ -231,7 +234,7 @@ export default function Home() {
       if (!alive()) return;
 
       // 4. SETTLE: hold the board so every landed orb is actually seen before the next wave.
-      await sleep((260 * speed) / TEMPO); if (!alive()) return;
+      await sleep(TIMING.settle * speed); if (!alive()) return;
     }
     setDisplayCells(finalCells.map((cell) => ({ ...cell }))); setWave(null);
     await nextPaint();
@@ -258,7 +261,7 @@ export default function Home() {
     pendingMoveRef.current = null;
     setLastMove(lastCell);
     const steps = reaction.steps ?? [];
-    console.debug('[reaction] move', payload.sequence, { hadPreviousBoard: Boolean(before), steps: steps.length, firstStep: steps[0] });
+    console.debug('[reaction] move', payload.sequence, { hadPreviousBoard: Boolean(before), steps: steps.length, firstStep: steps[0], timing: TIMING });
     if (before && (steps.length > 0 || animationPendingRef.current > 0)) {
       const placementPlayer = reaction.placement?.player ?? payload.player_slot ?? before.players[before.current_player_index]?.id ?? 0;
       enqueueAnimation((alive) => playReaction(alive, before, { cell: reaction.placement?.cell ?? lastCell, player: placementPlayer }, steps, finalState.board.cells));
@@ -719,7 +722,7 @@ export default function Home() {
                             >
                               {/* This wrapper stays centered while each sphere's surface spins in place. */}
                               <span className="orb-cluster">
-                                <span className="orb-ring">
+                                <span className="orb-ring" key={Math.min(cell.orb_count, 4)}>
                                   {Array.from(
                                     { length: Math.min(cell.orb_count, 4) },
                                     (_, j) => (
