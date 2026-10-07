@@ -226,7 +226,7 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
     const explicitWebSocketUrl = process.env.NEXT_PUBLIC_WS_URL;
     const apiOrigin = process.env.NEXT_PUBLIC_API_URL
       ? new URL(process.env.NEXT_PUBLIC_API_URL, location.origin).origin.replace(/^http/, 'ws')
-      : 'ws://20.240.198.63:8080';
+      : 'wss://backend.samyakshrma.space';
     const websocketBase = explicitWebSocketUrl || apiOrigin;
     const socket = new WebSocket(
       `${websocketBase.replace(/\/$/, '')}/ws/games/${id}?token=${encodeURIComponent(token)}`,
