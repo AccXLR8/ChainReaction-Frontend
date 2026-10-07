@@ -1,0 +1,481 @@
+/* Carry the game arena's matte surfaces and restrained neon palette through the app. */
+:root {
+  --arena-black: #070908;
+  --arena-panel: #0b0e0c;
+  --arena-panel-raised: #101411;
+  --arena-line: #303832;
+  --arena-white: #f2f5f2;
+  --arena-muted: #b3beb6;
+  --arena-green: #39e58c;
+  --arena-red: #ff5964;
+}
+
+html,
+body {
+  background: var(--arena-black);
+  color: var(--arena-white);
+  font-family: Inter, Arial, sans-serif;
+}
+
+/* Signed-out entry and visual rules guide. */
+.welcome-shell {
+  --welcome-ink: var(--arena-white);
+  --welcome-muted: var(--arena-muted);
+  --welcome-green: var(--arena-green);
+  --welcome-border: var(--arena-line);
+  max-width: none;
+  min-height: 100vh;
+  color: var(--arena-white);
+  background: var(--arena-black);
+}
+
+.welcome-noise {
+  opacity: 0.08;
+  background-image: radial-gradient(#b9ffd51c 0.65px, transparent 0.65px);
+}
+
+.welcome-content {
+  max-width: none;
+}
+
+.welcome-copy .eyebrow,
+.welcome-copy h1,
+.how-to-play,
+.how-to-play > h2,
+.rule-step h3,
+.bot-callout h3 {
+  color: var(--arena-white);
+  font-family: Inter, Arial, sans-serif;
+}
+
+.welcome-copy h1 {
+  font-size: clamp(44px, 5.7vw, 76px);
+  line-height: 1.04;
+  letter-spacing: -0.055em;
+  font-weight: 750;
+}
+
+.welcome-copy > p,
+.how-to-intro,
+.rule-step p,
+.bot-callout p {
+  color: var(--arena-muted);
+}
+
+.welcome-feature {
+  border-color: var(--arena-line);
+}
+
+.welcome-feature b {
+  color: var(--arena-white);
+  font-size: 13px;
+}
+
+.welcome-feature small {
+  color: var(--arena-muted);
+  font-size: 11px;
+}
+
+.auth-sidebar {
+  border-right-color: #28332c;
+  background: #090b0a;
+  scrollbar-color: #3c4940 #090b0a;
+}
+
+.auth-sidebar-brand {
+  color: var(--arena-white);
+  font-family: Inter, Arial, sans-serif;
+  font-size: 26px;
+  letter-spacing: -0.065em;
+}
+
+.auth-sidebar-brand .brand-wordmark span {
+  color: var(--arena-white);
+}
+
+.auth-sidebar-brand .brand-wordmark strong {
+  color: var(--arena-green);
+}
+
+.welcome-card {
+  padding: 24px 18px;
+  border: 1px solid #27332c;
+  border-radius: 9px;
+  background: #0c100d;
+  box-shadow: none;
+}
+
+.welcome-card .eyebrow-mini,
+.welcome-card label {
+  color: #c4cec7;
+}
+
+.welcome-card h2 {
+  color: var(--arena-white);
+  font: 700 27px/1.15 Inter, Arial, sans-serif;
+  letter-spacing: -0.04em;
+}
+
+.welcome-card > p {
+  color: var(--arena-muted);
+  font-size: 14px;
+}
+
+.welcome-card input {
+  border-color: #414a43;
+  background: #070908;
+  color: var(--arena-white);
+  font: 15px Inter, Arial, sans-serif;
+}
+
+.welcome-card input:focus {
+  border-color: var(--arena-green);
+  box-shadow: 0 0 0 3px #39e58c1c;
+}
+
+.welcome-card input::placeholder {
+  color: #87938a;
+}
+
+.welcome-card .primary-action,
+.welcome-card .guest-cta {
+  border: 1px solid var(--arena-green);
+  background: #0c2015;
+  color: #78f2ae;
+  box-shadow: 0 0 13px #39e58c15;
+}
+
+.welcome-card .primary-action:hover:not(:disabled),
+.welcome-card .guest-cta:hover:not(:disabled) {
+  border-color: #87f4b5;
+  background: #102a1b;
+}
+
+.welcome-card .secondary-action,
+.welcome-card .guest-button {
+  border-color: #d8dfda;
+  background: transparent;
+  color: var(--arena-white);
+}
+
+.welcome-card .secondary-action:hover:not(:disabled),
+.welcome-card .guest-button:hover:not(:disabled) {
+  border-color: var(--arena-green);
+  background: #ffffff08;
+}
+
+.welcome-card .auth-divider {
+  color: #aab6ad;
+}
+
+.welcome-card .auth-divider::before,
+.welcome-card .auth-divider::after,
+.welcome-card .card-foot {
+  border-color: var(--arena-line);
+}
+
+.welcome-card .auth-divider::before,
+.welcome-card .auth-divider::after {
+  background: var(--arena-line);
+}
+
+.welcome-card .auth-switch {
+  color: var(--arena-muted);
+  font-size: 12px;
+}
+
+.welcome-card .auth-switch button {
+  color: #76efaa;
+}
+
+.welcome-card .auth-error {
+  color: #ff858d;
+  font-size: 13px;
+}
+
+.welcome-card .card-foot {
+  color: var(--arena-muted);
+  font-size: 9px;
+}
+
+.welcome-footer {
+  border-color: var(--arena-line);
+  color: var(--arena-muted);
+}
+
+.welcome-footer b {
+  color: var(--arena-green);
+}
+
+/* Rules diagrams use the same dark neutral cells as the live arena. */
+.how-to-play > .eyebrow-mini {
+  color: #c0cbc3;
+}
+
+.how-to-play > h2 {
+  font-size: clamp(30px, 3.4vw, 42px);
+  letter-spacing: -0.045em;
+}
+
+.threshold-card,
+.rule-step,
+.bot-callout {
+  border-color: var(--arena-line);
+  border-radius: 8px;
+  background: var(--arena-panel);
+}
+
+.threshold-board {
+  border-color: #3a443d;
+  background: #050706;
+}
+
+.threshold-cell,
+.reaction-cell,
+.capture-board i {
+  border-color: #353e38;
+  background: #0d100e;
+}
+
+.threshold-cell.is-target,
+.reaction-cell.is-green {
+  border-color: #39e58c;
+  background: #0d2116;
+  box-shadow: inset 0 0 0 1px #39e58c26;
+}
+
+.reaction-cell.is-red {
+  border-color: #ff5964;
+  background: #241012;
+}
+
+.threshold-caption b,
+.rule-step h3,
+.bot-callout h3 {
+  color: var(--arena-white);
+}
+
+.threshold-caption > span,
+.coming-soon {
+  color: #c0cbc3;
+}
+
+.threshold-caption > span i,
+.rule-number,
+.reaction-arrow,
+.capture-arrow,
+.capture-label {
+  color: var(--arena-green);
+}
+
+.reaction-cell.is-red i,
+.capture-board i.red-orb {
+  background: var(--arena-red);
+  box-shadow: 0 0 6px #ff596455;
+}
+
+.capture-board {
+  border-color: #414a43;
+  background: #050706;
+}
+
+.capture-board i:not(.red-orb) {
+  border-color: var(--arena-green);
+  background: #39e58c;
+  box-shadow: 0 0 7px #39e58c66;
+}
+
+.bot-mark {
+  border: 1px solid #39e58c70;
+  background: #102519;
+  color: var(--arena-green);
+}
+
+.coming-soon {
+  border-color: #59645c;
+  border-radius: 5px;
+}
+
+/* Player lobby and matchmaking queue. */
+.lobby-shell {
+  max-width: none;
+  min-height: 100vh;
+  padding-right: clamp(20px, 5vw, 76px);
+  padding-left: clamp(20px, 5vw, 76px);
+  color: var(--arena-white);
+  background: var(--arena-black);
+}
+
+.lobby-topbar {
+  border-bottom-color: var(--arena-line);
+}
+
+.lobby-topbar .brand,
+.lobby-user {
+  color: var(--arena-white);
+  font-family: Inter, Arial, sans-serif;
+}
+
+.lobby-topbar .brand-wordmark span {
+  color: var(--arena-white);
+}
+
+.lobby-topbar .brand-wordmark strong {
+  color: var(--arena-green);
+}
+
+.lobby-user {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.lobby-user small {
+  color: var(--arena-green);
+  font-size: 10px;
+}
+
+.lobby-user button {
+  border-left-color: var(--arena-line);
+  color: #d5ddd7;
+  font-size: 13px;
+}
+
+.lobby-user button:hover {
+  color: var(--arena-green);
+}
+
+.user-avatar {
+  border-color: var(--arena-green);
+  background: #0e2518;
+  color: #82f1b1;
+  box-shadow: 0 0 12px #39e58c1c;
+}
+
+.lobby-copy .eyebrow,
+.welcome-copy .eyebrow {
+  color: #c1ccc4;
+}
+
+.lobby-copy h1 {
+  color: var(--arena-white);
+  font-family: Inter, Arial, sans-serif;
+  font-weight: 750;
+  letter-spacing: -0.055em;
+}
+
+.lobby-copy h1 em,
+.lobby-copy h1 span {
+  color: var(--arena-green);
+}
+
+.lobby-copy > p {
+  color: var(--arena-muted);
+  font-size: 16px;
+}
+
+.lobby-error {
+  color: #ff858d;
+  font-size: 14px;
+}
+
+.lobby-play,
+.queue-actions .primary-action {
+  border: 1px solid var(--arena-green);
+  background: #0c2015;
+  color: #78f2ae;
+  box-shadow: 0 0 14px #39e58c18;
+}
+
+.lobby-play:hover:not(:disabled),
+.queue-actions .primary-action:hover:not(:disabled) {
+  border-color: #87f4b5;
+  background: #102a1b;
+}
+
+.lobby-meta,
+.queue-state {
+  color: #c0cbc3;
+  font-size: 10px;
+}
+
+.lobby-meta i {
+  background: var(--arena-green);
+}
+
+.lobby-footer {
+  border-top-color: var(--arena-line);
+  color: var(--arena-muted);
+}
+
+.lobby-footer b {
+  color: var(--arena-green);
+}
+
+.lobby-art .art-grid {
+  filter: drop-shadow(0 18px 24px #0008);
+}
+
+.lobby-shell .art-grid i {
+  border-color: #343d37;
+  border-radius: 4px;
+  background: #0b0e0c;
+  box-shadow: none;
+}
+
+.lobby-shell .art-grid i.art-lit {
+  border-color: #39e58c99;
+  background: #0c2115;
+  box-shadow: inset 0 0 12px #39e58c1c, 0 0 10px #39e58c14;
+}
+
+.lobby-shell .art-grid i.art-hot {
+  border-color: #8ef4b7;
+  background: radial-gradient(circle, #39e58c 0, #0c2115 70%);
+  box-shadow: 0 0 18px #39e58c55;
+}
+
+.lobby-shell .art-label {
+  border-color: #404a43;
+  background: #090b0a;
+  color: var(--arena-white);
+}
+
+.lobby-shell .art-label span {
+  color: var(--arena-green);
+}
+
+@media (max-width: 700px) {
+  .welcome-shell,
+  .lobby-shell {
+    background: var(--arena-black);
+  }
+
+  .auth-sidebar {
+    border: 1px solid #27332c;
+    border-radius: 8px;
+    background: #090b0a;
+  }
+
+  .welcome-card {
+    padding: 22px 18px;
+  }
+
+  .lobby-shell {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .lobby-topbar {
+    height: 70px;
+  }
+
+  .lobby-user {
+    gap: 7px;
+    font-size: 12px;
+  }
+
+  .lobby-user button {
+    margin-left: 2px;
+    padding-left: 8px;
+  }
+}
