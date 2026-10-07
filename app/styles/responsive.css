@@ -1,0 +1,135 @@
+/* Responsive layout and reduced-motion rules. */
+/* Medium screens and tablet layout. */
+@media (max-width: 1000px) {
+  .shell {
+    padding: 0 24px;
+  }
+  .game-layout {
+    grid-template-columns: minmax(0, 1fr) 220px;
+    gap: 14px;
+  }
+  .side-panel {
+    padding: 17px 14px;
+  }
+  .board-panel {
+    padding: 18px 15px 12px;
+  }
+  .arena {
+    min-height: 600px;
+    padding: 14px;
+  }
+}
+/* Compact layout for phones. */
+@media (max-width: 700px) {
+  .shell {
+    padding: 0 14px;
+  }
+  .topbar {
+    height: 62px;
+  }
+  .brand {
+    font-size: 13px;
+  }
+  .brand-sub {
+    display: none;
+  }
+  .connection {
+    font-size: 8px;
+  }
+  .top-new {
+    display: block;
+    padding: 8px 10px;
+  }
+  .hero {
+    padding: 28px 0 20px;
+  }
+  .hero h1 {
+    font-size: 40px;
+  }
+  .game-layout {
+    display: flex;
+    flex-direction: column;
+  }
+  .side-panel {
+    padding: 15px;
+  }
+  .turn-label {
+    margin-top: 18px;
+  }
+  .players {
+    grid-template-columns: 1fr 1fr;
+  }
+  .stats {
+    max-width: 330px;
+  }
+  .rules {
+    display: none;
+  }
+  .board-panel {
+    padding: 14px 10px 10px;
+  }
+  .board-heading {
+    margin-bottom: 13px;
+  }
+  .arena {
+    min-height: 0;
+    padding: 10px 4px;
+    overflow: hidden;
+  }
+  .cell {
+    width: min(var(--cell), calc((100vw - 50px) / var(--cols)));
+    height: min(var(--cell), calc((100vw - 50px) / var(--cols)));
+  }
+  .grid-wrap {
+    gap: 0;
+  }
+  .critical {
+    font-size: 6px;
+    right: 3px;
+    top: 2px;
+  }
+  .legend {
+    gap: 8px;
+    font-size: 7px;
+  }
+  .board-footer {
+    font-size: 9px;
+  }
+  .engine-note {
+    display: none;
+  }
+  .wide {
+    display: none;
+  }
+  footer {
+    height: 48px;
+  }
+}
+/* Small phone spacing. */
+@media (max-width: 420px) {
+  .board-panel {
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+  .arena {
+    padding: 6px 2px;
+  }
+  .critical {
+    display: none;
+  }
+  .legend {
+    font-size: 6px;
+  }
+}
+/* Honor reduced motion everywhere except the game board, whose reaction animation is the gameplay itself. */
+@media (prefers-reduced-motion: reduce) {
+  *:not(.grid-stage):not(.grid-stage *),
+  *:not(.grid-stage):not(.grid-stage *)::before,
+  *:not(.grid-stage):not(.grid-stage *)::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

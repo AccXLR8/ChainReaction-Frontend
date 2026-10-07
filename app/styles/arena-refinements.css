@@ -1,0 +1,114 @@
+/* Arena and match layout refinements. */
+.shell { max-width:1480px; padding:0 clamp(16px,3.2vw,48px); }
+.topbar { border-color:#ffffff16; }
+.game-layout { grid-template-columns:minmax(0,1fr) 286px; gap:18px; }
+.board-panel,.side-panel { border:1px solid #ffffff14; border-radius:11px; background:linear-gradient(145deg,#090e0bf5,#050706); box-shadow:0 16px 55px #0005; }
+.board-panel { padding:22px 24px 15px; }
+.side-panel { padding:19px 17px; }
+.hero { padding:30px 0 22px; }
+.hero h1 { font-size:clamp(34px,4vw,46px); margin-top:11px; }
+.arena { min-height:630px; border:1px solid #ffffff12; border-radius:8px; background:radial-gradient(ellipse at center,#09120d,#050806 75%); padding:22px; }
+.grid-stage { filter:drop-shadow(0 13px 20px #0008); }
+.grid-wrap { gap:3px; }
+.cell { border-radius:5px; border-color:var(--active-color); background:linear-gradient(145deg,#07100a,#040805); box-shadow:0 0 6px color-mix(in srgb,var(--active-color),transparent 82%); }
+.cell:not(:disabled):hover { background:#102219; box-shadow:inset 0 0 0 1px var(--active-color),0 0 18px color-mix(in srgb,var(--active-color),transparent 72%); transform:scale(1.025); z-index:3; }
+.cell.owned { border-color:var(--active-color); background:radial-gradient(ellipse at center,color-mix(in srgb,var(--owner) 11%,transparent),#060b08); }
+.cell:disabled { cursor:default; }
+.critical { color:#91b99e; opacity:.55; }
+.active-player { min-height:62px; padding:15px; }
+.player-card { min-height:56px; height:auto; padding:9px 11px; }
+.player-card small { font-size:7px; letter-spacing:.5px; }
+.players { gap:8px; }
+.matchmaking-card { background:linear-gradient(135deg,#0b1710,#080c0a); }
+.live-tag.is-muted { color:#8c9890; }
+.live-tag.is-muted i { background:#89948d;box-shadow:none; }
+.board-footer { min-height:42px; }
+.empty-arena { position:relative; inset:auto; margin:auto; transform:none; }
+.account-button { background:transparent;border:1px solid #ffffff19;border-radius:5px;padding:9px 12px;color:#aab7af;cursor:pointer; }
+.account-button:hover { border-color:#39e58c55;color:#d8f2e2; }
+.service-live i { background:var(--green); }
+.player-card.disconnected .dot { background:#66746b; box-shadow:none; }
+.player-card.connected .dot { animation:connected-pulse 2.1s infinite; }
+@keyframes connected-pulse { 50% { box-shadow:0 0 0 4px color-mix(in srgb,var(--player-color,var(--green)) 12%,transparent),0 0 12px color-mix(in srgb,var(--player-color,var(--green)) 48%,transparent); } }
+.match-result { display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-top:18px; padding:17px; border:1px solid #39e58c35; border-radius:8px; background:linear-gradient(140deg,#102218,#0a100c); }
+.result-icon { color:var(--green); font-size:21px; text-shadow:0 0 15px #39e58c99; }
+.match-result strong { font:600 19px 'Space Grotesk'; }
+.match-result small { color:#91a097; font-size:10px; }
+.match-result .queue-button { margin-top:7px; }
+.result-lobby { width:100%; border:0; padding:7px; color:#91a097; background:none; cursor:pointer; font-size:10px; }
+.queue-button span { float:right; font-size:16px; }
+.cell { width:var(--cell); height:var(--cell); }
+.board-panel { position:relative; }
+.game-layout { align-items:start; }
+.side-panel { min-height:100%; }
+.active-player strong { max-width:170px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.legend span { max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+@media (max-width:900px) {
+  .welcome-content { gap:38px; grid-template-columns:1fr .9fr; }
+  .welcome-orbit { right:-15px; top:2%; width:32vw; }
+  .game-layout { grid-template-columns:minmax(0,1fr) 250px; gap:13px; }
+  .board-panel { padding:18px 16px 13px; }
+  .side-panel { padding:16px 13px; }
+  .arena { min-height:560px; padding:14px; }
+}
+@media (max-width:700px) {
+  .welcome-shell,.lobby-shell { padding:0 18px; }
+  .welcome-topbar,.lobby-topbar { height:66px; }
+  .welcome-topbar .brand-sub,.lobby-topbar .brand-sub { display:none; }
+  .welcome-content { min-height:auto; display:flex; flex-direction:column; align-items:stretch; gap:22px; padding:48px 0 42px; }
+  .welcome-copy { min-height:0; padding:0 0 2px; }
+  .welcome-copy h1 { font-size:clamp(42px,11vw,61px); letter-spacing:-2.8px; margin:14px 0 10px; }
+  .welcome-copy>p { max-width:390px; font-size:12px; }
+  .welcome-orbit { top:-13px; right:-15px; width:160px; opacity:.5; }
+  .welcome-feature { max-width:430px; margin-top:18px; padding-top:14px; grid-template-columns:27px 1fr 27px 1fr; gap:6px; }
+  .welcome-feature b { font-size:9px; }
+  .welcome-feature small { font-size:8px; }
+  .welcome-card { padding:23px; }
+  .welcome-footer,.lobby-footer { min-height:49px; height:auto; gap:12px; font-size:7px; }
+  .lobby-user { gap:7px; font-size:10px; }
+  .lobby-user button { margin-left:3px; padding-left:8px; }
+  .user-avatar { width:29px;height:29px; }
+  .lobby-main { min-height:calc(100vh - 116px); display:flex; flex-direction:column; align-items:stretch; justify-content:center; padding:28px 0; }
+  .lobby-copy h1 { font-size:clamp(50px,13vw,72px); letter-spacing:-3px; }
+  .lobby-meta { margin-top:31px; }
+  .lobby-art { position:absolute; width:76vw; right:-25vw; bottom:-18vw; opacity:.33; }
+  .lobby-copy { padding:24px 0; }
+  .lobby-copy>p { max-width:340px; }
+  .game-layout { display:flex; flex-direction:column; gap:12px; }
+  .board-panel { width:100%; padding:15px 10px 10px; }
+  .board-heading { padding:0 4px; }
+  .board-heading h2 { font-size:17px; }
+  .arena { min-height:0; padding:9px 2px; overflow:hidden; }
+  .grid-stage { max-width:100%; }
+  .grid-wrap { gap:3px; }
+  .cell { width:var(--cell);height:var(--cell); border-radius:4px; }
+  .side-panel { width:100%; min-height:0; padding:15px; }
+  .turn-label { margin-top:18px; }
+  .players { grid-template-columns:1fr 1fr; }
+  .player-card { min-width:0; gap:7px; padding:8px; }
+  .player-card b { font-size:10px; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .player-card small { font-size:6px; letter-spacing:0; }
+  .player-id { font-size:8px; }
+  .stats { max-width:350px; }
+  .rules { display:none; }
+  .wide { display:block; }
+  .topbar { height:62px; gap:8px; }
+  .connection { font-size:7px; gap:5px; }
+  .top-new { display:block; padding:8px 10px; font-size:10px; }
+  .hero { padding:25px 0 16px; }
+  .hero h1 { font-size:37px; }
+  .hero p { font-size:11px; }
+  .board-footer { font-size:9px; padding:10px 3px 0; }
+  .engine-note { display:none; }
+  footer { height:48px; font-size:7px; }
+}
+@media (max-width:420px) {
+  .shell { padding:0 10px; }
+  .board-panel { padding-left:6px; padding-right:6px; }
+  .arena { padding:6px 0; }
+  .critical { display:none; }
+  .legend { font-size:6px;gap:5px; }
+  .legend span { max-width:95px; }
+  .connection { display:none; }
+}
+

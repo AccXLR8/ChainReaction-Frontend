@@ -1,0 +1,133 @@
+/* Orb cluster detail and 3D motion. */
+/* Reversible preview: a meridian and highlight rotate over each fixed sphere. */
+.orb-cluster {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.orbs .atom.orb-spin-preview::before {
+  left: 15%;
+  top: 15%;
+  width: 25%;
+  height: 20%;
+  animation: orb-specular-spin 1.15s ease-in-out infinite;
+}
+.orbs .atom.orb-spin-preview::after {
+  content: '';
+  position: absolute;
+  inset: 5% 20%;
+  left: 20%;
+  top: 5%;
+  width: auto;
+  height: auto;
+  border-radius: 50%;
+  border-left: 1px solid #ffffffdb;
+  border-right: 1px solid #ffffff95;
+  background: linear-gradient(
+    90deg,
+    transparent 8%,
+    #ffffff15 35%,
+    #ffffff80 50%,
+    #ffffff15 65%,
+    transparent 92%
+  );
+  box-shadow: 0 0 3px #ffffff35;
+  transform-origin: center;
+  animation: orb-longitude-spin 1.15s linear infinite;
+}
+@keyframes orb-specular-spin {
+  0%,
+  100% {
+    left: 15%;
+    opacity: 0.9;
+  }
+  50% {
+    left: 60%;
+    opacity: 0.58;
+  }
+}
+@keyframes orb-longitude-spin {
+  0%,
+  100% {
+    transform: scaleX(0.08);
+    opacity: 0.25;
+  }
+  25% {
+    transform: scaleX(0.92);
+    opacity: 0.92;
+  }
+  50% {
+    transform: scaleX(0.08);
+    opacity: 0.3;
+  }
+  75% {
+    transform: scaleX(0.92);
+    opacity: 0.8;
+  }
+}
+
+/* ---- Fused 3D orb clusters --------------------------------------------------------------
+   1 orb : spins in place on its own axis (meridian + highlight animation).
+   2 orbs: two bubbles overlapping ~25%, the pair turning around its midpoint.
+   3 orbs: a triangle with every orb overlapping its neighbours, turning as ONE rigid group.
+   4 orbs: a tetrahedron (three below, one on top), also one rigid group.
+   Tweak: --orb (ONE size for every orb, as % of the cell), --tilt (camera angle),
+   --r (distance from the group's centre; smaller = more fused), --spin-duration (speed).
+   Fit check: a 3-orb cluster is ~1.8 orbs wide, so --orb 45 => ~88% of the cell. */
+.orbs {
+  width: 100%;
+  aspect-ratio: 1;
+  --orb: 45;
+}
+.orbs .atom {
+  width: calc(var(--orb) * 1%);
+  left: calc((100 - var(--orb)) / 2 * 1%);
+  top: calc((100 - var(--orb)) / 2 * 1%);
+}
+.orb-cluster {
+  perspective: 220cqw;
+  --tilt: 28deg;
+}
+.orbs.count-2 .orb-cluster { --tilt: 55deg; }
+.orbs.count-3 .orb-cluster { --tilt: 62deg; }
+.orbs.count-4 .orb-cluster { --tilt: 88deg; }
+.orb-ring {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--tilt));
+}
+.orbs .atom {
+  /* counter-tilt so every sphere always faces the viewer */
+  transform: rotateX(calc(-1 * var(--tilt)));
+}
+/* soft, slightly see-through bubble skin with a bright rim so overlaps read as fused */
+.orbs.count-2 .atom, .orbs.count-3 .atom, .orbs.count-4 .atom {
+  opacity: 0.92;
+  box-shadow:
+    0 0 8px color-mix(in srgb, var(--owner), transparent 42%),
+    inset 0 0 7px color-mix(in srgb, var(--owner) 55%, white),
+    inset -2px -3px 5px #0008,
+    inset 1px 1px 2px #ffffff80;
+}
+/* distance from the group's centre: edge length = 80% of a bubble => ~20% overlap.
+   --tilt above points the spin axis toward the camera so no two bubbles ever line up
+   behind each other and read as one (pair >= 0.66, triangle >= 0.71 orb-widths apart on screen). */
+.orbs.count-2 .atom { --r: calc(var(--orb) * 0.4cqw); }
+.orbs.count-3 .atom { --r: calc(var(--orb) * 0.462cqw); }
+.orbs.count-4 .atom { --r: calc(var(--orb) * 0.462cqw); --ay: calc(var(--orb) * 0.163cqw); }
+.orbs.count-4 .atom:nth-child(4) { --r: 0cqw; --ay: calc(var(--orb) * -0.49cqw); }
+/* every orb of a cluster runs the same rotation, offset in time = offset in angle */
+.orbs.count-2 .atom, .orbs.count-3 .atom, .orbs.count-4 .atom {
+  animation: group-spin var(--spin-duration, 3s) linear infinite;
+}
+.orbs.count-2 .atom:nth-child(2) { animation-delay: calc(var(--spin-duration, 3s) * -0.5); }
+.orbs.count-3 .atom:nth-child(2), .orbs.count-4 .atom:nth-child(2) { animation-delay: calc(var(--spin-duration, 3s) * -0.3333); }
+.orbs.count-3 .atom:nth-child(3), .orbs.count-4 .atom:nth-child(3) { animation-delay: calc(var(--spin-duration, 3s) * -0.6667); }
+/* Swing round the group's axis (rotateY + translate), then rotate back so each bubble stays a
+   round, camera-facing sphere. 3D depth sorting makes bubbles pass in front of / behind each other. */
+@keyframes group-spin {
+  from { transform: rotateY(0deg) translate3d(0, var(--ay, 0cqw), var(--r, 0cqw)) rotateY(0deg) rotateX(calc(-1 * var(--tilt))); }
+  to   { transform: rotateY(360deg) translate3d(0, var(--ay, 0cqw), var(--r, 0cqw)) rotateY(-360deg) rotateX(calc(-1 * var(--tilt))); }
+}
