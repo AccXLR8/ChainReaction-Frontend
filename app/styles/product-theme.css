@@ -1,0 +1,353 @@
+/* Extend the welcome page's light sage-and-green palette to lobby and match chrome. */
+.lobby-shell,
+.shell {
+  color: #202a23;
+  background:
+    radial-gradient(ellipse at 18% 12%, #eef4e8 0, transparent 38%),
+    #f7f8f4;
+}
+
+.lobby-shell {
+  width: 100%;
+  max-width: none;
+  padding: 0 clamp(20px, 5vw, 76px);
+}
+
+.shell {
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  padding: 0 clamp(20px, 4vw, 64px);
+}
+
+.lobby-topbar,
+.shell .topbar {
+  border-color: #dfe7da;
+  background: #f7f8f4;
+}
+
+.lobby-shell .brand,
+.shell .brand {
+  color: #202a23;
+}
+
+.lobby-shell .brand-mark,
+.shell .brand-mark {
+  color: #6b9e45;
+}
+
+.lobby-shell .brand-sub,
+.shell .brand-sub {
+  color: #69766d;
+  border-color: #d5dfd1;
+}
+
+.lobby-user {
+  color: #344137;
+}
+
+.lobby-user small {
+  color: #6d7b70;
+}
+
+.lobby-user button {
+  border-color: #d9e2d5;
+  color: #58675b;
+}
+
+.lobby-user button:hover {
+  color: #3f6d2e;
+}
+
+.user-avatar {
+  border-color: #b5cda7;
+  background: #e7f0e1;
+  color: #557f37;
+}
+
+.lobby-copy h1,
+.shell .hero h1 {
+  color: #202a23;
+}
+
+.lobby-copy h1 em,
+.lobby-copy h1 span,
+.shell .hero h1 span {
+  color: #6b9e45;
+}
+
+.lobby-copy > p,
+.shell .hero > p {
+  color: #69766d;
+}
+
+.lobby-copy .eyebrow,
+.shell .hero .eyebrow {
+  color: #647267;
+}
+
+.lobby-copy .eyebrow i,
+.shell .hero .eyebrow span {
+  background: #6b9e45;
+  box-shadow: 0 0 8px #6b9e4540;
+}
+
+.lobby-error {
+  color: #a84243;
+}
+
+.lobby-meta {
+  color: #69766d;
+}
+
+.lobby-meta i {
+  background: #6b9e45;
+  box-shadow: 0 0 8px #6b9e4540;
+}
+
+.lobby-shell .primary-action,
+.shell .queue-button,
+.shell .new-game {
+  border: 1px solid #6b9e45;
+  border-radius: 7px;
+  background: #6b9e45;
+  color: #fff;
+  box-shadow: 0 2px 0 #557f37;
+}
+
+.lobby-shell .primary-action:hover:not(:disabled),
+.shell .queue-button:hover:not(:disabled),
+.shell .new-game:hover:not(:disabled) {
+  border-color: #5b883b;
+  background: #5b883b;
+}
+
+.shell .new-game:disabled,
+.lobby-shell .primary-action:disabled {
+  opacity: 0.62;
+}
+
+.lobby-shell .queue-state {
+  color: #5d6b60;
+}
+
+.lobby-shell .queue-spinner {
+  border-color: #6b9e4540;
+  border-top-color: #6b9e45;
+}
+
+/* The lobby's static illustration adopts the sage palette; live board cells stay untouched. */
+.lobby-shell .art-grid i {
+  border-color: #d9e5d2;
+  background: linear-gradient(145deg, #fff, #edf3e8);
+  box-shadow: inset 0 1px #fff;
+}
+
+.lobby-shell .art-grid i.art-lit {
+  border-color: #a7c391;
+  background: radial-gradient(circle, #dceccd, #eaf2e4 66%);
+  box-shadow: inset 0 0 12px #6b9e451e;
+}
+
+.lobby-shell .art-grid i.art-hot {
+  border-color: #8eb773;
+  background: radial-gradient(circle at 32% 25%, #fff 0, #d8eacb 15%, #8fb66f 55%, #e8f0e3 100%);
+  box-shadow: 0 0 20px #6b9e4538;
+}
+
+.lobby-shell .art-glow {
+  background: #6b9e4520;
+}
+
+.lobby-shell .art-label {
+  border-color: #d8e3d2;
+  background: #f7f8f4e8;
+  color: #4c5c4f;
+}
+
+.lobby-shell .art-label span {
+  color: #6b9e45;
+}
+
+.lobby-footer,
+.shell footer {
+  border-color: #dfe7da;
+  color: #69766d;
+}
+
+.lobby-footer b,
+.shell footer b {
+  color: #6b9e45;
+}
+
+.shell .connection {
+  color: #526257;
+}
+
+.shell .connection span {
+  color: #6b9e45;
+}
+
+.shell .engine-note {
+  color: #69766d;
+}
+
+.shell .board-panel,
+.shell .side-panel {
+  border-color: #e1e8dc;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 14px 40px #293b240d, 0 2px 7px #293b2408;
+}
+
+.shell .board-heading h2 {
+  color: #202a23;
+}
+
+.shell .board-heading .eyebrow-mini {
+  color: #6a786d;
+}
+
+.shell .legend {
+  color: #56645a;
+}
+
+.shell .legend .green-bg {
+  background: #6b9e45;
+  box-shadow: 0 0 7px #6b9e4560;
+}
+
+.shell .legend .red-bg {
+  background: #bd716a;
+  box-shadow: 0 0 7px #bd716a60;
+}
+
+.shell .side-panel {
+  color: #27332a;
+}
+
+.shell .panel-head {
+  color: #657267;
+}
+
+.shell .live-tag {
+  color: #527e37;
+}
+
+.shell .live-tag.is-muted {
+  color: #778278;
+}
+
+.shell .live-tag.is-muted i {
+  background: #89948d;
+}
+
+.shell .turn-label {
+  color: #69766d;
+}
+
+.shell .active-player {
+  color: #27332a;
+  border-color: color-mix(in srgb, var(--accent), transparent 58%);
+  background: color-mix(in srgb, var(--accent), white 92%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent), transparent 89%);
+}
+
+.shell .active-player small {
+  color: color-mix(in srgb, var(--accent), #263329 38%);
+}
+
+.shell .player-card {
+  border-color: #e0e7dc;
+  background: #fbfcfa;
+}
+
+.shell .player-card.selected {
+  border-color: color-mix(in srgb, var(--player-color), #fff 48%);
+  background: color-mix(in srgb, var(--player-color), white 94%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--player-color), transparent 90%);
+}
+
+.shell .player-card b {
+  color: #27332a;
+}
+
+.shell .player-card small,
+.shell .player-id {
+  color: #66746a;
+}
+
+.shell .divider {
+  background: #e2e8de;
+}
+
+.shell .stats span {
+  color: #6c796f;
+}
+
+.shell .stats b {
+  color: #29362c;
+}
+
+.shell .rules {
+  color: #637066;
+}
+
+.shell .rules b {
+  color: #35493a;
+}
+
+.shell .rules-icon {
+  color: #6b9e45;
+}
+
+.shell .match-result {
+  border-color: #d8e7d1;
+  background: linear-gradient(140deg, #f0f6eb, #f9fbf7);
+  color: #29362c;
+}
+
+.shell .result-icon {
+  color: #6b9e45;
+  text-shadow: 0 0 12px #6b9e4540;
+}
+
+.shell .match-result small {
+  color: #68766c;
+}
+
+.shell .result-lobby {
+  color: #5d6b60;
+}
+
+.shell .result-lobby:hover {
+  color: #3e6b2f;
+}
+
+.shell .board-footer {
+  color: #637066;
+}
+
+.shell .board-footer i {
+  background: #6b9e45;
+}
+
+.shell .top-new {
+  background: #6b9e45;
+  color: #fff;
+}
+
+@media (max-width: 700px) {
+  .lobby-shell {
+    padding: 0 18px;
+  }
+
+  .shell {
+    padding: 0 14px;
+  }
+
+  .shell .board-panel,
+  .shell .side-panel {
+    border-radius: 10px;
+  }
+}

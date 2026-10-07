@@ -65,8 +65,8 @@ export function BoardPanel({
           <h2>Game board</h2>
         </div>
         <div className="legend">
-          <span><i className="green-bg" /> {ownPlayerName}</span>
-          <span><i className="red-bg" /> {opponentPlayerName}</span>
+          <span className="own-player"><i className="green-bg" /> {ownPlayerName}</span>
+          <span className="opponent-player"><i className="red-bg" /> {opponentPlayerName}</span>
         </div>
       </div>
 

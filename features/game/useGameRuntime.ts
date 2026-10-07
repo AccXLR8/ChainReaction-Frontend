@@ -23,6 +23,7 @@ const PLAYER_COLORS = ['#39e58c', '#ff5964'];
 export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptions) {
   const [socketStatus, setSocketStatus] = useState('offline');
   const [ownSlot, setOwnSlot] = useState<number | null>(null);
+  const [currentPlayerSlot, setCurrentPlayerSlot] = useState<number | null>(null);
   const [playerNames, setPlayerNames] = useState(['Player 1', 'Player 2']);
   const [playerClocks, setPlayerClocks] = useState<number[]>([]);
   const [playerConnected, setPlayerConnected] = useState<boolean[]>([]);
@@ -32,6 +33,7 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
   const [notice, setNotice] = useState('Waiting for a match');
   const [lastMove, setLastMove] = useState<number | null>(null);
   const [viewportWidth, setViewportWidth] = useState(1280);
+  const [viewportHeight, setViewportHeight] = useState(900);
 
   const socketRef = useRef<WebSocket | null>(null);
   const gameIdRef = useRef<string | null>(null);
@@ -91,6 +93,10 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
     moveTimerRef.current = null;
 
     const finalState = normalizeGameState(payload.final_state);
+    const nextTurnSlot = Number.isInteger(payload.current_player_slot)
+      ? Number(payload.current_player_slot)
+      : finalState.players[finalState.current_player_index]?.id ?? finalState.current_player_index;
+    if (nextTurnSlot >= 0 && nextTurnSlot <= 1) setCurrentPlayerSlot(nextTurnSlot);
     const previousState = gameRef.current;
     setAuthoritativeGame(finalState);
 
@@ -205,7 +211,9 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
       lastSequenceRef.current = 0;
       playback.cancelAnimations();
       setAuthoritativeGame(null);
+      ownSlotRef.current = null;
       setOwnSlot(null);
+      setCurrentPlayerSlot(null);
       setPlayerNames(['Player 1', 'Player 2']);
       setPlayerClocks([]);
       setPlayerConnected([]);
@@ -251,8 +259,11 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
         const payload = message.payload ?? {};
 
         if (messageType === 'connection_ack') {
-          ownSlotRef.current = payload.player_slot ?? null;
-          setOwnSlot(payload.player_slot ?? null);
+          const acknowledgedSlot = Number.isInteger(payload.player_slot)
+            ? Number(payload.player_slot)
+            : null;
+          ownSlotRef.current = acknowledgedSlot;
+          setOwnSlot(acknowledgedSlot);
           if (typeof payload.player_slot === 'number') {
             setPlayerConnected((current) =>
               current.map((connected, slot) => slot === payload.player_slot ? true : connected),
@@ -278,13 +289,21 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
             people.find((person: { player_slot: number }) => person.player_slot === 1)?.connected ?? false,
           ]);
 
-          const mySlot = people.find(
+          const listedMySlot = people.find(
             (person: { user_id: string }) => person.user_id === sessionRef.current?.user.id,
-          )?.player_slot ?? null;
+          )?.player_slot;
+          // The handshake identifies this connection's slot; the player list is a fallback.
+          const mySlot = ownSlotRef.current ?? listedMySlot ?? null;
           ownSlotRef.current = mySlot;
           setOwnSlot(mySlot);
 
           const next = normalizeGameState(payload.state);
+          const snapshotTurnSlot = Number.isInteger(payload.current_player_slot)
+            ? Number(payload.current_player_slot)
+            : next.players[next.current_player_index]?.id ?? next.current_player_index;
+          if (snapshotTurnSlot >= 0 && snapshotTurnSlot <= 1) {
+            setCurrentPlayerSlot(snapshotTurnSlot);
+          }
           setAuthoritativeGame(next);
           setStage(payload.status === 'FINISHED' || next.status.kind === 'won' ? 'finished' : 'game');
           lastSequenceRef.current = Math.max(
@@ -295,7 +314,7 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
           if (!playback.isAnimatingRef.current) playback.setDisplayCells(null);
           if (!playback.isAnimatingRef.current) {
             setNotice(
-              payload.current_player_slot === mySlot
+              snapshotTurnSlot === mySlot
                 ? 'Your turn — choose an empty cell or one of your own.'
                 : 'Opponent’s turn. Watch the board.',
             );
@@ -318,6 +337,10 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
           setBusy(false);
           setLastMove(null);
           setNotice(typeof payload.message === 'string' ? payload.message : 'Move rejected. Try another cell.');
+          // Rejections can reveal that the local turn snapshot is stale; ask for a fresh one.
+          if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ type: 'join_game', payload: {} }));
+          }
         }
         if (messageType === 'error') {
           const pendingMove = pendingMoveRef.current;
@@ -376,7 +399,9 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
     playback.cancelAnimations();
     setBusy(false);
     setAuthoritativeGame(null);
+    ownSlotRef.current = null;
     setOwnSlot(null);
+    setCurrentPlayerSlot(null);
     setPlayerNames(['Player 1', 'Player 2']);
     setStage('lobby');
     setNotice('Ready when you are.');
@@ -386,7 +411,9 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
     closeSocket();
     setGameId(null);
     setAuthoritativeGame(null);
+    ownSlotRef.current = null;
     setOwnSlot(null);
+    setCurrentPlayerSlot(null);
   };
 
   // Restore only the latest state from history if a WebSocket event was missed.
@@ -423,14 +450,19 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
   useEffect(() => () => closeSocket(), []);
 
   useEffect(() => {
-    const measureViewport = () => setViewportWidth(window.innerWidth);
+    const measureViewport = () => {
+      setViewportWidth(window.innerWidth);
+      setViewportHeight(window.innerHeight);
+    };
     measureViewport();
     window.addEventListener('resize', measureViewport);
     return () => window.removeEventListener('resize', measureViewport);
   }, []);
 
   const winner = game?.status.kind === 'won' ? (game.status.winner ?? null) : null;
-  const currentPlayer = game?.players[game.current_player_index]?.id ?? 0;
+  const currentPlayer = currentPlayerSlot ?? (
+    game?.players[game.current_player_index]?.id ?? game?.current_player_index ?? 0
+  );
   const isYourTurn = ownSlot !== null && currentPlayer === ownSlot;
   ownSlotRef.current = ownSlot;
 
@@ -451,7 +483,7 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
 
   useEffect(() => {
     if (stage !== 'game' || !game || winner !== null) return;
-    const playerOnTurn = game.current_player_index;
+    const playerOnTurn = currentPlayer;
     const timer = window.setInterval(() => {
       setPlayerClocks((clocks) =>
         clocks.map((clock, slot) =>
@@ -460,7 +492,7 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
       );
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [stage, game?.current_player_index, winner]);
+  }, [stage, currentPlayer, winner]);
 
   const play = (index: number) => {
     const activeSession = sessionRef.current;
@@ -496,8 +528,8 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
   const boardWidth = game?.board.width ?? DEFAULT_BOARD_SIZE.width;
   const boardHeight = game?.board.height ?? DEFAULT_BOARD_SIZE.height;
   const cellSize = useMemo(
-    () => getCellSize(viewportWidth, boardWidth, boardHeight),
-    [viewportWidth, boardWidth, boardHeight],
+    () => getCellSize(viewportWidth, boardWidth, boardHeight, viewportHeight),
+    [viewportWidth, viewportHeight, boardWidth, boardHeight],
   );
   const cellGap = 3;
   const stageWidth = boardWidth * cellSize + (boardWidth - 1) * cellGap;

@@ -32,14 +32,15 @@ export function GameScreen({
   const matchLabel = gameId ? `MATCH ${gameId.slice(0, 8).toUpperCase()}` : 'LIVE MATCH';
 
   return (
-    <main className="shell" id="play">
+    <main className="shell game-shell" id="play">
       <header className="topbar">
         <a className="brand" href="#play">
           <span className="brand-mark">✳</span>
           <span className="brand-wordmark"><span>Super</span><strong>kritical</strong></span>
         </a>
         <div className={`connection service-${socketStatus}`}>
-          <i /> {socketStatus.toUpperCase()} <span>●</span> {user.username}
+          <i /> {socketStatus.toUpperCase()} <span>●</span>
+          <strong className="connection-user">{user.username}</strong>
         </div>
         <button
           className="new-game top-new"

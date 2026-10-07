@@ -48,6 +48,7 @@ export type AcceptedMove = {
   sequence?: number;
   final_state: unknown;
   status?: string;
+  current_player_slot?: number;
   cell?: number;
   player_slot?: number;
   client_move_id?: string;

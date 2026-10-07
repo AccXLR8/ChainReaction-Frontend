@@ -90,17 +90,21 @@ export function getCellSize(
   viewportWidth: number,
   boardWidth: number,
   boardHeight: number,
+  viewportHeight = 900,
 ): number {
   const longestSide = Math.max(boardWidth, boardHeight);
-  const targetWidth = Math.min(
-    520,
-    Math.max(220, viewportWidth - (viewportWidth < 700 ? 68 : 446)),
+  const availableWidth = Math.max(
+    220,
+    viewportWidth - (viewportWidth < 700 ? 36 : 420),
   );
+  const availableHeight = Math.max(
+    180,
+    viewportWidth < 700 ? viewportHeight * 0.61 - 135 : viewportHeight - 216,
+  );
+  const boardEdge = Math.min(availableWidth, availableHeight);
 
-  return Math.min(
-    70,
-    Math.floor((targetWidth - 3 * (longestSide - 1)) / longestSide),
-  );
+  const fittedCellSize = Math.floor((boardEdge - 3 * (longestSide - 1)) / longestSide);
+  return Math.max(24, Math.min(100, fittedCellSize));
 }
 
 export function formatClock(milliseconds: number): string {
