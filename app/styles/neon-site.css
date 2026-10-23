@@ -308,6 +308,7 @@ body {
 
 .lobby-topbar {
   border-bottom-color: var(--arena-line);
+  background: var(--arena-black);
 }
 
 .lobby-topbar .brand,
