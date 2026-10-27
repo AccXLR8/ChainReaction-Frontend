@@ -6,6 +6,7 @@ import type { AppStage, AuthMode, SessionUser } from './types';
 import { HowToPlay } from './HowToPlay';
 import { ProfilePanel } from '@/features/profile/ProfilePanel';
 import { MenuBoardPreview } from './MenuBoardPreview';
+import type { BoardPanelProps } from '@/features/game/BoardPanel';
 
 type WelcomeScreenProps = {
   authMode: AuthMode;
@@ -19,6 +20,7 @@ type WelcomeScreenProps = {
   queueBusy: boolean;
   queueAction: 'joining' | 'checking' | null;
   notice: string;
+  previewBoard: BoardPanelProps;
   onAuthModeChange: (mode: AuthMode) => void;
   onGoogleSignIn: (credential: string) => void;
   onGoogleError: (message: string) => void;
@@ -42,6 +44,7 @@ export function WelcomeScreen({
   queueBusy,
   queueAction,
   notice,
+  previewBoard,
   onAuthModeChange,
   onGoogleSignIn,
   onGoogleError,
@@ -89,6 +92,7 @@ export function WelcomeScreen({
       </header>
 
       <section className="play-stage" id="welcome">
+        <MenuBoardPreview board={previewBoard} />
         <section className="play-entry-panel" aria-label="Find a match">
           <span className="eyebrow"><i /> {isQueueing ? 'MATCHMAKING · LIVE' : 'ONLINE MATCHMAKING · 1V1'}</span>
           <h1>{isQueueing ? 'Finding your opponent' : 'Ready for a match?'}</h1>
@@ -133,17 +137,6 @@ export function WelcomeScreen({
           </div>
         </section>
 
-        <section className="play-board-panel" aria-label="Arena board preview">
-          <div className="play-board-heading">
-            <span><i /> THE ARENA</span>
-            <strong>8 × 8</strong>
-          </div>
-          <MenuBoardPreview />
-          <div className="play-board-footer">
-            <span>CHAIN REACTION</span>
-            <span>64 CELLS · TWO PLAYERS</span>
-          </div>
-        </section>
       </section>
 
       {authMode && !user && (

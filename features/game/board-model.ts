@@ -97,9 +97,10 @@ export function getCellSize(
     220,
     viewportWidth - (viewportWidth < 700 ? 36 : 420),
   );
+  // Reserve the header, footer, and panel padding before sizing cells; the board heading is hidden.
   const availableHeight = Math.max(
     180,
-    viewportWidth < 700 ? viewportHeight * 0.61 - 135 : viewportHeight - 216,
+    viewportWidth < 700 ? viewportHeight * 0.61 - 82 : viewportHeight - 185,
   );
   const boardEdge = Math.min(availableWidth, availableHeight);
 

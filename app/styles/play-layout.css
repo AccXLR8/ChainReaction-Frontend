@@ -28,6 +28,11 @@ body {
   display: none;
 }
 
+.play-stage .board-heading,
+.game-shell .board-heading {
+  display: none;
+}
+
 .play-stage {
   position: relative;
   z-index: 1;
@@ -35,8 +40,8 @@ body {
   flex: 1;
   min-width: 0;
   min-height: 0;
-  grid-template-columns: minmax(286px, 330px) minmax(0, 1fr);
-  grid-template-areas: 'entry board';
+  grid-template-columns: minmax(0, 1fr) minmax(286px, 330px);
+  grid-template-areas: 'board entry';
   align-items: stretch;
   gap: clamp(12px, 1.6vw, 22px);
   width: 100%;
@@ -45,8 +50,7 @@ body {
   overflow: hidden;
 }
 
-.play-entry-panel,
-.play-board-panel {
+.play-entry-panel {
   min-width: 0;
   min-height: 0;
   border: 1px solid #424b43;
@@ -69,8 +73,7 @@ body {
   line-height: 1.4;
 }
 
-.play-entry-panel > .eyebrow i,
-.play-board-heading > span i {
+.play-entry-panel > .eyebrow i {
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -150,105 +153,51 @@ body {
   text-align: right;
 }
 
-.play-board-panel {
+.play-stage > .board-panel {
   grid-area: board;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 13px;
-  padding: 13px clamp(13px, 2vw, 24px);
-}
-
-.play-board-heading,
-.play-board-footer {
-  display: flex;
-  width: 100%;
-  flex: none;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.play-board-heading > span,
-.play-board-footer {
-  color: #bec8c0;
-  font: 9px 'DM Mono', monospace;
-  letter-spacing: 0.09em;
-}
-
-.play-board-heading > span {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-
-.play-board-heading strong {
-  padding: 6px 9px;
-  border: 1px solid #657068;
-  border-radius: 4px;
-  color: #f0f4f0;
-  font: 600 10px Inter, Arial, sans-serif;
-}
-
-.menu-board-preview {
-  display: grid;
-  width: min(100%, calc(100dvh - 216px), calc(100vw - 420px), 821px);
-  aspect-ratio: 1;
-  flex: none;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 3px;
-  padding: 8px;
-  overflow: hidden;
-  border: 1px solid #070a08;
-  border-radius: 6px;
-  background: #050706;
-  box-shadow: 0 10px 30px #080b082b;
-  grid-template-rows: repeat(8, minmax(0, 1fr));
-}
-
-.menu-preview-cell {
-  display: grid;
   min-width: 0;
   min-height: 0;
-  place-items: center;
-  border: 1px solid #26302a;
-  border-radius: 4px;
-  background: #0a0d0b;
+  height: 100%;
+  padding: 13px 16px 10px;
+  overflow: hidden;
+  border: 1px solid #424b43;
+  border-radius: 8px;
+  background: #222823;
+  box-shadow: 0 12px 36px #080b081c;
 }
 
-.menu-preview-cell:nth-child(3n + 1) {
-  background: #0d110e;
+.play-stage .arena {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  overflow: hidden;
+  border: 1px solid #080b09;
+  border-radius: 5px;
+  background: #050706;
 }
 
-.menu-preview-cell.has-green {
-  border-color: #39e58c68;
-  background: #0d1b13;
+.play-stage .grid-stage {
+  max-width: 100%;
+  max-height: 100%;
 }
 
-.menu-preview-cell.has-red {
-  border-color: #ff596468;
-  background: #1d1012;
+.play-stage .board-footer {
+  flex: none;
+  min-height: 34px;
+  padding-top: 9px;
+  color: #edf2ee;
 }
 
-.menu-preview-orb {
-  width: 43%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 25%, #fff 0 6%, #caffdc 13%, #39e58c 50%, #105b35 100%);
-  box-shadow: 0 0 11px #39e58c80, inset -2px -3px 5px #000a;
+.play-stage .engine-note {
+  color: #c1c9c3;
 }
 
-.has-red .menu-preview-orb {
-  background: radial-gradient(circle at 30% 25%, #fff 0 6%, #ffc7ca 13%, #ff5964 50%, #741b23 100%);
-  box-shadow: 0 0 11px #ff59647d, inset -2px -3px 5px #000a;
-}
-
-.play-board-footer {
-  color: #9eaaa1;
-  font-size: 8px;
-}
-
-/* The live match replaces the preview without changing the board's right-hand column. */
+/* The live match replaces the lobby controls beside the same left-hand board. */
 .game-shell {
   background: #171b18;
 }
@@ -260,8 +209,9 @@ body {
 }
 
 .game-shell .game-layout {
-  grid-template-columns: minmax(286px, 330px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(286px, 330px);
   gap: clamp(12px, 1.6vw, 22px);
+  padding: 12px 0;
 }
 
 .game-shell .board-panel,
@@ -273,12 +223,12 @@ body {
 }
 
 .game-shell .board-panel {
-  grid-column: 2;
+  grid-column: 1;
   grid-row: 1;
 }
 
 .game-shell .side-panel {
-  grid-column: 1;
+  grid-column: 2;
   grid-row: 1;
   overflow: hidden;
 }
@@ -289,13 +239,18 @@ body {
 }
 
 @media (max-width: 900px) and (min-width: 701px) {
+  .game-shell {
+    padding-right: clamp(14px, 2vw, 28px);
+    padding-left: clamp(14px, 2vw, 28px);
+  }
+
   .play-stage {
-    grid-template-columns: minmax(260px, 280px) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 280px);
     gap: 12px;
   }
 
   .game-shell .game-layout {
-    grid-template-columns: minmax(260px, 280px) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 280px);
     gap: 12px;
   }
 }
@@ -308,9 +263,14 @@ body {
     padding-left: 10px;
   }
 
+  .game-shell {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
   .play-stage {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) minmax(150px, 0.78fr);
+    grid-template-rows: minmax(0, 1.55fr) minmax(150px, 0.9fr);
     grid-template-areas:
       'board'
       'entry';
@@ -367,28 +327,22 @@ body {
     font-size: 9px;
   }
 
-  .play-board-panel {
-    gap: 6px;
-    padding: 6px 9px;
+  .play-stage > .board-panel {
+    padding: 8px 8px 4px;
   }
 
-  .play-board-heading > span,
-  .play-board-footer {
-    font-size: 7px;
+  .play-stage .arena {
+    padding: 4px;
   }
 
-  .play-board-heading strong {
-    padding: 3px 6px;
+  .play-stage .board-footer {
+    min-height: 25px;
+    padding-top: 5px;
+    font-size: 10px;
   }
 
-  .menu-board-preview {
-    width: min(100%, calc(100vw - 48px), calc(100dvh - 440px));
-    gap: 2px;
-    padding: 5px;
-  }
-
-  .menu-preview-cell {
-    border-radius: 3px;
+  .play-stage .engine-note {
+    display: none;
   }
 
   .game-shell .topbar {
@@ -399,7 +353,7 @@ body {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: minmax(0, 1.55fr) minmax(150px, 0.9fr);
     gap: 8px;
-    padding: 7px 0 8px;
+    padding: 8px 0 10px;
   }
 
   .game-shell .board-panel {
@@ -485,8 +439,7 @@ body {
     padding-top: 12px;
   }
 
-  .play-board-panel {
-    gap: 8px;
+  .play-stage > .board-panel {
     padding-top: 8px;
     padding-bottom: 8px;
   }

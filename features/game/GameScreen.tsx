@@ -61,8 +61,8 @@ export function GameScreen({
       </section>
 
       <section className="game-layout">
-        <MatchSidebar {...sidebar} />
         <BoardPanel {...board} />
+        <MatchSidebar {...sidebar} />
       </section>
 
       <footer>

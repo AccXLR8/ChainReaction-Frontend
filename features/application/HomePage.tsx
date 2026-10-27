@@ -6,8 +6,39 @@ import type { AppStage, AuthMode, AuthResponse, SessionUser } from '@/features/a
 import { GameScreen } from '@/features/game/GameScreen';
 import type { BoardPanelProps } from '@/features/game/BoardPanel';
 import type { MatchSidebarProps } from '@/features/game/MatchSidebar';
+import type { Cell, GameState } from '@/features/game/types';
 import { useGameRuntime } from '@/features/game/useGameRuntime';
 import { ApiError, authRequest, request } from '@/lib/api/client';
+
+const PREVIEW_ORBS: Record<number, Cell> = {
+  18: { owner: 0, orb_count: 1 },
+  19: { owner: 0, orb_count: 2 },
+  20: { owner: 1, orb_count: 1 },
+  26: { owner: 0, orb_count: 2 },
+  27: { owner: 0, orb_count: 3 },
+  28: { owner: 1, orb_count: 2 },
+  35: { owner: 0, orb_count: 1 },
+  36: { owner: 1, orb_count: 3 },
+  43: { owner: 0, orb_count: 1 },
+  44: { owner: 1, orb_count: 1 },
+};
+
+const LOBBY_PREVIEW_GAME: GameState = {
+  board: {
+    width: 8,
+    height: 8,
+    cells: Array.from({ length: 64 }, (_, index) =>
+      PREVIEW_ORBS[index] ?? { owner: null, orb_count: 0 },
+    ),
+  },
+  players: [
+    { id: 0, eliminated: false, has_moved: true },
+    { id: 1, eliminated: false, has_moved: true },
+  ],
+  current_player_index: 0,
+  turn_number: 8,
+  status: { kind: 'active' },
+};
 
 /** Coordinates the three application screens and delegates live play to its feature hook. */
 export function HomePage() {
@@ -263,6 +294,53 @@ export function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage, session]);
 
+  const board: BoardPanelProps = {
+    // Keep the lobby's board visible while the accepted match's first snapshot loads.
+    game: game.game ?? LOBBY_PREVIEW_GAME,
+    cells: game.game ? game.displayCells : LOBBY_PREVIEW_GAME.board.cells,
+    wave: game.wave,
+    lastMove: game.lastMove,
+    busy: game.busy || !game.game,
+    animating: game.animating,
+    winner: game.winner,
+    isYourTurn: game.isYourTurn,
+    ownSlot: game.ownSlot,
+    socketStatus: game.socketStatus,
+    notice: game.game ? game.notice : 'Connecting to the match…',
+    ownPlayerName: game.game ? game.ownPlayerName : 'YOU',
+    opponentPlayerName: game.game ? game.opponentPlayerName : 'OPPONENT',
+    boardWidth: game.boardWidth,
+    boardHeight: game.boardHeight,
+    cellSize: game.cellSize,
+    cellGap: game.cellGap,
+    stageWidth: game.stageWidth,
+    stageHeight: game.stageHeight,
+    activeBoardColor: game.activeBoardColor,
+    gridRef: game.gridRef,
+    flightLayerRef: game.flightLayerRef,
+    colorForSlot: game.colorForSlot,
+    onPlay: game.play,
+  };
+  const previewBoard: BoardPanelProps = {
+    ...board,
+    game: LOBBY_PREVIEW_GAME,
+    cells: LOBBY_PREVIEW_GAME.board.cells,
+    wave: null,
+    lastMove: null,
+    busy: false,
+    animating: false,
+    winner: null,
+    isYourTurn: false,
+    ownSlot: 0,
+    socketStatus: 'preview',
+    notice: 'DEMO POSITION · READY TO PLAY',
+    ownPlayerName: 'YOU',
+    opponentPlayerName: 'OPPONENT',
+    activeBoardColor: '#39e58c',
+    colorForSlot: (slot) => slot === 0 ? '#39e58c' : '#ff5964',
+    onPlay: () => undefined,
+  };
+
   if (!session || stage === 'lobby' || stage === 'queue') {
     return (
       <WelcomeScreen
@@ -277,6 +355,7 @@ export function HomePage() {
         queueBusy={queueBusy}
         queueAction={queueAction}
         notice={game.notice}
+        previewBoard={previewBoard}
         onAuthModeChange={setAuthMode}
         onGoogleSignIn={(credential) => void googleAuthSubmit(credential)}
         onGoogleError={setAuthError}
@@ -290,32 +369,6 @@ export function HomePage() {
   }
 
   const visibleStage = stage === 'finished' ? 'finished' : 'game';
-  const board: BoardPanelProps = {
-    game: game.game,
-    cells: game.displayCells,
-    wave: game.wave,
-    lastMove: game.lastMove,
-    busy: game.busy,
-    animating: game.animating,
-    winner: game.winner,
-    isYourTurn: game.isYourTurn,
-    ownSlot: game.ownSlot,
-    socketStatus: game.socketStatus,
-    notice: game.notice,
-    ownPlayerName: game.ownPlayerName,
-    opponentPlayerName: game.opponentPlayerName,
-    boardWidth: game.boardWidth,
-    boardHeight: game.boardHeight,
-    cellSize: game.cellSize,
-    cellGap: game.cellGap,
-    stageWidth: game.stageWidth,
-    stageHeight: game.stageHeight,
-    activeBoardColor: game.activeBoardColor,
-    gridRef: game.gridRef,
-    flightLayerRef: game.flightLayerRef,
-    colorForSlot: game.colorForSlot,
-    onPlay: game.play,
-  };
   const sidebar: MatchSidebarProps = {
     stage: visibleStage,
     game: game.game,
