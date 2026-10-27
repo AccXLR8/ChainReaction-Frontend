@@ -32,7 +32,7 @@ export function GameScreen({
   const matchLabel = gameId ? `MATCH ${gameId.slice(0, 8).toUpperCase()}` : 'LIVE MATCH';
 
   return (
-    <main className="shell game-shell" id="play">
+    <main className={`shell game-shell ${isFinished ? 'is-finished' : ''}`} id="play">
       <header className="topbar">
         <a className="brand" href="#play">
           <span className="brand-mark">✳</span>
@@ -61,8 +61,8 @@ export function GameScreen({
       </section>
 
       <section className="game-layout">
-        <BoardPanel {...board} />
         <MatchSidebar {...sidebar} />
+        <BoardPanel {...board} />
       </section>
 
       <footer>

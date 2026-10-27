@@ -1,28 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import type { FormEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { WelcomeScreen } from '@/features/auth/WelcomeScreen';
 import type { AppStage, AuthMode, AuthResponse, SessionUser } from '@/features/auth/types';
 import { GameScreen } from '@/features/game/GameScreen';
 import type { BoardPanelProps } from '@/features/game/BoardPanel';
 import type { MatchSidebarProps } from '@/features/game/MatchSidebar';
 import { useGameRuntime } from '@/features/game/useGameRuntime';
-import { LobbyScreen } from '@/features/lobby/LobbyScreen';
-import { authRequest, request } from '@/lib/api/client';
+import { ApiError, authRequest, request } from '@/lib/api/client';
 
 /** Coordinates the three application screens and delegates live play to its feature hook. */
 export function HomePage() {
   const [session, setSession] = useState<{ token: string; user: SessionUser } | null>(null);
   const [authMode, setAuthMode] = useState<AuthMode>(null);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [authBusy, setAuthBusy] = useState(false);
   const [stage, setStage] = useState<AppStage>('welcome');
   const [queueBusy, setQueueBusy] = useState(false);
+  const [queueAction, setQueueAction] = useState<'joining' | 'checking' | null>(null);
   const [serviceStatus, setServiceStatus] = useState('checking');
   const [errorMessage, setErrorMessage] = useState('');
+  const assignedGameId = useRef<string | null>(null);
+  const queueCanceling = useRef(false);
 
   const game = useGameRuntime({ session, stage, setStage });
 
@@ -59,10 +58,15 @@ export function HomePage() {
         } else {
           setStage('lobby');
         }
-      } catch {
+      } catch (error) {
         localStorage.removeItem('cr_access_token');
         localStorage.removeItem('cr_user');
         localStorage.removeItem('cr_game_id');
+        localStorage.removeItem('cr_queue');
+        if (error instanceof ApiError && error.status === 401) {
+          setAuthMode('login');
+          setAuthError('Your session expired. Sign in again to access your account.');
+        }
       }
     })();
 
@@ -73,89 +77,126 @@ export function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const saveSession = (response: AuthResponse) => {
+  const rememberSession = (response: AuthResponse) => {
     const nextSession = { token: response.access_token, user: response.user };
     localStorage.setItem('cr_access_token', nextSession.token);
     localStorage.setItem('cr_user', JSON.stringify(nextSession.user));
     setSession(nextSession);
-    setStage('lobby');
     setAuthMode(null);
     setAuthError('');
-    setPassword('');
     setErrorMessage('');
   };
 
-  const authSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const saveSession = (response: AuthResponse) => {
+    rememberSession(response);
+    setStage('lobby');
+  };
+
+  const acceptAssignment = (gameId: string, activeSession: { token: string; user: SessionUser }) => {
+    if (assignedGameId.current === gameId) return;
+    assignedGameId.current = gameId;
+    localStorage.removeItem('cr_queue');
+    game.connectGame(gameId, activeSession.token, activeSession.user);
+  };
+
+  const googleAuthSubmit = async (credential: string) => {
+    if (authBusy) return;
     setAuthError('');
     setAuthBusy(true);
 
     try {
-      const endpoint = authMode === 'register' ? 'register' : 'login';
-      saveSession(await authRequest(endpoint, { username, password }));
+      // The auth service must verify this Google ID token and return the normal game session.
+      saveSession(await authRequest('google', { credential }));
     } catch (error) {
-      setAuthError(error instanceof Error ? error.message : 'Could not authenticate.');
+      const message = error instanceof Error ? error.message : 'Could not sign in with Google.';
+      setAuthError(/\b404\b|not found/i.test(message)
+        ? 'Google sign-in is not enabled on the game server yet.'
+        : message);
     } finally {
       setAuthBusy(false);
     }
   };
 
-  const guestLogin = async () => {
-    setAuthError('');
-    setAuthBusy(true);
-
-    try {
-      const guestName = username.trim();
-      saveSession(await authRequest('guest', guestName ? { username: guestName } : undefined));
-    } catch (error) {
-      setAuthError(error instanceof Error ? error.message : 'Could not create guest session.');
-    } finally {
-      setAuthBusy(false);
+  const enqueuePlayer = async (activeSession: { token: string; user: SessionUser }) => {
+    game.setNotice('Looking for an opponent…');
+    const response = await request('/api/matchmaking/join', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${activeSession.token}` },
+    });
+    if (response.status === 'matched' && typeof response.game_id === 'string') {
+      game.connectGame(response.game_id, activeSession.token, activeSession.user);
+    } else {
+      localStorage.setItem('cr_queue', 'yes');
+      game.setNotice('You’re in the queue. We’ll connect you as soon as an opponent is ready.');
     }
   };
 
-  const joinQueue = async () => {
-    if (!session || queueBusy) return;
-
+  const startMatchmaking = async () => {
+    if (queueBusy) return;
     setQueueBusy(true);
+    setQueueAction('joining');
     setStage('queue');
     setErrorMessage('');
-    game.setNotice('Looking for an opponent…');
+    assignedGameId.current = null;
+    queueCanceling.current = false;
+    let activeSession = session;
 
     try {
-      const response = await request('/api/matchmaking/join', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${session.token}` },
-      });
-      if (response.status === 'matched' && typeof response.game_id === 'string') {
-        game.connectGame(response.game_id, session.token, session.user);
-      } else {
-        localStorage.setItem('cr_queue', 'yes');
-        game.setNotice('You’re in the queue. We’ll connect you as soon as an opponent is ready.');
+      if (!activeSession) {
+        // Quick play creates a guest account just in time for authenticated matchmaking.
+        const guest = await authRequest('guest');
+        activeSession = { token: guest.access_token, user: guest.user };
+        rememberSession(guest);
       }
+      await enqueuePlayer(activeSession);
     } catch (error) {
-      setStage('lobby');
+      setStage(activeSession ? 'lobby' : 'welcome');
       setErrorMessage(error instanceof Error ? error.message : 'Could not join matchmaking.');
     } finally {
       setQueueBusy(false);
+      setQueueAction(null);
     }
   };
 
+  const joinQueue = () => startMatchmaking();
+  const findMatch = () => startMatchmaking();
+
   const leaveQueue = async () => {
+    if (queueCanceling.current) return;
+    queueCanceling.current = true;
+    setQueueBusy(true);
+    setQueueAction('checking');
+
     try {
       if (session) {
-        await request('/api/matchmaking/leave', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${session.token}` },
-        });
+        const headers = { Authorization: `Bearer ${session.token}` };
+
+        // A match can be assigned between the last poll and the player's cancel click.
+        const current = await request('/api/matchmaking/status', { headers });
+        if (current.status === 'matched' && typeof current.game_id === 'string') {
+          acceptAssignment(current.game_id, session);
+          return;
+        }
+        if (assignedGameId.current) return;
+
+        const result = await request('/api/matchmaking/leave', { method: 'POST', headers });
+        if (result.status === 'matched' && typeof result.game_id === 'string') {
+          acceptAssignment(result.game_id, session);
+          return;
+        }
+        if (assignedGameId.current) return;
       }
+
+      localStorage.removeItem('cr_queue');
+      setStage('lobby');
+      game.setNotice('Search cancelled.');
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Could not leave the queue.');
+    } finally {
+      queueCanceling.current = false;
+      setQueueBusy(false);
+      setQueueAction(null);
     }
-
-    localStorage.removeItem('cr_queue');
-    setStage('lobby');
-    game.setNotice('Search cancelled.');
   };
 
   const signOut = async () => {
@@ -170,19 +211,40 @@ export function HomePage() {
     setAuthMode(null);
   };
 
+  const updateSessionUsername = (username: string) => {
+    setSession((current) => {
+      if (!current) return current;
+      const updated = { ...current, user: { ...current.user, username } };
+      localStorage.setItem('cr_user', JSON.stringify(updated.user));
+      return updated;
+    });
+  };
+
+  const handleSessionExpired = () => {
+    localStorage.removeItem('cr_access_token');
+    localStorage.removeItem('cr_user');
+    localStorage.removeItem('cr_game_id');
+    localStorage.removeItem('cr_queue');
+    setSession(null);
+    game.clearForSignOut();
+    setStage('welcome');
+    setAuthMode('login');
+    setAuthError('Your session expired. Sign in again to access your account.');
+  };
+
   // Poll only while queued; the server assigns the same game ID used by the socket flow.
   useEffect(() => {
     if (stage !== 'queue' || !session) return;
     let stopped = false;
 
     const pollQueue = async () => {
+      if (queueCanceling.current) return;
       try {
         const response = await request('/api/matchmaking/status', {
           headers: { Authorization: `Bearer ${session.token}` },
         });
         if (!stopped && response.status === 'matched' && typeof response.game_id === 'string') {
-          localStorage.removeItem('cr_queue');
-          game.connectGame(response.game_id, session.token, session.user);
+          acceptAssignment(response.game_id, session);
         }
       } catch (error) {
         if (!stopped) {
@@ -201,41 +263,28 @@ export function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage, session]);
 
-  if (!session) {
+  if (!session || stage === 'lobby' || stage === 'queue') {
     return (
       <WelcomeScreen
         authMode={authMode}
-        username={username}
-        password={password}
         authError={authError}
         errorMessage={errorMessage}
         authBusy={authBusy}
         serviceStatus={serviceStatus}
-        onAuthModeChange={setAuthMode}
-        onAuthSwitch={(mode) => {
-          setAuthMode(mode);
-          setAuthError('');
-        }}
-        onUsernameChange={setUsername}
-        onPasswordChange={setPassword}
-        onAuthSubmit={authSubmit}
-        onGuestLogin={() => void guestLogin()}
-      />
-    );
-  }
-
-  if (stage === 'lobby' || stage === 'queue') {
-    return (
-      <LobbyScreen
+        user={session?.user ?? null}
+        sessionToken={session?.token ?? null}
         stage={stage}
-        user={session.user}
         queueBusy={queueBusy}
-        errorMessage={errorMessage}
+        queueAction={queueAction}
         notice={game.notice}
-        serviceStatus={serviceStatus}
+        onAuthModeChange={setAuthMode}
+        onGoogleSignIn={(credential) => void googleAuthSubmit(credential)}
+        onGoogleError={setAuthError}
+        onSessionUsernameUpdate={updateSessionUsername}
+        onSessionExpired={handleSessionExpired}
+        onFindMatch={() => void findMatch()}
+        onCancelSearch={() => void leaveQueue()}
         onSignOut={() => void signOut()}
-        onJoinQueue={() => void joinQueue()}
-        onLeaveQueue={() => void leaveQueue()}
       />
     );
   }

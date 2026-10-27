@@ -76,6 +76,35 @@ body {
   font-size: 11px;
 }
 
+.welcome-match-action {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 390px);
+  margin-top: 25px;
+}
+
+.welcome-play {
+  min-height: 64px;
+  margin-top: 0;
+  border-radius: 6px;
+  font-size: 19px;
+  letter-spacing: 0.01em;
+}
+
+.match-searching {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  gap: 12px;
+  padding: 0 17px;
+  border: 1px solid #39e58c;
+  border-radius: 6px;
+  background: #0c2015;
+  color: #8af2b7;
+  font-size: 15px;
+  font-weight: 650;
+}
+
 .auth-sidebar {
   border-right-color: #28332c;
   background: #090b0a;
@@ -114,6 +143,7 @@ body {
   color: var(--arena-white);
   font: 700 27px/1.15 Inter, Arial, sans-serif;
   letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
 }
 
 .welcome-card > p {
@@ -186,6 +216,28 @@ body {
 
 .welcome-card .auth-switch button {
   color: #76efaa;
+}
+
+.welcome-card .auth-back {
+  align-self: flex-start;
+  margin-top: 13px;
+  padding: 5px 0;
+  border: 0;
+  background: transparent;
+  color: #c4cec7;
+  cursor: pointer;
+  font: 500 12px Inter, Arial, sans-serif;
+}
+
+.welcome-card .auth-back:hover {
+  color: var(--arena-green);
+}
+
+.quick-play-note {
+  margin: 14px 0 0;
+  color: #c0cbc3;
+  font-size: 12px;
+  line-height: 1.55;
 }
 
 .welcome-card .auth-error {
@@ -459,6 +511,15 @@ body {
 
   .welcome-card {
     padding: 22px 18px;
+  }
+
+  .welcome-match-action {
+    margin-top: 20px;
+  }
+
+  .welcome-play {
+    min-height: 56px;
+    font-size: 17px;
   }
 
   .lobby-shell {

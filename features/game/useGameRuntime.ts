@@ -41,6 +41,7 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
   const gameRef = useRef<GameState | null>(null);
   const ownSlotRef = useRef<number | null>(null);
   const reconnectTimerRef = useRef<number | null>(null);
+  const reconnectAttemptsRef = useRef(0);
   const pingTimerRef = useRef<number | null>(null);
   const moveTimerRef = useRef<number | null>(null);
   const processedSequencesRef = useRef(new Set<number>());
@@ -97,6 +98,12 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
       ? Number(payload.current_player_slot)
       : finalState.players[finalState.current_player_index]?.id ?? finalState.current_player_index;
     if (nextTurnSlot >= 0 && nextTurnSlot <= 1) setCurrentPlayerSlot(nextTurnSlot);
+    if (payload.clocks) {
+      setPlayerClocks([
+        Number(payload.clocks['0'] ?? 0),
+        Number(payload.clocks['1'] ?? 0),
+      ]);
+    }
     const previousState = gameRef.current;
     setAuthoritativeGame(finalState);
 
@@ -189,6 +196,7 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
     if (pingTimerRef.current !== null) window.clearInterval(pingTimerRef.current);
     if (moveTimerRef.current !== null) window.clearTimeout(moveTimerRef.current);
     reconnectTimerRef.current = null;
+    reconnectAttemptsRef.current = 0;
     pingTimerRef.current = null;
     moveTimerRef.current = null;
 
@@ -200,7 +208,11 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
   const connectGame = (id: string, token: string, restoredUser?: SessionUser) => {
     if (restoredUser) sessionRef.current = { token, user: restoredUser };
 
-    if (socketRef.current?.readyState === WebSocket.OPEN && gameIdRef.current === id) {
+    if (
+      gameIdRef.current === id &&
+      (socketRef.current?.readyState === WebSocket.OPEN ||
+        socketRef.current?.readyState === WebSocket.CONNECTING)
+    ) {
       setStage(gameRef.current?.status.kind === 'won' ? 'finished' : 'game');
       return;
     }
@@ -243,6 +255,7 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
     setNotice('Connecting to the live arena…');
 
     socket.onopen = () => {
+      reconnectAttemptsRef.current = 0;
       setSocketStatus('live');
       setNotice('Connected. Syncing match state…');
       pingTimerRef.current = window.setInterval(() => {
@@ -325,7 +338,14 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
           acceptMove(payload as AcceptedMove);
         }
         if (messageType === 'game_finished') {
-          if (payload.state) setAuthoritativeGame(normalizeGameState(payload.state));
+          const finishedState = payload.state ?? payload.final_state;
+          if (finishedState) setAuthoritativeGame(normalizeGameState(finishedState));
+          if (payload.clocks) {
+            setPlayerClocks([
+              Number(payload.clocks['0'] ?? 0),
+              Number(payload.clocks['1'] ?? 0),
+            ]);
+          }
           setBusy(false);
           setStage('finished');
           setNotice('The match is complete.');
@@ -368,23 +388,50 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
     };
 
     socket.onerror = () => {
-      setSocketStatus('reconnecting');
-      setNotice('Connection interrupted. Reconnecting…');
+      // The close event owns retry scheduling so error + close cannot create two timers.
+      setNotice('Connection interrupted. Waiting for the server…');
     };
 
-    socket.onclose = () => {
+    socket.onclose = (event) => {
       if (socketRef.current !== socket || gameIdRef.current !== id) return;
+      socketRef.current = null;
       if (pingTimerRef.current !== null) window.clearInterval(pingTimerRef.current);
       pingTimerRef.current = null;
       setBusy(false);
+
+      // Authentication, authorization and invalid-game failures are not retryable.
+      if ([4401, 4403, 4404].includes(event.code)) {
+        reconnectAttemptsRef.current = 0;
+        setSocketStatus('offline');
+        setNotice(
+          event.code === 4401
+            ? 'Your session has expired. Please sign in again.'
+            : event.code === 4403
+              ? 'You are not a participant in this match.'
+              : 'This match no longer exists.',
+        );
+        return;
+      }
+
+      const attempt = reconnectAttemptsRef.current + 1;
+      reconnectAttemptsRef.current = attempt;
+      if (attempt > 8) {
+        setSocketStatus('offline');
+        setNotice('Live connection is unavailable. Refresh to try again.');
+        return;
+      }
+
       setSocketStatus('reconnecting');
-      setNotice('Connection interrupted. Reconnecting…');
+      const delay = Math.min(30_000, 1_000 * 2 ** (attempt - 1));
+      setNotice(`Connection interrupted. Reconnecting in ${Math.ceil(delay / 1000)}s…`);
+      if (reconnectTimerRef.current !== null) window.clearTimeout(reconnectTimerRef.current);
       reconnectTimerRef.current = window.setTimeout(() => {
+        reconnectTimerRef.current = null;
         const currentSession = sessionRef.current;
-        if (currentSession && gameIdRef.current === id) {
+        if (currentSession && gameIdRef.current === id && socketRef.current === null) {
           connectGame(id, currentSession.token);
         }
-      }, 1800);
+      }, delay);
     };
   };
 
@@ -419,7 +466,8 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
   // Restore only the latest state from history if a WebSocket event was missed.
   useEffect(() => {
     const activeSession = session;
-    if (stage !== 'game' || !gameId || !activeSession) return;
+    // History is a low-frequency recovery path only while the live socket is down.
+    if (stage !== 'game' || !gameId || !activeSession || socketStatus === 'live') return;
     let stopped = false;
 
     const syncHistory = async () => {
@@ -438,14 +486,15 @@ export function useGameRuntime({ session, stage, setStage }: UseGameRuntimeOptio
       }
     };
 
-    const timer = window.setInterval(() => void syncHistory(), 3200);
+    void syncHistory();
+    const timer = window.setInterval(() => void syncHistory(), 10_000);
     return () => {
       stopped = true;
       window.clearInterval(timer);
     };
     // The socket/event callbacks use refs for changing connection state.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stage, gameId, session]);
+  }, [stage, gameId, session, socketStatus]);
 
   useEffect(() => () => closeSocket(), []);
 
