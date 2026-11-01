@@ -10,7 +10,6 @@ import {
   DEFAULT_ORB_SKIN,
   DEFAULT_ORB_SKIN_ID,
   normalizeOrbSkinCatalog,
-  resolveOrbSkinAssetKey,
   type OrbSkinCatalogItem,
 } from '@/features/game/orb-skins';
 
@@ -159,14 +158,13 @@ export function OrbSkinsPanel({
 
               <div className="orb-skin-list">
                 {catalog.map((skin) => {
-                  const assetKey = resolveOrbSkinAssetKey(skin.id, catalog);
                   const owned = ownedIds.has(skin.id);
                   const equipped = skin.id === selectedSkinId;
                   const busy = savingSkinId === skin.id;
 
                   return (
                     <article className={`orb-skin-card ${equipped ? 'is-equipped' : ''}`} key={skin.id}>
-                      <SkinPreview assetKey={assetKey} previewAssetKey={skin.preview_asset_key} />
+                      <SkinPreview skin={skin} />
                       <div className="orb-skin-copy">
                         <span className="orb-skin-status">
                           {equipped ? 'EQUIPPED' : owned ? 'IN YOUR INVENTORY' : 'LOCKED'}
@@ -211,26 +209,28 @@ export function OrbSkinsPanel({
   );
 }
 
-function SkinPreview({ assetKey, previewAssetKey }: { assetKey: string; previewAssetKey: string }) {
-  const safePreviewKey = /^[a-zA-Z0-9_-]{1,64}$/.test(previewAssetKey)
-    ? previewAssetKey
-    : DEFAULT_ORB_SKIN_ID;
+function SkinPreview({ skin }: { skin: OrbSkinCatalogItem }) {
+  const previewUrl = skin.assets?.preview_url ?? (
+    skin.preview_asset_key !== DEFAULT_ORB_SKIN_ID
+      ? `/orb-skins/${skin.preview_asset_key}/preview.webp`
+      : undefined
+  );
 
   return (
     <div className="orb-skin-preview" aria-hidden="true">
       <span className="orb-skin-preview-orb">
-        <OrbMaterial assetKey={assetKey} />
+        <OrbMaterial assetKey={skin.asset_key} assets={skin.assets} />
       </span>
       <span className="orb-skin-preview-orb small-one">
-        <OrbMaterial assetKey={assetKey} />
+        <OrbMaterial assetKey={skin.asset_key} assets={skin.assets} />
       </span>
       <span className="orb-skin-preview-orb small-two">
-        <OrbMaterial assetKey={assetKey} />
+        <OrbMaterial assetKey={skin.asset_key} assets={skin.assets} />
       </span>
-      {safePreviewKey !== DEFAULT_ORB_SKIN_ID && (
+      {previewUrl && (
         <img
           className="orb-skin-preview-image"
-          src={`/orb-skins/${safePreviewKey}/preview.webp`}
+          src={previewUrl}
           alt=""
           onError={(event) => { event.currentTarget.hidden = true; }}
         />

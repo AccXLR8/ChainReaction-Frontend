@@ -10,7 +10,7 @@ import {
   DEFAULT_ORB_SKIN,
   DEFAULT_ORB_SKIN_ID,
   normalizeOrbSkinCatalog,
-  resolveOrbSkinAssetKey,
+  resolveOrbSkin,
   type OrbSkinCatalogItem,
 } from '@/features/game/orb-skins';
 import { useGameRuntime } from '@/features/game/useGameRuntime';
@@ -38,11 +38,11 @@ export function HomePage() {
   const [orbSkinCatalog, setOrbSkinCatalog] = useState<OrbSkinCatalogItem[]>([DEFAULT_ORB_SKIN]);
   const [equippedOrbSkinId, setEquippedOrbSkinId] = useState(DEFAULT_ORB_SKIN_ID);
 
-  const resolveOrbAssetKey = useCallback(
-    (skinId: unknown) => resolveOrbSkinAssetKey(skinId, orbSkinCatalog),
+  const resolveSkin = useCallback(
+    (skinId: unknown) => resolveOrbSkin(skinId, orbSkinCatalog),
     [orbSkinCatalog],
   );
-  const game = useGameRuntime({ session, stage, setStage, resolveOrbAssetKey });
+  const game = useGameRuntime({ session, stage, setStage, resolveOrbSkin: resolveSkin });
 
   /** Persist the API session and normalize older auth responses for the UI. */
   const rememberSession = (response: AuthResponse): AppSession => {
@@ -297,7 +297,7 @@ export function HomePage() {
     gridRef: game.gridRef,
     flightLayerRef: game.flightLayerRef,
     colorForSlot: game.colorForSlot,
-    orbAssetKeyForSlot: game.orbAssetKeyForSlot,
+    orbSkinForSlot: game.orbSkinForSlot,
     onPlay: game.play,
   };
 
@@ -318,9 +318,17 @@ export function HomePage() {
     opponentPlayerName: 'OPPONENT',
     activeBoardColor: '#39e58c',
     colorForSlot: (slot) => slot === 0 ? '#39e58c' : '#ff5964',
-    orbAssetKeyForSlot: (slot) => resolveOrbAssetKey(
-      slot === 0 ? equippedOrbSkinId : DEFAULT_ORB_SKIN_ID,
-    ),
+    orbSkinForSlot: (slot) => {
+      const isOwnPlayer = slot === 0;
+      const skin = resolveSkin(isOwnPlayer ? equippedOrbSkinId : DEFAULT_ORB_SKIN_ID);
+      return {
+        skinId: skin.id,
+        assetKey: skin.asset_key,
+        assets: skin.assets,
+        side: isOwnPlayer ? 'self' : 'opponent',
+        color: isOwnPlayer ? '#39e58c' : '#ff5964',
+      };
+    },
     onPlay: () => undefined,
   };
 

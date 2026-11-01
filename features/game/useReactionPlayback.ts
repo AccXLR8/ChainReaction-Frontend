@@ -13,6 +13,7 @@ type AnimationJob = (isCurrent: () => boolean) => Promise<void>;
 export function useReactionPlayback(
   orbAppearanceForSlot: (slot: number) => OrbSkinAppearance,
   onPlaybackComplete: () => void,
+  classicCollisionSoundUrl: string | undefined,
 ) {
   const [wave, setWave] = useState<ReactionEffects | null>(null);
   const [animating, setAnimating] = useState(false);
@@ -24,14 +25,15 @@ export function useReactionPlayback(
   const isAnimatingRef = useRef(false);
   const gridRef = useRef<HTMLDivElement | null>(null);
   const flightLayerRef = useRef<HTMLDivElement | null>(null);
-  const firstSkinAssetKey = orbAppearanceForSlot(0).assetKey;
-  const secondSkinAssetKey = orbAppearanceForSlot(1).assetKey;
+  const firstSkinSoundUrl = orbAppearanceForSlot(0).assets?.collision_sound?.url;
+  const secondSkinSoundUrl = orbAppearanceForSlot(1).assets?.collision_sound?.url;
 
   // Load cues alongside the two player skin appearances, before a chain reaction starts.
   useEffect(() => {
-    preloadOrbSkinCollisionSound(firstSkinAssetKey);
-    preloadOrbSkinCollisionSound(secondSkinAssetKey);
-  }, [firstSkinAssetKey, secondSkinAssetKey]);
+    preloadOrbSkinCollisionSound(firstSkinSoundUrl);
+    preloadOrbSkinCollisionSound(secondSkinSoundUrl);
+    preloadOrbSkinCollisionSound(classicCollisionSoundUrl);
+  }, [firstSkinSoundUrl, secondSkinSoundUrl, classicCollisionSoundUrl]);
 
   // Unlock audio on the first interaction so later WebSocket-driven steps can play reliably.
   useEffect(() => {
@@ -157,10 +159,13 @@ export function useReactionPlayback(
       await waitForPaint();
       if (!isCurrent()) return;
 
-      // A reaction step may move many orbs, but it produces one skin-specific cue.
+      // The mover's equipped skin owns the cue; one step emits one sound, not one per orb.
       if (transfers.length > 0) {
-        const movingPlayer = transfers[0].player;
-        void playOrbSkinCollisionSound(orbAppearanceForSlot(movingPlayer).assetKey)
+        const movingPlayerSkin = orbAppearanceForSlot(placement.player);
+        void playOrbSkinCollisionSound(
+          movingPlayerSkin.assets?.collision_sound?.url,
+          classicCollisionSoundUrl,
+        )
           .catch(() => undefined);
       }
 

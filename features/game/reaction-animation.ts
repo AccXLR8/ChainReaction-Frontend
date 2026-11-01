@@ -1,5 +1,9 @@
 import { getNeighborCells, readNumber } from './board-model';
-import { DEFAULT_ORB_SKIN_ASSET_KEY, type OrbSkinAppearance } from './orb-skins';
+import {
+  DEFAULT_ORB_SKIN_ASSET_KEY,
+  resolveOrbSkinLayerImages,
+  type OrbSkinAppearance,
+} from './orb-skins';
 import type { Transfer } from './types';
 
 // Reaction durations are intentionally centralized so the motion sequence is easy to tune.
@@ -46,12 +50,10 @@ export function launchOrb(
   const safeAssetKey = /^[a-zA-Z0-9_-]{1,64}$/.test(appearance.assetKey)
     ? appearance.assetKey
     : DEFAULT_ORB_SKIN_ASSET_KEY;
-  const textureImage = safeAssetKey === DEFAULT_ORB_SKIN_ASSET_KEY
-    ? 'none'
-    : `url("/orb-skins/${safeAssetKey}/texture.webp")`;
-  const detailImage = safeAssetKey === DEFAULT_ORB_SKIN_ASSET_KEY
-    ? 'none'
-    : `url("/orb-skins/${safeAssetKey}/detail.webp")`;
+  const { textureImage, detailImage } = resolveOrbSkinLayerImages(
+    safeAssetKey,
+    appearance.assets,
+  );
 
   const rail = document.createElement('span');
   rail.className = 'flight-rail';

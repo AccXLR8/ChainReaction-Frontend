@@ -5,7 +5,13 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { AppStage, SessionUser } from '@/features/auth/types';
 import { ApiError, request } from '@/lib/api/client';
 import { DEFAULT_BOARD_SIZE, normalizeGameState } from './board-model';
-import { DEFAULT_ORB_SKIN_ID, normalizeOrbSkinId, type OrbSkinAppearance } from './orb-skins';
+import {
+  DEFAULT_ORB_SKIN,
+  DEFAULT_ORB_SKIN_ID,
+  normalizeOrbSkinId,
+  type OrbSkinAppearance,
+  type OrbSkinCatalogItem,
+} from './orb-skins';
 import { normalizeNationality } from '@/features/nationality/countries';
 import { REACTION_TIMING } from './reaction-animation';
 import type { AcceptedMove, GameState } from './types';
@@ -19,13 +25,13 @@ type UseGameRuntimeOptions = {
   session: PlayerSession | null;
   stage: AppStage;
   setStage: Dispatch<SetStateAction<AppStage>>;
-  resolveOrbAssetKey: (skinId: unknown) => string;
+  resolveOrbSkin: (skinId: unknown) => OrbSkinCatalogItem;
 };
 
 const PLAYER_COLORS = ['#39e58c', '#ff5964'];
 
 /** Owns the authenticated game connection, board state, and reaction playback. */
-export function useGameRuntime({ session, stage, setStage, resolveOrbAssetKey }: UseGameRuntimeOptions) {
+export function useGameRuntime({ session, stage, setStage, resolveOrbSkin }: UseGameRuntimeOptions) {
   // React state drives visible UI; refs below keep async socket callbacks current.
   const [socketStatus, setSocketStatus] = useState('offline');
   const [ownSlot, setOwnSlot] = useState<number | null>(null);
@@ -53,7 +59,7 @@ export function useGameRuntime({ session, stage, setStage, resolveOrbAssetKey }:
   const gameRef = useRef<GameState | null>(null);
   const ownSlotRef = useRef<number | null>(null);
   const playerSkinIdsRef = useRef([DEFAULT_ORB_SKIN_ID, DEFAULT_ORB_SKIN_ID]);
-  const resolveOrbAssetKeyRef = useRef(resolveOrbAssetKey);
+  const resolveOrbSkinRef = useRef(resolveOrbSkin);
   const reconnectTimerRef = useRef<number | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const connectionAttemptRef = useRef(0);
@@ -65,7 +71,7 @@ export function useGameRuntime({ session, stage, setStage, resolveOrbAssetKey }:
   const pendingMoveRef = useRef<{ cell: number; id: string } | null>(null);
 
   sessionRef.current = session;
-  resolveOrbAssetKeyRef.current = resolveOrbAssetKey;
+  resolveOrbSkinRef.current = resolveOrbSkin;
 
   const setAuthoritativeGame = (next: GameState | null) => {
     gameRef.current = next;
@@ -86,13 +92,22 @@ export function useGameRuntime({ session, stage, setStage, resolveOrbAssetKey }:
   const orbAppearanceForSlot = (slot: number): OrbSkinAppearance => {
     const ownSlotNow = ownSlotRef.current;
     const isOpponent = ownSlotNow === null ? slot % 2 === 1 : slot !== ownSlotNow;
+    const skin = resolveOrbSkinRef.current(
+      playerSkinIdsRef.current[slot] ?? DEFAULT_ORB_SKIN_ID,
+    );
     return {
-      assetKey: resolveOrbAssetKeyRef.current(playerSkinIdsRef.current[slot] ?? DEFAULT_ORB_SKIN_ID),
+      skinId: skin.id,
+      assetKey: skin.asset_key,
+      assets: skin.assets,
       side: isOpponent ? 'opponent' : 'self',
       color: flightColor(slot),
     };
   };
-  const playback = useReactionPlayback(orbAppearanceForSlot, () => setBusy(false));
+  const playback = useReactionPlayback(
+    orbAppearanceForSlot,
+    () => setBusy(false),
+    DEFAULT_ORB_SKIN.assets?.collision_sound?.url,
+  );
 
   // Accept server moves once, update authoritative state, then animate from the prior board.
   const acceptMove = (payload: AcceptedMove, submittedCell?: number) => {
@@ -155,8 +170,8 @@ export function useGameRuntime({ session, stage, setStage, resolveOrbAssetKey }:
 
     if (previousState && (steps.length > 0 || playback.animationPendingRef.current > 0)) {
       const placementPlayer =
-        reaction.placement?.player ??
         payload.player_slot ??
+        reaction.placement?.player ??
         previousState.players[previousState.current_player_index]?.id ??
         0;
       playback.queueReaction(
@@ -663,8 +678,8 @@ export function useGameRuntime({ session, stage, setStage, resolveOrbAssetKey }:
     if (ownSlot === null) return PLAYER_COLORS[slot % 2];
     return slot === ownSlot ? PLAYER_COLORS[0] : PLAYER_COLORS[1];
   };
-  const orbAssetKeyForSlot = (slot: number) =>
-    resolveOrbAssetKey(playerSkinIds[slot] ?? DEFAULT_ORB_SKIN_ID);
+  const orbSkinForSlot = (slot: number) =>
+    orbAppearanceForSlot(slot);
   const activeBoardColor = ownSlot === null
     ? PLAYER_COLORS[currentPlayer % 2]
     : isYourTurn ? PLAYER_COLORS[0] : PLAYER_COLORS[1];
@@ -745,7 +760,7 @@ export function useGameRuntime({ session, stage, setStage, resolveOrbAssetKey }:
     currentPlayer,
     isYourTurn,
     colorForSlot,
-    orbAssetKeyForSlot,
+    orbSkinForSlot,
     activeBoardColor,
     ownPlayerName,
     opponentPlayerName,

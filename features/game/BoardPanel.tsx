@@ -1,6 +1,7 @@
 import type { CSSProperties, RefObject } from 'react';
 import type { Cell, GameState, ReactionEffects } from './types';
 import { OrbMaterial } from './OrbMaterial';
+import type { OrbSkinAppearance } from './orb-skins';
 
 export type BoardPanelProps = {
   game: GameState | null;
@@ -26,7 +27,7 @@ export type BoardPanelProps = {
   gridRef: RefObject<HTMLDivElement | null>;
   flightLayerRef: RefObject<HTMLDivElement | null>;
   colorForSlot: (slot: number) => string;
-  orbAssetKeyForSlot: (slot: number) => string;
+  orbSkinForSlot: (slot: number) => OrbSkinAppearance;
   onPlay: (index: number) => void;
 };
 
@@ -55,7 +56,7 @@ export function BoardPanel({
   gridRef,
   flightLayerRef,
   colorForSlot,
-  orbAssetKeyForSlot,
+  orbSkinForSlot,
   onPlay,
 }: BoardPanelProps) {
   const visibleCells = cells ?? game?.board.cells;
@@ -108,9 +109,8 @@ export function BoardPanel({
                   const charging = wave?.charge.includes(index) ?? false;
                   const bursting = wave?.burst.find((item) => item.cell === index);
                   const receiving = wave?.receive.find((item) => item.cell === index);
-                  const orbAssetKey = cell.owner === null
-                    ? 'classic'
-                    : orbAssetKeyForSlot(cell.owner);
+                  const orbSkin = cell.owner === null ? null : orbSkinForSlot(cell.owner);
+                  const orbAssetKey = orbSkin?.assetKey ?? 'classic';
                   const orbSide = cell.owner === null || ownSlot === null
                     ? 'self'
                     : cell.owner === ownSlot ? 'self' : 'opponent';
@@ -173,7 +173,11 @@ export function BoardPanel({
                                     key={orbIndex}
                                     style={{ '--orb-i': orbIndex } as CSSProperties}
                                   >
-                                    <OrbMaterial assetKey={orbAssetKey} className="orb-spin-preview" />
+                                    <OrbMaterial
+                                      assetKey={orbAssetKey}
+                                      assets={orbSkin?.assets}
+                                      className="orb-spin-preview"
+                                    />
                                     <span className="orb-owner-rim" />
                                   </span>
                                 ),
