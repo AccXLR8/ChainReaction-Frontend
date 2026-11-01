@@ -1,0 +1,469 @@
+/* Unified electric-green on matte-black product theme. */
+:root {
+  color-scheme: dark;
+  --bg: #070907;
+  --panel: #0b100c;
+  --line: #263329;
+  --muted: #98a79b;
+  --text: #eef5ef;
+  --green: #a4ff35;
+  --red: #ff5964;
+  --arena-black: #070907;
+  --arena-panel: #0c110d;
+  --arena-panel-raised: #111912;
+  --arena-line: #253329;
+  --arena-white: #eef5ef;
+  --arena-muted: #a0afa3;
+  --arena-green: #a4ff35;
+  --arena-red: #ff5964;
+  --weathered-paper: #080b09;
+  --weathered-paper-light: #0c110d;
+  --weathered-paper-dark: #131b15;
+  --weathered-silt: #d4dfd6;
+  --weathered-silt-dark: #eef5ef;
+  --weathered-silt-muted: #91a194;
+  --weathered-line: #263329;
+  --weathered-accent: #a4ff35;
+  --weathered-accent-dark: #6fbd18;
+  --font-ui: Inter, 'Manrope', Arial, sans-serif;
+}
+
+html,
+body {
+  background: var(--arena-black);
+  color: var(--arena-white);
+  font-family: var(--font-ui);
+}
+
+body {
+  scrollbar-color: #354532 #080b09;
+}
+
+::selection {
+  background: #a4ff3545;
+  color: #f5ffe9;
+}
+
+.welcome-shell,
+.game-shell,
+.lobby-shell,
+.shell:not(.game-shell) {
+  color: var(--arena-white);
+  background:
+    radial-gradient(ellipse at 72% 22%, #a4ff350c, transparent 36%),
+    radial-gradient(ellipse at 18% 84%, #38ff7b08, transparent 35%),
+    #070907;
+}
+
+.welcome-shell {
+  --welcome-ink: var(--arena-white);
+  --welcome-muted: var(--arena-muted);
+  --welcome-green: var(--arena-green);
+  --welcome-border: var(--arena-line);
+  isolation: isolate;
+}
+
+.welcome-shell::before {
+  position: fixed;
+  z-index: -1;
+  inset: 76px 0 0;
+  background-image:
+    linear-gradient(#a4ff3508 1px, transparent 1px),
+    linear-gradient(90deg, #a4ff3508 1px, transparent 1px);
+  background-size: 56px 56px;
+  content: '';
+  mask-image: radial-gradient(ellipse at 50% 40%, #000 0, transparent 72%);
+  pointer-events: none;
+}
+
+.welcome-noise {
+  opacity: 0.12;
+  background-image: radial-gradient(#caff9e22 0.7px, transparent 0.7px);
+  background-size: 7px 7px;
+  mask-image: linear-gradient(180deg, #000, transparent 86%);
+}
+
+.home-topbar,
+.lobby-topbar,
+.game-shell .topbar,
+.shell:not(.game-shell) .topbar {
+  border-color: #263329;
+  background: rgb(7 9 7 / 92%);
+  box-shadow: 0 1px 0 #a4ff3510;
+  backdrop-filter: blur(16px);
+}
+
+.home-brand .brand-mark,
+.lobby-shell .brand-mark,
+.game-shell .brand-mark,
+.shell:not(.game-shell) .brand-mark {
+  color: var(--arena-green);
+  text-shadow: 0 0 18px #a4ff3540;
+}
+
+.home-brand .brand-wordmark strong,
+.lobby-shell .brand-wordmark strong,
+.game-shell .brand-wordmark strong {
+  color: var(--arena-green);
+}
+
+.home-nav a:hover,
+.home-nav button:hover,
+.home-nav a.is-active,
+.home-nav button.is-active {
+  color: #f5ffe9;
+}
+
+.home-nav a.is-active::after,
+.home-nav button.is-active::after {
+  background: var(--arena-green);
+  box-shadow: 0 0 14px #a4ff3590;
+}
+
+.nav-signin,
+.top-player button {
+  border-color: #465344;
+  color: #e6eee7;
+}
+
+.nav-signin:hover,
+.top-player button:hover {
+  border-color: var(--arena-green);
+  background: #a4ff3510;
+  color: var(--arena-green);
+}
+
+.play-entry-panel {
+  position: relative;
+  border-color: #27362a;
+  background: linear-gradient(145deg, #0d120e 0%, #090c0a 75%);
+  box-shadow: inset 0 1px 0 #ffffff08, 0 24px 70px #0007;
+}
+
+.play-entry-panel::before {
+  position: absolute;
+  top: -1px;
+  left: 17%;
+  width: 66%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #a4ff3570, transparent);
+  content: '';
+  pointer-events: none;
+}
+
+.play-entry-panel > .eyebrow,
+.play-entry-panel h1,
+.match-mode-card h2 {
+  color: var(--arena-white);
+}
+
+.play-entry-panel > .eyebrow i {
+  background: var(--arena-green);
+  box-shadow: 0 0 12px #a4ff3590;
+}
+
+.play-entry-panel h1 {
+  text-shadow: 0 4px 36px #a4ff3512;
+}
+
+.play-entry-panel > p,
+.match-mode-card > p {
+  color: #aab8ad;
+}
+
+.match-mode-card {
+  border-color: #29372c;
+  background: linear-gradient(135deg, #111812, #0c100d 72%);
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+.match-mode-card:hover {
+  transform: translateY(-2px);
+  border-color: #506444;
+  background: linear-gradient(135deg, #141d15, #0d120e 72%);
+  box-shadow: 0 12px 30px #0006;
+}
+
+.quick-match-card {
+  border-color: #5b8d2e;
+  background: linear-gradient(135deg, #17220f, #0c110b 76%);
+  box-shadow: inset 0 1px 0 #a4ff3518, 0 0 28px #a4ff3508;
+}
+
+.mini-match-card {
+  border-color: #3a4635;
+}
+
+.ranked-match-card {
+  border-color: #323a33;
+  background: linear-gradient(135deg, #111512, #0a0d0b 76%);
+}
+
+.match-mode-kicker,
+.match-mode-badge {
+  color: #a6b5a8;
+}
+
+.match-mode-badge {
+  border-color: #3c493c;
+  background: #080b09;
+}
+
+.quick-match-card .match-mode-badge {
+  border-color: #678f3e;
+  color: var(--arena-green);
+}
+
+.mini-match-card .match-mode-badge {
+  border-color: #586447;
+  color: #d0df9a;
+}
+
+.play-entry-panel .welcome-play,
+.game-shell .match-sidebar .new-game.wide,
+.game-shell .match-result .queue-button,
+.shell .queue-button,
+.shell .new-game {
+  border: 1px solid #b5ff65;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #b3ff51, #8be51e);
+  box-shadow: 0 0 0 1px #a4ff3517, 0 7px 22px #a4ff3518;
+  color: #101809;
+  font-weight: 800;
+  transition: transform 160ms ease, filter 160ms ease, box-shadow 160ms ease;
+}
+
+.play-entry-panel .welcome-play:hover:not(:disabled),
+.game-shell .match-sidebar .new-game.wide:hover:not(:disabled),
+.game-shell .match-result .queue-button:hover:not(:disabled),
+.shell .queue-button:hover:not(:disabled),
+.shell .new-game:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow: 0 0 24px #a4ff3545;
+}
+
+.ranked-play:disabled,
+.play-entry-panel .welcome-play:disabled {
+  border-color: #455046;
+  background: #1a211b;
+  box-shadow: none;
+  color: #87958a;
+  filter: none;
+  opacity: 0.72;
+}
+
+.match-searching {
+  border-color: #5c9434;
+  background: #111c0d;
+  color: #c4ff88;
+  box-shadow: inset 0 0 20px #a4ff350b;
+}
+
+.play-entry-panel .queue-spinner {
+  border-color: #a4ff3533;
+  border-top-color: var(--arena-green);
+}
+
+.cancel-search {
+  border-color: #3b493d;
+  background: #0a0e0b;
+  color: #d7e1d8;
+}
+
+.cancel-search:hover:not(:disabled) {
+  border-color: #ff727b;
+  color: #ff9399;
+}
+
+.menu-error,
+.lobby-error {
+  color: #ff8d94;
+}
+
+.welcome-card,
+.menu-auth-modal,
+.profile-panel,
+.orb-skins-panel,
+.auth-dialog {
+  border-color: #2a382c;
+  background: linear-gradient(145deg, #101611, #090c0a 82%);
+  color: var(--arena-white);
+  box-shadow: 0 28px 90px #000b, inset 0 1px 0 #ffffff08;
+}
+
+.welcome-card input,
+.menu-auth-modal input,
+.profile-panel input,
+.profile-panel select,
+.orb-skins-panel select {
+  border-color: #344337;
+  background: #080b09;
+  color: #edf5ee;
+}
+
+.welcome-card input:focus,
+.menu-auth-modal input:focus,
+.profile-panel input:focus,
+.profile-panel select:focus,
+.orb-skins-panel select:focus {
+  border-color: var(--arena-green);
+  box-shadow: 0 0 0 3px #a4ff3518;
+}
+
+.google-signin {
+  border-color: #3a473c;
+  background: #111713;
+  color: #edf5ee;
+}
+
+.game-shell {
+  background:
+    radial-gradient(ellipse at 50% 12%, #a4ff3509, transparent 38%),
+    #070907;
+}
+
+.game-shell .match-sidebar,
+.game-shell .board-panel {
+  border-color: #263329;
+  background: linear-gradient(145deg, #0d120e, #090c0a);
+  box-shadow: 0 18px 48px #0005;
+}
+
+.match-player-card {
+  border-color: color-mix(in srgb, var(--player-color) 42%, #263329);
+  background: linear-gradient(120deg, #101611, #0b0f0c 80%);
+  box-shadow: inset 0 1px 0 #ffffff07;
+  color: #edf4ee;
+}
+
+.match-player-card.is-active {
+  background: color-mix(in srgb, var(--player-color) 9%, #0b0f0c);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--player-color) 11%, transparent), inset 0 1px #ffffff0a;
+}
+
+.match-player-avatar {
+  background: color-mix(in srgb, var(--player-color) 12%, #0b100c);
+  color: color-mix(in srgb, var(--player-color) 75%, white);
+}
+
+.match-turn-card {
+  border-color: color-mix(in srgb, var(--player-color) 30%, #29372c);
+  background: color-mix(in srgb, var(--player-color) 7%, #0b100c);
+}
+
+.game-shell .match-result {
+  border-color: #2c392e;
+  background: #0d120e;
+  color: var(--arena-white);
+}
+
+.game-shell .match-result.is-your-win {
+  border-color: #679d36;
+  background: linear-gradient(120deg, #16200e, #0d120c);
+}
+
+.game-shell .match-result.is-opponent-win {
+  border-color: #74373a;
+  background: linear-gradient(120deg, #211112, #100c0d);
+}
+
+@media (max-width: 1400px) and (min-width: 901px) {
+  .play-stage > .board-panel {
+    transform: scale(0.9);
+  }
+}
+
+.match-turn-card .match-turn-orb {
+  border-color: #eef5ef;
+}
+
+.latency-indicator {
+  border-color: #344237;
+  background: #0b100c;
+}
+
+.auth-sidebar,
+.auth-sidebar-brand,
+.welcome-copy h1,
+.welcome-copy .eyebrow,
+.how-to-play,
+.how-to-play > h2,
+.rule-step h3,
+.bot-callout h3 {
+  color: var(--arena-white);
+}
+
+.auth-sidebar {
+  background: #090d0a;
+}
+
+.rule-step,
+.bot-callout,
+.rules-modal,
+.rules-modal .rule-step {
+  border-color: #29372c;
+  background: #0c110d;
+  color: var(--arena-white);
+}
+
+.rule-step p,
+.bot-callout p,
+.welcome-copy > p,
+.how-to-intro {
+  color: #a0afa3;
+}
+
+.welcome-footer,
+.lobby-footer,
+.shell footer {
+  border-color: #253329;
+  color: #8fa092;
+}
+
+button,
+a,
+input,
+select {
+  accent-color: var(--arena-green);
+}
+
+:focus-visible {
+  outline: 2px solid var(--arena-green);
+  outline-offset: 3px;
+}
+
+@media (max-width: 700px) {
+  .welcome-shell {
+    background:
+      radial-gradient(ellipse at 70% 12%, #a4ff3510, transparent 42%),
+      #070907;
+  }
+
+  .welcome-shell::before {
+    inset: 62px 0 0;
+    background-size: 42px 42px;
+  }
+
+  .auth-sidebar {
+    border: 1px solid #29372c;
+    background: #090d0a;
+  }
+
+  .welcome-card {
+    border-color: #2a382c;
+    background: linear-gradient(145deg, #101611, #090c0a 82%);
+    box-shadow: 0 18px 50px #0008;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

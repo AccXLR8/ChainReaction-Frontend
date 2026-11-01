@@ -100,7 +100,7 @@ export function getCellSize(
       ? viewportWidth - 36
       : viewportWidth <= 900
         ? (viewportWidth - 90) / 2
-        : (viewportWidth - 136) / 2,
+        : (viewportWidth - 220) / 2,
   );
   // Fit the board after accounting for the fixed shell and any player tags around it.
   const availableHeight = Math.max(

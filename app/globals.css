@@ -9,7 +9,6 @@
 @import './styles/auth-entry.css';
 @import './styles/auth-entry-responsive.css';
 @import './styles/readability.css';
-@import './styles/product-theme.css';
 @import './styles/game-screen.css';
 @import './styles/neon-site.css';
 @import './styles/neon-site-responsive.css';
@@ -22,5 +21,5 @@
 @import './styles/play-layout.css';
 @import './styles/board-surface.css';
 @import './styles/orb-skins.css';
-@import './styles/weathered-theme.css';
 @import './styles/match-board-layout.css';
+@import './styles/electric-matte-theme.css';
