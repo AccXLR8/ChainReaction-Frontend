@@ -1,4 +1,5 @@
 import type { SessionUser } from '@/features/auth/types';
+import { BrandLockup } from '@/features/brand/BrandLockup';
 
 type LobbyScreenProps = {
   stage: 'lobby' | 'queue';
@@ -30,8 +31,7 @@ export function LobbyScreen({
     <main className="lobby-shell">
       <header className="lobby-topbar">
         <a className="brand" href="#lobby">
-          <span className="brand-mark">✳</span>
-          <span className="brand-wordmark"><span>Super</span><strong>kritical</strong></span>
+          <BrandLockup />
         </a>
         <div className="lobby-user">
           <span className="user-avatar">{user.username.slice(0, 1).toUpperCase()}</span>

@@ -1,0 +1,111 @@
+.nationality-picker {
+  display: block;
+  margin: 12px 0;
+  color: #d0d8d2;
+  font: 10px 'DM Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nationality-picker > span {
+  display: block;
+}
+
+.nationality-picker select {
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin-top: 7px;
+  padding: 0 11px;
+  border: 1px solid #414a43;
+  border-radius: 4px;
+  outline: 0;
+  background: #070908;
+  color: #f2f5f2;
+  font: 13px Inter, Arial, sans-serif;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.nationality-picker select:focus {
+  border-color: var(--arena-green);
+  box-shadow: 0 0 0 3px #39e58c1c;
+}
+
+.nationality-picker option {
+  background: #0b0e0c;
+  color: #f2f5f2;
+}
+
+.nationality-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  color: #c6d0c9;
+  font: 500 10px Inter, Arial, sans-serif;
+  letter-spacing: normal;
+  line-height: 1.2;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.nationality-flag {
+  flex: none;
+  font-family: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+.nationality-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top-player-nationality {
+  margin-left: -4px;
+  font-size: 16px;
+}
+
+.profile-country-display {
+  margin-left: 8px;
+  color: #b9c5bd;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+.profile-editor .nationality-picker {
+  margin: 0;
+}
+
+.manual-auth-form {
+  display: grid;
+  gap: 10px;
+}
+
+.manual-auth-form > label {
+  margin: 0;
+}
+
+.manual-auth-form .nationality-picker {
+  margin: 0;
+}
+
+.manual-auth-form .primary-action {
+  width: 100%;
+}
+
+.player-nationality {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 4px;
+  color: #bac5bd;
+  font-size: 9px;
+}
+
+.player-nationality .nationality-name {
+  text-overflow: ellipsis;
+}

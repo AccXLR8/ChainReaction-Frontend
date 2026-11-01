@@ -1,4 +1,5 @@
 import { getNeighborCells, readNumber } from './board-model';
+import { DEFAULT_ORB_SKIN_ASSET_KEY, type OrbSkinAppearance } from './orb-skins';
 import type { Transfer } from './types';
 
 // Reaction durations are intentionally centralized so the motion sequence is easy to tune.
@@ -27,7 +28,7 @@ export function launchOrb(
   layer: HTMLElement,
   grid: HTMLElement,
   transfer: Transfer,
-  color: string,
+  appearance: OrbSkinAppearance,
   delay: number,
   duration: number,
 ) {
@@ -42,15 +43,26 @@ export function launchOrb(
   const deltaY = destination.offsetTop + destination.offsetHeight / 2 - startY;
   const distance = Math.hypot(deltaX, deltaY);
   const angle = Math.atan2(deltaY, deltaX);
+  const safeAssetKey = /^[a-zA-Z0-9_-]{1,64}$/.test(appearance.assetKey)
+    ? appearance.assetKey
+    : DEFAULT_ORB_SKIN_ASSET_KEY;
+  const textureImage = safeAssetKey === DEFAULT_ORB_SKIN_ASSET_KEY
+    ? 'none'
+    : `url("/orb-skins/${safeAssetKey}/texture.webp")`;
+  const detailImage = safeAssetKey === DEFAULT_ORB_SKIN_ASSET_KEY
+    ? 'none'
+    : `url("/orb-skins/${safeAssetKey}/detail.webp")`;
 
   const rail = document.createElement('span');
   rail.className = 'flight-rail';
-  rail.style.cssText = `left:${startX}px;top:${startY - size * 0.11}px;width:${distance}px;height:${size * 0.22}px;--c:${color}`;
+  rail.style.cssText = `left:${startX}px;top:${startY - size * 0.11}px;width:${distance}px;height:${size * 0.22}px;--c:${appearance.color}`;
 
   const orb = document.createElement('span');
   orb.className = 'flight';
-  orb.style.cssText = `left:${startX - size / 2}px;top:${startY - size / 2}px;width:${size}px;height:${size}px;--c:${color};--angle:${angle}rad;--tail:${size * 1.8}px`;
-  orb.innerHTML = '<i class="flight-trail"></i><i class="flight-body"></i>';
+  orb.dataset.orbSkin = safeAssetKey;
+  orb.dataset.orbSide = appearance.side;
+  orb.style.cssText = `left:${startX - size / 2}px;top:${startY - size / 2}px;width:${size}px;height:${size}px;--c:${appearance.color};--owner:${appearance.color};--orb-texture-image:${textureImage};--orb-detail-image:${detailImage};--angle:${angle}rad;--tail:${size * 1.8}px`;
+  orb.innerHTML = '<i class="flight-trail"></i><i class="flight-body"><i class="orb-surface orb-spin-preview"><i class="orb-surface-texture"></i><i class="orb-surface-detail"></i></i><i class="orb-owner-rim"></i></i>';
   layer.append(rail, orb);
 
   const railAnimation = rail.animate(

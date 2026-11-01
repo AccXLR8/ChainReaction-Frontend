@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { GameState } from './types';
 import { formatClock } from './board-model';
+import { NationalityDisplay } from '@/features/nationality/NationalityDisplay';
 
 export type MatchSidebarProps = {
   stage: string;
@@ -11,6 +12,7 @@ export type MatchSidebarProps = {
   winner: number | null;
   ownSlot: number | null;
   playerNames: string[];
+  playerNationalities: string[];
   playerClocks: number[];
   playerConnected: boolean[];
   colorForSlot: (slot: number) => string;
@@ -29,6 +31,7 @@ export function MatchSidebar({
   winner,
   ownSlot,
   playerNames,
+  playerNationalities,
   playerClocks,
   playerConnected,
   colorForSlot,
@@ -82,6 +85,10 @@ export function MatchSidebar({
             />
             <div>
               <b>{playerNames[slot]}</b>
+              <NationalityDisplay
+                value={playerNationalities[slot]}
+                className="player-nationality"
+              />
               <small>
                 {playerRole(slot)} {playerClocks[slot] > 0 ? `· ${formatClock(playerClocks[slot])}` : ''}
               </small>

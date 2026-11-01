@@ -95,17 +95,24 @@ export function getCellSize(
   const longestSide = Math.max(boardWidth, boardHeight);
   const availableWidth = Math.max(
     220,
-    viewportWidth - (viewportWidth < 700 ? 36 : 420),
+    viewportWidth < 700
+      ? viewportWidth - 36
+      : viewportWidth <= 900
+        ? (viewportWidth - 90) / 2
+        : (viewportWidth - 136) / 2,
   );
-  // Reserve the header, footer, and panel padding before sizing cells; the board heading is hidden.
+  // Keep cells within the viewport after reserving the fixed header and outer panel spacing.
   const availableHeight = Math.max(
     180,
-    viewportWidth < 700 ? viewportHeight * 0.61 - 82 : viewportHeight - 185,
+    viewportWidth < 700 ? viewportHeight * 0.61 - 48 : viewportHeight - 162,
   );
   const boardEdge = Math.min(availableWidth, availableHeight);
 
   const fittedCellSize = Math.floor((boardEdge - 3 * (longestSide - 1)) / longestSide);
-  return Math.max(24, Math.min(100, fittedCellSize));
+  // Add roughly 5 mm to each side of wide-screen boards while keeping phone layouts unchanged.
+  const screenExpansion = viewportWidth >= 901 ? 5 : viewportWidth >= 701 ? 3 : 0;
+  const maxCellSize = viewportWidth >= 901 ? 105 : viewportWidth >= 701 ? 103 : 100;
+  return Math.max(24, Math.min(maxCellSize, fittedCellSize + screenExpansion));
 }
 
 export function formatClock(milliseconds: number): string {

@@ -1,62 +1,144 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { WelcomeScreen } from '@/features/auth/WelcomeScreen';
 import type { AppStage, AuthMode, AuthResponse, SessionUser } from '@/features/auth/types';
 import { GameScreen } from '@/features/game/GameScreen';
 import type { BoardPanelProps } from '@/features/game/BoardPanel';
 import type { MatchSidebarProps } from '@/features/game/MatchSidebar';
-import type { Cell, GameState } from '@/features/game/types';
+import {
+  DEFAULT_ORB_SKIN,
+  DEFAULT_ORB_SKIN_ID,
+  normalizeOrbSkinCatalog,
+  resolveOrbSkinAssetKey,
+  type OrbSkinCatalogItem,
+} from '@/features/game/orb-skins';
 import { useGameRuntime } from '@/features/game/useGameRuntime';
+import { LOBBY_PREVIEW_GAME } from '@/features/lobby/preview-game';
+import {
+  useMatchmakingRuntime,
+  type MatchmakingSession,
+} from '@/features/matchmaking/useMatchmakingRuntime';
+import type { MatchmakingMode } from '@/features/matchmaking/api';
 import { ApiError, authRequest, request } from '@/lib/api/client';
+import { getMyProfile, getOrbSkinCatalog } from '@/lib/api/profiles';
+import { normalizeNationality } from '@/features/nationality/countries';
 
-const PREVIEW_ORBS: Record<number, Cell> = {
-  18: { owner: 0, orb_count: 1 },
-  19: { owner: 0, orb_count: 2 },
-  20: { owner: 1, orb_count: 1 },
-  26: { owner: 0, orb_count: 2 },
-  27: { owner: 0, orb_count: 3 },
-  28: { owner: 1, orb_count: 2 },
-  35: { owner: 0, orb_count: 1 },
-  36: { owner: 1, orb_count: 3 },
-  43: { owner: 0, orb_count: 1 },
-  44: { owner: 1, orb_count: 1 },
-};
+type AppSession = MatchmakingSession;
 
-const LOBBY_PREVIEW_GAME: GameState = {
-  board: {
-    width: 8,
-    height: 8,
-    cells: Array.from({ length: 64 }, (_, index) =>
-      PREVIEW_ORBS[index] ?? { owner: null, orb_count: 0 },
-    ),
-  },
-  players: [
-    { id: 0, eliminated: false, has_moved: true },
-    { id: 1, eliminated: false, has_moved: true },
-  ],
-  current_player_index: 0,
-  turn_number: 8,
-  status: { kind: 'active' },
-};
-
-/** Coordinates the three application screens and delegates live play to its feature hook. */
+/** Coordinates application state and composes the lobby and live game screens. */
 export function HomePage() {
-  const [session, setSession] = useState<{ token: string; user: SessionUser } | null>(null);
+  const [session, setSession] = useState<AppSession | null>(null);
   const [authMode, setAuthMode] = useState<AuthMode>(null);
   const [authError, setAuthError] = useState('');
   const [authBusy, setAuthBusy] = useState(false);
   const [stage, setStage] = useState<AppStage>('welcome');
-  const [queueBusy, setQueueBusy] = useState(false);
-  const [queueAction, setQueueAction] = useState<'joining' | 'checking' | null>(null);
   const [serviceStatus, setServiceStatus] = useState('checking');
   const [errorMessage, setErrorMessage] = useState('');
-  const assignedGameId = useRef<string | null>(null);
-  const queueCanceling = useRef(false);
+  const [orbSkinCatalog, setOrbSkinCatalog] = useState<OrbSkinCatalogItem[]>([DEFAULT_ORB_SKIN]);
+  const [equippedOrbSkinId, setEquippedOrbSkinId] = useState(DEFAULT_ORB_SKIN_ID);
 
-  const game = useGameRuntime({ session, stage, setStage });
+  const resolveOrbAssetKey = useCallback(
+    (skinId: unknown) => resolveOrbSkinAssetKey(skinId, orbSkinCatalog),
+    [orbSkinCatalog],
+  );
+  const game = useGameRuntime({ session, stage, setStage, resolveOrbAssetKey });
 
-  // Restore the signed-in player and the last active game after a browser refresh.
+  /** Persist the API session and normalize older auth responses for the UI. */
+  const rememberSession = (response: AuthResponse): AppSession => {
+    const nextSession: AppSession = {
+      token: response.access_token,
+      user: {
+        ...response.user,
+        nationality: response.user.is_guest ? 'global' : normalizeNationality(response.user.nationality),
+      },
+    };
+    localStorage.setItem('cr_access_token', nextSession.token);
+    localStorage.setItem('cr_user', JSON.stringify(nextSession.user));
+    setSession(nextSession);
+    setAuthMode(null);
+    setAuthError('');
+    setErrorMessage('');
+    return nextSession;
+  };
+
+  const saveSession = (response: AuthResponse) => {
+    rememberSession(response);
+    setStage('lobby');
+  };
+
+  /** Quick play creates a guest only when no session exists yet. */
+  const createGuestSession = async (): Promise<AppSession> =>
+    rememberSession(await authRequest('guest'));
+
+  const matchmaking = useMatchmakingRuntime({
+    session,
+    stage,
+    setStage,
+    game: {
+      connectGame: game.connectGame,
+      setNotice: game.setNotice,
+    },
+    createGuestSession,
+    onRequestSignIn: () => setAuthMode('login'),
+    setErrorMessage,
+  });
+
+  // The catalog is optional at startup: a service outage leaves Classic available.
+  useEffect(() => {
+    let active = true;
+    void getOrbSkinCatalog()
+      .then((skins) => {
+        if (active) setOrbSkinCatalog(normalizeOrbSkinCatalog(skins));
+      })
+      .catch(() => {
+        if (active) setOrbSkinCatalog([DEFAULT_ORB_SKIN]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Refresh the lobby's equipped skin and nationality from the authoritative profile.
+  useEffect(() => {
+    if (!session) {
+      setEquippedOrbSkinId(DEFAULT_ORB_SKIN_ID);
+      return;
+    }
+
+    let active = true;
+    void getMyProfile(session.token)
+      .then((profile) => {
+        if (!active) return;
+
+        const nationality = session.user.is_guest
+          ? 'global'
+          : normalizeNationality(profile.nationality);
+        setSession((current) => {
+          if (!current || current.token !== session.token || current.user.nationality === nationality) {
+            return current;
+          }
+          const user = { ...current.user, nationality };
+          localStorage.setItem('cr_user', JSON.stringify(user));
+          return { ...current, user };
+        });
+
+        const ownedSkins = new Set(profile.owned_orb_skin_ids ?? []);
+        ownedSkins.add(DEFAULT_ORB_SKIN_ID);
+        const equipped = profile.equipped_orb_skin_id ?? DEFAULT_ORB_SKIN_ID;
+        setEquippedOrbSkinId(ownedSkins.has(equipped) ? equipped : DEFAULT_ORB_SKIN_ID);
+      })
+      .catch(() => {
+        if (active) setEquippedOrbSkinId(DEFAULT_ORB_SKIN_ID);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [session?.token]);
+
+  // Restore a signed-in player, active match, or pending matchmaking queue after refresh.
   useEffect(() => {
     let cancelled = false;
 
@@ -79,21 +161,28 @@ export function HomePage() {
         }) as { id: string; username: string };
         if (cancelled) return;
 
-        const restored = { token, user: { ...stored, id: profile.id, username: profile.username } };
+        const restored: AppSession = {
+          token,
+          user: {
+            ...stored,
+            id: profile.id,
+            username: profile.username,
+            nationality: stored.is_guest ? 'global' : normalizeNationality(stored.nationality),
+          },
+        };
         setSession(restored);
+
         const restoredGameId = localStorage.getItem('cr_game_id');
         if (restoredGameId) {
           game.connectGame(restoredGameId, token, restored.user);
         } else if (localStorage.getItem('cr_queue') === 'yes') {
+          matchmaking.restoreQueueMode(localStorage.getItem('cr_queue_mode'));
           setStage('queue');
         } else {
           setStage('lobby');
         }
       } catch (error) {
-        localStorage.removeItem('cr_access_token');
-        localStorage.removeItem('cr_user');
-        localStorage.removeItem('cr_game_id');
-        localStorage.removeItem('cr_queue');
+        clearStoredSession();
         if (error instanceof ApiError && error.status === 401) {
           setAuthMode('login');
           setAuthError('Your session expired. Sign in again to access your account.');
@@ -104,30 +193,13 @@ export function HomePage() {
     return () => {
       cancelled = true;
     };
-    // Run once during startup; API and WebSocket origins are build-time settings.
+    // Startup restoration intentionally runs once; environment URLs are build-time settings.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const rememberSession = (response: AuthResponse) => {
-    const nextSession = { token: response.access_token, user: response.user };
-    localStorage.setItem('cr_access_token', nextSession.token);
-    localStorage.setItem('cr_user', JSON.stringify(nextSession.user));
-    setSession(nextSession);
-    setAuthMode(null);
-    setAuthError('');
-    setErrorMessage('');
-  };
-
-  const saveSession = (response: AuthResponse) => {
-    rememberSession(response);
-    setStage('lobby');
-  };
-
-  const acceptAssignment = (gameId: string, activeSession: { token: string; user: SessionUser }) => {
-    if (assignedGameId.current === gameId) return;
-    assignedGameId.current = gameId;
-    localStorage.removeItem('cr_queue');
-    game.connectGame(gameId, activeSession.token, activeSession.user);
+  const createGuestForSkins = async () => {
+    if (session) return;
+    saveSession(await authRequest('guest'));
   };
 
   const googleAuthSubmit = async (credential: string) => {
@@ -136,7 +208,7 @@ export function HomePage() {
     setAuthBusy(true);
 
     try {
-      // The auth service must verify this Google ID token and return the normal game session.
+      // The backend verifies this Google ID token and returns the regular game session.
       saveSession(await authRequest('google', { credential }));
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Could not sign in with Google.';
@@ -148,114 +220,51 @@ export function HomePage() {
     }
   };
 
-  const enqueuePlayer = async (activeSession: { token: string; user: SessionUser }) => {
-    game.setNotice('Looking for an opponent…');
-    const response = await request('/api/matchmaking/join', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${activeSession.token}` },
-    });
-    if (response.status === 'matched' && typeof response.game_id === 'string') {
-      game.connectGame(response.game_id, activeSession.token, activeSession.user);
-    } else {
-      localStorage.setItem('cr_queue', 'yes');
-      game.setNotice('You’re in the queue. We’ll connect you as soon as an opponent is ready.');
-    }
-  };
-
-  const startMatchmaking = async () => {
-    if (queueBusy) return;
-    setQueueBusy(true);
-    setQueueAction('joining');
-    setStage('queue');
-    setErrorMessage('');
-    assignedGameId.current = null;
-    queueCanceling.current = false;
-    let activeSession = session;
+  const manualAuthSubmit = async (
+    mode: 'login' | 'register',
+    username: string,
+    password: string,
+    nationality: string,
+  ) => {
+    if (authBusy) return;
+    setAuthError('');
+    setAuthBusy(true);
 
     try {
-      if (!activeSession) {
-        // Quick play creates a guest account just in time for authenticated matchmaking.
-        const guest = await authRequest('guest');
-        activeSession = { token: guest.access_token, user: guest.user };
-        rememberSession(guest);
-      }
-      await enqueuePlayer(activeSession);
+      const body = mode === 'register'
+        ? { username, password, nationality: normalizeNationality(nationality) }
+        : { username, password };
+      saveSession(await authRequest(mode, body));
     } catch (error) {
-      setStage(activeSession ? 'lobby' : 'welcome');
-      setErrorMessage(error instanceof Error ? error.message : 'Could not join matchmaking.');
+      setAuthError(error instanceof Error ? error.message : `Could not ${mode === 'login' ? 'sign in' : 'create account'}.`);
     } finally {
-      setQueueBusy(false);
-      setQueueAction(null);
-    }
-  };
-
-  const joinQueue = () => startMatchmaking();
-  const findMatch = () => startMatchmaking();
-
-  const leaveQueue = async () => {
-    if (queueCanceling.current) return;
-    queueCanceling.current = true;
-    setQueueBusy(true);
-    setQueueAction('checking');
-
-    try {
-      if (session) {
-        const headers = { Authorization: `Bearer ${session.token}` };
-
-        // A match can be assigned between the last poll and the player's cancel click.
-        const current = await request('/api/matchmaking/status', { headers });
-        if (current.status === 'matched' && typeof current.game_id === 'string') {
-          acceptAssignment(current.game_id, session);
-          return;
-        }
-        if (assignedGameId.current) return;
-
-        const result = await request('/api/matchmaking/leave', { method: 'POST', headers });
-        if (result.status === 'matched' && typeof result.game_id === 'string') {
-          acceptAssignment(result.game_id, session);
-          return;
-        }
-        if (assignedGameId.current) return;
-      }
-
-      localStorage.removeItem('cr_queue');
-      setStage('lobby');
-      game.setNotice('Search cancelled.');
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Could not leave the queue.');
-    } finally {
-      queueCanceling.current = false;
-      setQueueBusy(false);
-      setQueueAction(null);
+      setAuthBusy(false);
     }
   };
 
   const signOut = async () => {
-    if (stage === 'queue') await leaveQueue();
-    localStorage.removeItem('cr_access_token');
-    localStorage.removeItem('cr_user');
-    localStorage.removeItem('cr_game_id');
-    localStorage.removeItem('cr_queue');
+    if (stage === 'queue') await matchmaking.leaveQueue();
+    clearStoredSession();
     setSession(null);
     game.clearForSignOut();
     setStage('welcome');
     setAuthMode(null);
   };
 
-  const updateSessionUsername = (username: string) => {
+  const updateSessionProfile = (username: string, nationality: string) => {
     setSession((current) => {
       if (!current) return current;
-      const updated = { ...current, user: { ...current.user, username } };
+      const updated = {
+        ...current,
+        user: { ...current.user, username, nationality: normalizeNationality(nationality) },
+      };
       localStorage.setItem('cr_user', JSON.stringify(updated.user));
       return updated;
     });
   };
 
   const handleSessionExpired = () => {
-    localStorage.removeItem('cr_access_token');
-    localStorage.removeItem('cr_user');
-    localStorage.removeItem('cr_game_id');
-    localStorage.removeItem('cr_queue');
+    clearStoredSession();
     setSession(null);
     game.clearForSignOut();
     setStage('welcome');
@@ -263,39 +272,8 @@ export function HomePage() {
     setAuthError('Your session expired. Sign in again to access your account.');
   };
 
-  // Poll only while queued; the server assigns the same game ID used by the socket flow.
-  useEffect(() => {
-    if (stage !== 'queue' || !session) return;
-    let stopped = false;
-
-    const pollQueue = async () => {
-      if (queueCanceling.current) return;
-      try {
-        const response = await request('/api/matchmaking/status', {
-          headers: { Authorization: `Bearer ${session.token}` },
-        });
-        if (!stopped && response.status === 'matched' && typeof response.game_id === 'string') {
-          acceptAssignment(response.game_id, session);
-        }
-      } catch (error) {
-        if (!stopped) {
-          game.setNotice(error instanceof Error ? error.message : 'Checking matchmaking…');
-        }
-      }
-    };
-
-    const timer = window.setInterval(() => void pollQueue(), 1800);
-    void pollQueue();
-    return () => {
-      stopped = true;
-      window.clearInterval(timer);
-    };
-    // Connection handlers use refs and do not need to restart the queue timer.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stage, session]);
-
+  // Build the live board props once; the same BoardPanel powers the lobby preview.
   const board: BoardPanelProps = {
-    // Keep the lobby's board visible while the accepted match's first snapshot loads.
     game: game.game ?? LOBBY_PREVIEW_GAME,
     cells: game.game ? game.displayCells : LOBBY_PREVIEW_GAME.board.cells,
     wave: game.wave,
@@ -319,8 +297,10 @@ export function HomePage() {
     gridRef: game.gridRef,
     flightLayerRef: game.flightLayerRef,
     colorForSlot: game.colorForSlot,
+    orbAssetKeyForSlot: game.orbAssetKeyForSlot,
     onPlay: game.play,
   };
+
   const previewBoard: BoardPanelProps = {
     ...board,
     game: LOBBY_PREVIEW_GAME,
@@ -338,6 +318,9 @@ export function HomePage() {
     opponentPlayerName: 'OPPONENT',
     activeBoardColor: '#39e58c',
     colorForSlot: (slot) => slot === 0 ? '#39e58c' : '#ff5964',
+    orbAssetKeyForSlot: (slot) => resolveOrbAssetKey(
+      slot === 0 ? equippedOrbSkinId : DEFAULT_ORB_SKIN_ID,
+    ),
     onPlay: () => undefined,
   };
 
@@ -352,17 +335,23 @@ export function HomePage() {
         user={session?.user ?? null}
         sessionToken={session?.token ?? null}
         stage={stage}
-        queueBusy={queueBusy}
-        queueAction={queueAction}
+        queueMode={matchmaking.queueMode}
+        queueBusy={matchmaking.queueBusy}
+        queueAction={matchmaking.queueAction}
         notice={game.notice}
         previewBoard={previewBoard}
         onAuthModeChange={setAuthMode}
         onGoogleSignIn={(credential) => void googleAuthSubmit(credential)}
         onGoogleError={setAuthError}
-        onSessionUsernameUpdate={updateSessionUsername}
+        onManualAuth={(mode, username, password, nationality) =>
+          void manualAuthSubmit(mode, username, password, nationality)
+        }
+        onSessionProfileUpdate={updateSessionProfile}
         onSessionExpired={handleSessionExpired}
-        onFindMatch={() => void findMatch()}
-        onCancelSearch={() => void leaveQueue()}
+        onCreateGuestForSkins={createGuestForSkins}
+        onSkinEquipped={setEquippedOrbSkinId}
+        onFindMatch={(mode) => void matchmaking.findMatch(mode)}
+        onCancelSearch={() => void matchmaking.leaveQueue()}
         onSignOut={() => void signOut()}
       />
     );
@@ -378,11 +367,12 @@ export function HomePage() {
     winner: game.winner,
     ownSlot: game.ownSlot,
     playerNames: game.playerNames,
+    playerNationalities: game.playerNationalities,
     playerClocks: game.playerClocks,
     playerConnected: game.playerConnected,
     colorForSlot: game.colorForSlot,
     playerRole: game.playerRole,
-    onPlayAgain: () => void joinQueue(),
+    onPlayAgain: () => void matchmaking.joinQueue(),
     onReturnToLobby: game.returnToLobby,
   };
 
@@ -391,13 +381,24 @@ export function HomePage() {
       stage={visibleStage}
       user={session.user}
       socketStatus={game.socketStatus}
+      latencyMs={game.latencyMs}
+      latencyQuality={game.latencyQuality}
       serviceStatus={serviceStatus}
       gameId={game.gameId}
       turnNumber={game.game?.turn_number ?? 0}
       board={board}
       sidebar={sidebar}
       onReturnToLobby={game.returnToLobby}
-      onPlayAgain={() => void joinQueue()}
+      onPlayAgain={() => void matchmaking.joinQueue()}
     />
   );
+}
+
+/** Clear browser-persisted session and navigation state together. */
+function clearStoredSession() {
+  localStorage.removeItem('cr_access_token');
+  localStorage.removeItem('cr_user');
+  localStorage.removeItem('cr_game_id');
+  localStorage.removeItem('cr_queue');
+  localStorage.removeItem('cr_queue_mode');
 }

@@ -3,6 +3,7 @@ export type SessionUser = {
   id: string;
   username: string;
   is_guest: boolean;
+  nationality?: string | null;
 };
 
 /** Successful response returned after Google authentication. */
@@ -12,6 +13,6 @@ export type AuthResponse = {
   user: SessionUser;
 };
 
-export type AuthMode = 'login' | null;
+export type AuthMode = 'login' | 'register' | null;
 
 export type AppStage = 'welcome' | 'lobby' | 'queue' | 'game' | 'finished';

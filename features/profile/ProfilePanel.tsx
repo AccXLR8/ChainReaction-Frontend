@@ -12,13 +12,16 @@ import {
 } from '@/lib/api/profiles';
 import type { Achievement, Avatar, PlayerProfile } from './types';
 import type { SessionUser } from '@/features/auth/types';
+import { NationalityDisplay } from '@/features/nationality/NationalityDisplay';
+import { NationalityPicker } from '@/features/nationality/NationalityPicker';
+import { normalizeNationality } from '@/features/nationality/countries';
 
 type ProfilePanelProps = {
   token: string | null;
   user: SessionUser | null;
   onClose: () => void;
   onRequestSignIn: () => void;
-  onUsernameUpdated: (username: string) => void;
+  onProfileUpdated: (username: string, nationality: string) => void;
   onSessionExpired: () => void;
 };
 
@@ -28,7 +31,7 @@ export function ProfilePanel({
   user,
   onClose,
   onRequestSignIn,
-  onUsernameUpdated,
+  onProfileUpdated,
   onSessionExpired,
 }: ProfilePanelProps) {
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
@@ -37,6 +40,7 @@ export function ProfilePanel({
   const [lookup, setLookup] = useState('');
   const [editUsername, setEditUsername] = useState('');
   const [editAvatarId, setEditAvatarId] = useState<number | null>(null);
+  const [editNationality, setEditNationality] = useState('global');
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -112,6 +116,7 @@ export function ProfilePanel({
     if (!profile) return;
     setEditUsername(profile.username);
     setEditAvatarId(profile.avatar.id);
+    setEditNationality(user?.is_guest ? 'global' : normalizeNationality(profile.nationality));
     setError('');
     setNotice('');
     setEditing(true);
@@ -127,9 +132,13 @@ export function ProfilePanel({
       return;
     }
 
-    const update: { username?: string; avatar_id?: number } = {};
+    const nationality = user?.is_guest ? 'global' : normalizeNationality(editNationality);
+    const update: { username?: string; avatar_id?: number; nationality?: string } = {};
     if (username !== profile.username) update.username = username;
     if (editAvatarId !== profile.avatar.id) update.avatar_id = editAvatarId;
+    if (!user?.is_guest && nationality !== normalizeNationality(profile.nationality)) {
+      update.nationality = nationality;
+    }
     if (!Object.keys(update).length) {
       setEditing(false);
       return;
@@ -142,7 +151,10 @@ export function ProfilePanel({
       const updatedProfile = await updateMyProfile(token, update);
       setProfile(updatedProfile);
       setLookup(updatedProfile.username);
-      onUsernameUpdated(updatedProfile.username);
+      onProfileUpdated(
+        updatedProfile.username,
+        user?.is_guest ? 'global' : normalizeNationality(updatedProfile.nationality),
+      );
       setNotice('Profile updated.');
       setEditing(false);
     } catch (cause) {
@@ -198,7 +210,13 @@ export function ProfilePanel({
                 <img className="profile-avatar" src={profile.avatar.image_url} alt={profile.avatar.name} />
                 <div className="profile-identity-copy">
                   <span className="eyebrow-mini">{canEdit ? 'YOUR ARENA PROFILE' : 'PLAYER PROFILE'}</span>
-                  <h3>{profile.username}</h3>
+                  <h3>
+                    {profile.username}
+                    <NationalityDisplay
+                      value={canEdit && user?.is_guest ? 'global' : profile.nationality}
+                      className="profile-country-display"
+                    />
+                  </h3>
                   <p>{formatDate(profile.created_at)} <span>·</span> Member for {profile.profile_age_days} {profile.profile_age_days === 1 ? 'day' : 'days'}</p>
                 </div>
                 {canEdit && !editing && (
@@ -218,6 +236,13 @@ export function ProfilePanel({
                       onChange={(event) => setEditUsername(event.target.value)}
                     />
                   </label>
+                  {!user?.is_guest && (
+                    <NationalityPicker
+                      id="profile-nationality"
+                      value={editNationality}
+                      onChange={setEditNationality}
+                    />
+                  )}
                   <fieldset className="avatar-picker">
                     <legend>Choose an avatar</legend>
                     <div className="avatar-options">

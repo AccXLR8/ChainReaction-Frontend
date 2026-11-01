@@ -6,36 +6,6 @@
   width: 100%;
   height: 100%;
 }
-.orbs .atom.orb-spin-preview::before {
-  left: 15%;
-  top: 15%;
-  width: 25%;
-  height: 20%;
-  animation: orb-specular-spin 1.15s ease-in-out infinite;
-}
-.orbs .atom.orb-spin-preview::after {
-  content: '';
-  position: absolute;
-  inset: 5% 20%;
-  left: 20%;
-  top: 5%;
-  width: auto;
-  height: auto;
-  border-radius: 50%;
-  border-left: 1px solid #ffffffdb;
-  border-right: 1px solid #ffffff95;
-  background: linear-gradient(
-    90deg,
-    transparent 8%,
-    #ffffff15 35%,
-    #ffffff80 50%,
-    #ffffff15 65%,
-    transparent 92%
-  );
-  box-shadow: 0 0 3px #ffffff35;
-  transform-origin: center;
-  animation: orb-longitude-spin 1.15s linear infinite;
-}
 @keyframes orb-specular-spin {
   0%,
   100% {

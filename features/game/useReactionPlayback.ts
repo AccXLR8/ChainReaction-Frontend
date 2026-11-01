@@ -1,7 +1,9 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { deriveTransfers, launchOrb, normalizeExplosionCells, waitForPaint, REACTION_TIMING, wait } from './reaction-animation';
+import type { OrbSkinAppearance } from './orb-skins';
+import { playOrbSkinCollisionSound, preloadOrbSkinCollisionSound, unlockOrbSkinAudio } from './orb-skin-audio';
 import type { AcceptedMove, Cell, GameState, ReactionEffects, Transfer } from './types';
 
 type Placement = { cell: number | null; player: number };
@@ -9,7 +11,7 @@ type AnimationJob = (isCurrent: () => boolean) => Promise<void>;
 
 /** Manages the temporary display board and serialized visual reaction timeline. */
 export function useReactionPlayback(
-  colorForSlot: (slot: number) => string,
+  orbAppearanceForSlot: (slot: number) => OrbSkinAppearance,
   onPlaybackComplete: () => void,
 ) {
   const [wave, setWave] = useState<ReactionEffects | null>(null);
@@ -22,6 +24,30 @@ export function useReactionPlayback(
   const isAnimatingRef = useRef(false);
   const gridRef = useRef<HTMLDivElement | null>(null);
   const flightLayerRef = useRef<HTMLDivElement | null>(null);
+  const firstSkinAssetKey = orbAppearanceForSlot(0).assetKey;
+  const secondSkinAssetKey = orbAppearanceForSlot(1).assetKey;
+
+  // Load cues alongside the two player skin appearances, before a chain reaction starts.
+  useEffect(() => {
+    preloadOrbSkinCollisionSound(firstSkinAssetKey);
+    preloadOrbSkinCollisionSound(secondSkinAssetKey);
+  }, [firstSkinAssetKey, secondSkinAssetKey]);
+
+  // Unlock audio on the first interaction so later WebSocket-driven steps can play reliably.
+  useEffect(() => {
+    const unlock = () => {
+      unlockOrbSkinAudio();
+      window.removeEventListener('pointerdown', unlock, true);
+      window.removeEventListener('keydown', unlock, true);
+    };
+
+    window.addEventListener('pointerdown', unlock, { capture: true, once: true });
+    window.addEventListener('keydown', unlock, { capture: true, once: true });
+    return () => {
+      window.removeEventListener('pointerdown', unlock, true);
+      window.removeEventListener('keydown', unlock, true);
+    };
+  }, []);
 
   const finishAnimations = () => {
     setWave(null);
@@ -131,6 +157,13 @@ export function useReactionPlayback(
       await waitForPaint();
       if (!isCurrent()) return;
 
+      // A reaction step may move many orbs, but it produces one skin-specific cue.
+      if (transfers.length > 0) {
+        const movingPlayer = transfers[0].player;
+        void playOrbSkinCollisionSound(orbAppearanceForSlot(movingPlayer).assetKey)
+          .catch(() => undefined);
+      }
+
       // Fly: add each orb to the destination when its own animation finishes.
       const layer = flightLayerRef.current;
       const grid = gridRef.current;
@@ -148,7 +181,7 @@ export function useReactionPlayback(
                 layer,
                 grid,
                 transfer,
-                colorForSlot(transfer.player),
+                orbAppearanceForSlot(transfer.player),
                 departureIndex * REACTION_TIMING.stagger * speed,
                 duration,
               )

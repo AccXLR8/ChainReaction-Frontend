@@ -1,0 +1,57 @@
+/*
+ * Board-only surface palette. These custom properties are scoped to the arena
+ * so a future board skin can replace its surfaces without changing the site
+ * theme. Orb materials and reaction motion are defined in their own layers.
+ */
+.game-shell .arena,
+.play-stage .arena {
+  --board-well-background: #050706;
+  --board-well-highlight: #09120d;
+  --board-well-border: #202622;
+  --board-cell-highlight: #07100a;
+  --board-cell-background: #040805;
+  --board-cell-hover: #102219;
+  --board-cell-owned: #060b08;
+
+  border-color: var(--board-well-border);
+  background: radial-gradient(
+    ellipse at center,
+    var(--board-well-highlight),
+    var(--board-well-background) 75%
+  );
+  box-shadow: none;
+}
+
+.game-shell .cell,
+.play-stage .cell {
+  background: linear-gradient(145deg, var(--board-cell-highlight), var(--board-cell-background));
+  box-shadow: 0 0 6px color-mix(in srgb, var(--active-color), transparent 82%);
+}
+
+.game-shell .cell:not(:disabled):hover,
+.play-stage .cell:not(:disabled):hover {
+  background: var(--board-cell-hover);
+  box-shadow:
+    inset 0 0 0 1px var(--active-color),
+    0 0 18px color-mix(in srgb, var(--active-color), transparent 72%);
+}
+
+.game-shell .cell.owned,
+.play-stage .cell.owned {
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--owner) 11%, transparent),
+    var(--board-cell-owned)
+  );
+}
+
+.game-shell .board-heading h2,
+.game-shell .board-footer {
+  color: #f1f4f1;
+}
+
+.game-shell .board-heading .eyebrow-mini,
+.game-shell .engine-note,
+.game-shell .legend {
+  color: #c1c9c3;
+}

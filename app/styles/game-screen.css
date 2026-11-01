@@ -61,6 +61,63 @@
   color: #9fa9a1;
 }
 
+.game-shell .latency-indicator {
+  --latency-color: #9fa9a1;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 0 9px;
+  border: 1px solid #36433d;
+  border-radius: 6px;
+  color: var(--latency-color);
+  font: 10px 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.game-shell .latency-good {
+  --latency-color: #39e58c;
+}
+
+.game-shell .latency-fair {
+  --latency-color: #f2c66d;
+}
+
+.game-shell .latency-poor {
+  --latency-color: #ff737c;
+}
+
+.game-shell .latency-unknown,
+.game-shell .latency-offline {
+  --latency-color: #9fa9a1;
+}
+
+.latency-bars {
+  display: inline-flex;
+  align-items: end;
+  gap: 2px;
+  height: 13px;
+}
+
+.latency-bar {
+  display: block;
+  width: 3px;
+  border-radius: 2px 2px 0 0;
+  background: var(--latency-color);
+  opacity: 0.24;
+}
+
+.latency-bar-1 { height: 4px; }
+.latency-bar-2 { height: 8px; }
+.latency-bar-3 { height: 12px; }
+.latency-bar.is-active { opacity: 1; }
+
+.latency-value {
+  min-width: 38px;
+  text-align: right;
+}
+
 .game-shell .top-new,
 .game-shell .new-game {
   min-height: 38px;
@@ -243,6 +300,10 @@
 .game-shell .player-card b,
 .game-shell .player-card small {
   color: var(--player-color);
+}
+
+.game-shell .player-card > div {
+  min-width: 0;
 }
 
 .game-shell .player-id {

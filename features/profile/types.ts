@@ -26,11 +26,14 @@ export type Achievement = {
 export type PlayerProfile = {
   user_id: string;
   username: string;
+  nationality?: string | null;
   avatar: Avatar;
   stats: PlayerStats;
   achievements: Achievement[];
   created_at: string;
   profile_age_days: number;
+  equipped_orb_skin_id?: string;
+  owned_orb_skin_ids?: string[];
 };
 
 export type AvatarListResponse = { avatars: Avatar[] };

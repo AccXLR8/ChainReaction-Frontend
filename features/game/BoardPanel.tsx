@@ -1,5 +1,6 @@
 import type { CSSProperties, RefObject } from 'react';
 import type { Cell, GameState, ReactionEffects } from './types';
+import { OrbMaterial } from './OrbMaterial';
 
 export type BoardPanelProps = {
   game: GameState | null;
@@ -25,6 +26,7 @@ export type BoardPanelProps = {
   gridRef: RefObject<HTMLDivElement | null>;
   flightLayerRef: RefObject<HTMLDivElement | null>;
   colorForSlot: (slot: number) => string;
+  orbAssetKeyForSlot: (slot: number) => string;
   onPlay: (index: number) => void;
 };
 
@@ -53,6 +55,7 @@ export function BoardPanel({
   gridRef,
   flightLayerRef,
   colorForSlot,
+  orbAssetKeyForSlot,
   onPlay,
 }: BoardPanelProps) {
   const visibleCells = cells ?? game?.board.cells;
@@ -105,6 +108,12 @@ export function BoardPanel({
                   const charging = wave?.charge.includes(index) ?? false;
                   const bursting = wave?.burst.find((item) => item.cell === index);
                   const receiving = wave?.receive.find((item) => item.cell === index);
+                  const orbAssetKey = cell.owner === null
+                    ? 'classic'
+                    : orbAssetKeyForSlot(cell.owner);
+                  const orbSide = cell.owner === null || ownSlot === null
+                    ? 'self'
+                    : cell.owner === ownSlot ? 'self' : 'opponent';
 
                   return (
                     <button
@@ -128,6 +137,8 @@ export function BoardPanel({
                       {cell.orb_count > 0 && (
                         <span
                           className={`orbs count-${cell.orb_count}`}
+                          data-orb-skin={orbAssetKey}
+                          data-orb-side={orbSide}
                           style={
                             {
                               '--count': Math.min(cell.orb_count, 4),
@@ -158,10 +169,13 @@ export function BoardPanel({
                                 { length: Math.min(cell.orb_count, 4) },
                                 (_, orbIndex) => (
                                   <span
-                                    className="atom orb-spin-preview"
+                                    className="atom"
                                     key={orbIndex}
                                     style={{ '--orb-i': orbIndex } as CSSProperties}
-                                  />
+                                  >
+                                    <OrbMaterial assetKey={orbAssetKey} className="orb-spin-preview" />
+                                    <span className="orb-owner-rim" />
+                                  </span>
                                 ),
                               )}
                             </span>

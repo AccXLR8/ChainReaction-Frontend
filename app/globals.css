@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+/* Keep imports ordered: later feature refinements intentionally override base styles. */
 @import './styles/site-foundation.css';
 @import './styles/game-board.css';
 @import './styles/responsive.css';
@@ -6,11 +7,19 @@
 @import './styles/arena-refinements.css';
 @import './styles/orb-rendering.css';
 @import './styles/auth-entry.css';
+@import './styles/auth-entry-responsive.css';
 @import './styles/readability.css';
 @import './styles/product-theme.css';
 @import './styles/game-screen.css';
 @import './styles/neon-site.css';
+@import './styles/neon-site-responsive.css';
 @import './styles/home-menu.css';
+@import './styles/home-menu-responsive.css';
 @import './styles/fixed-window.css';
+@import './styles/auth-dialog.css';
 @import './styles/profile-panel.css';
+@import './styles/nationality.css';
 @import './styles/play-layout.css';
+@import './styles/board-surface.css';
+@import './styles/orb-skins.css';
+@import './styles/weathered-theme.css';

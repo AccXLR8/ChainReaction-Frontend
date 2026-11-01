@@ -33,6 +33,11 @@ body {
   display: none;
 }
 
+.play-stage .board-footer,
+.game-shell .board-footer {
+  display: none;
+}
+
 .play-stage {
   position: relative;
   z-index: 1;
@@ -40,7 +45,7 @@ body {
   flex: 1;
   min-width: 0;
   min-height: 0;
-  grid-template-columns: minmax(0, 1fr) minmax(286px, 330px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   grid-template-areas: 'board entry';
   align-items: stretch;
   gap: clamp(12px, 1.6vw, 22px);
@@ -53,18 +58,27 @@ body {
 .play-entry-panel {
   min-width: 0;
   min-height: 0;
-  border: 1px solid #424b43;
+  border: 1px solid #343d36;
   border-radius: 8px;
-  background: #222823;
-  box-shadow: 0 12px 36px #080b081c;
+  background: linear-gradient(145deg, #1c211d, #191e1a);
+  box-shadow: inset 0 1px 0 #ffffff08, 0 12px 36px #080b0810;
 }
 
 .play-entry-panel {
   grid-area: entry;
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
   padding: clamp(20px, 3vw, 34px);
+}
+
+.play-entry-panel > .eyebrow,
+.play-entry-panel h1,
+.play-entry-panel > p,
+.play-entry-panel .queue-notice,
+.play-entry-panel .menu-error {
+  width: min(100%, 480px);
 }
 
 .play-entry-panel > .eyebrow {
@@ -89,7 +103,7 @@ body {
 }
 
 .play-entry-panel > p {
-  max-width: 330px;
+  max-width: 520px;
   margin: 0;
   color: #c0c9c1;
   font-size: 14px;
@@ -97,13 +111,13 @@ body {
 }
 
 .play-entry-panel .welcome-match-action {
-  width: 100%;
-  margin: 27px 0 0;
+  width: min(100%, 360px);
+  margin: 27px auto 0;
 }
 
 .play-entry-panel .welcome-play {
-  min-height: 60px;
-  font-size: 19px;
+  min-height: 58px;
+  font-size: 18px;
 }
 
 .play-entry-panel .match-searching {
@@ -124,53 +138,157 @@ body {
   text-align: left;
 }
 
-.play-quick-facts {
+/* Keep the three queues distinct while preserving the shared, compact card layout. */
+.match-mode-list {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 11px;
-  margin-top: 30px;
-  padding-top: 18px;
-  border-top: 1px solid #414941;
+  gap: 10px;
+  width: min(100%, 580px);
+  margin-top: 20px;
 }
 
-.play-quick-facts > div {
-  display: flex;
+.match-mode-card {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 34%);
+  grid-template-rows: auto auto;
   align-items: center;
+  column-gap: 20px;
+  row-gap: 0;
+  padding: 17px;
+  border: 1px solid #3b453d;
+  border-radius: 8px;
+  background: linear-gradient(155deg, #222923, #1b211c);
+}
+
+.quick-match-card {
+  border-color: #39835b;
+  background: linear-gradient(155deg, #203027, #1b241e);
+  box-shadow: inset 0 1px 0 #74f3a41a;
+}
+
+.mini-match-card {
+  border-color: #52634e;
+  background: linear-gradient(155deg, #242c24, #1b211c);
+}
+
+.ranked-match-card {
+  background: linear-gradient(155deg, #202521, #1b201c);
+}
+
+.match-mode-heading {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
 }
 
-.play-quick-facts span {
-  color: #aab5ab;
+.match-mode-kicker {
+  color: #aab7ac;
   font: 8px 'DM Mono', monospace;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.09em;
 }
 
-.play-quick-facts strong {
-  color: #e7eee8;
+.match-mode-card h2 {
+  margin: 7px 0 0;
+  color: #f0f3f0;
+  font: 700 clamp(17px, 1.5vw, 20px)/1.1 Inter, Arial, sans-serif;
+  letter-spacing: -0.035em;
+}
+
+.match-mode-badge {
+  flex: none;
+  margin-top: 1px;
+  padding: 5px 7px;
+  border: 1px solid #455047;
+  border-radius: 4px;
+  color: #b5c0b7;
+  font: 7px 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.quick-match-card .match-mode-badge {
+  border-color: #347c54;
+  color: #62e79b;
+}
+
+.mini-match-card .match-mode-badge {
+  border-color: #697b57;
+  color: #c7d98c;
+}
+
+.match-mode-card > p {
+  grid-column: 1;
+  grid-row: 2;
+  margin: 8px 0 0;
+  color: #bac4bc;
   font-size: 11px;
-  font-weight: 650;
-  text-align: right;
+  line-height: 1.5;
+}
+
+.match-mode-card .welcome-play {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  width: 100%;
+  min-height: 48px;
+  margin: 0;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.ranked-play:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+  filter: saturate(0.5);
+}
+
+.play-entry-panel.is-queueing {
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .match-mode-list {
+    grid-template-columns: minmax(0, 1fr);
+    width: min(100%, 480px);
+    gap: 9px;
+    margin-top: 15px;
+  }
+
+  .match-mode-card {
+    padding: 12px 14px;
+    grid-template-columns: minmax(0, 1fr) minmax(132px, 34%);
+    column-gap: 14px;
+  }
+
+  .match-mode-card > p {
+    margin-top: 7px;
+  }
 }
 
 .play-stage > .board-panel {
   grid-area: board;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   min-width: 0;
   min-height: 0;
   height: 100%;
-  padding: 13px 16px 10px;
-  overflow: hidden;
-  border: 1px solid #424b43;
-  border-radius: 8px;
-  background: #222823;
-  box-shadow: 0 12px 36px #080b081c;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .play-stage .arena {
   display: flex;
-  flex: 1;
+  flex: none;
+  align-self: center;
   min-height: 0;
   align-items: center;
   justify-content: center;
@@ -179,22 +297,13 @@ body {
   border: 1px solid #080b09;
   border-radius: 5px;
   background: #050706;
+  width: fit-content;
+  height: fit-content;
 }
 
 .play-stage .grid-stage {
   max-width: 100%;
   max-height: 100%;
-}
-
-.play-stage .board-footer {
-  flex: none;
-  min-height: 34px;
-  padding-top: 9px;
-  color: #edf2ee;
-}
-
-.play-stage .engine-note {
-  color: #c1c9c3;
 }
 
 /* The live match replaces the lobby controls beside the same left-hand board. */
@@ -209,7 +318,7 @@ body {
 }
 
 .game-shell .game-layout {
-  grid-template-columns: minmax(0, 1fr) minmax(286px, 330px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: clamp(12px, 1.6vw, 22px);
   padding: 12px 0;
 }
@@ -225,15 +334,30 @@ body {
 .game-shell .board-panel {
   grid-column: 1;
   grid-row: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
 }
 
 .game-shell .side-panel {
   grid-column: 2;
   grid-row: 1;
   overflow: hidden;
+  border-color: #343d36;
+  background: linear-gradient(145deg, #1c211d, #191e1a);
+  box-shadow: inset 0 1px 0 #ffffff08, 0 12px 36px #080b0810;
 }
 
 .game-shell .arena {
+  flex: none;
+  align-self: center;
+  width: fit-content;
+  height: fit-content;
   border-color: #080b09;
   background: #050706;
 }
@@ -245,13 +369,29 @@ body {
   }
 
   .play-stage {
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 280px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 12px;
   }
 
   .game-shell .game-layout {
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 280px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 12px;
+  }
+}
+
+@media (min-width: 901px) {
+  .play-entry-panel,
+  .game-shell .side-panel {
+    align-self: center;
+    height: var(--board-stage-height);
+  }
+}
+
+@media (max-width: 900px) and (min-width: 701px) {
+  .play-entry-panel,
+  .game-shell .side-panel {
+    align-self: center;
+    height: var(--board-stage-height);
   }
 }
 
@@ -270,7 +410,7 @@ body {
 
   .play-stage {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1.55fr) minmax(150px, 0.9fr);
+    grid-template-rows: minmax(0, 1fr) minmax(260px, 1fr);
     grid-template-areas:
       'board'
       'entry';
@@ -279,7 +419,7 @@ body {
   }
 
   .play-entry-panel {
-    padding: 12px 14px;
+    padding: 8px 10px;
   }
 
   .play-entry-panel > .eyebrow {
@@ -305,26 +445,64 @@ body {
     font-size: 15px;
   }
 
-  .play-quick-facts {
-    grid-template-columns: 1fr 1fr;
-    gap: 5px 10px;
-    margin-top: 9px;
-    padding-top: 7px;
+  .match-mode-list {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 7px;
+    margin-top: 10px;
   }
 
-  .play-quick-facts > div {
-    display: block;
+  .match-mode-card {
+    min-height: 86px;
+    grid-template-columns: minmax(0, 1fr) minmax(112px, 38%);
+    padding: 8px;
+    column-gap: 8px;
   }
 
-  .play-quick-facts span,
-  .play-quick-facts strong {
-    display: block;
-    text-align: left;
+  .match-mode-heading {
+    flex-direction: column;
+    gap: 0;
   }
 
-  .play-quick-facts strong {
-    margin-top: 3px;
+  .match-mode-kicker {
+    font-size: 7px;
+  }
+
+  .match-mode-card h2 {
+    margin-top: 5px;
+    font-size: 15px;
+  }
+
+  .match-mode-badge {
+    margin-top: 6px;
+    padding: 3px 5px;
+    font-size: 6px;
+  }
+
+  .match-mode-card > p {
+    margin: 6px 0 0;
     font-size: 9px;
+    line-height: 1.35;
+  }
+
+  .match-mode-card .welcome-play,
+  .ranked-match-placeholder {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    min-height: 38px;
+    padding: 4px 6px;
+    font-size: 9px;
+    line-height: 1.15;
+    text-align: center;
+  }
+
+  .ranked-match-placeholder span {
+    font-size: 7px;
+  }
+
+  .ranked-match-placeholder {
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
   }
 
   .play-stage > .board-panel {
@@ -333,16 +511,6 @@ body {
 
   .play-stage .arena {
     padding: 4px;
-  }
-
-  .play-stage .board-footer {
-    min-height: 25px;
-    padding-top: 5px;
-    font-size: 10px;
-  }
-
-  .play-stage .engine-note {
-    display: none;
   }
 
   .game-shell .topbar {
@@ -434,13 +602,4 @@ body {
     margin-top: 16px;
   }
 
-  .play-quick-facts {
-    margin-top: 16px;
-    padding-top: 12px;
-  }
-
-  .play-stage > .board-panel {
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
 }
