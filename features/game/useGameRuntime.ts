@@ -18,6 +18,7 @@ import type { AcceptedMove, GameState } from './types';
 import { useBoardViewport } from './useBoardViewport';
 import { useConnectionQuality } from './useConnectionQuality';
 import { useReactionPlayback } from './useReactionPlayback';
+import { MATCH_PLAYER_CHROME_HEIGHT } from './match-layout';
 
 type PlayerSession = { token: string; user: SessionUser };
 
@@ -49,6 +50,7 @@ export function useGameRuntime({ session, stage, setStage, resolveOrbSkin }: Use
   const boardViewport = useBoardViewport(
     game?.board.width ?? DEFAULT_BOARD_SIZE.width,
     game?.board.height ?? DEFAULT_BOARD_SIZE.height,
+    stage === 'game' || stage === 'finished' ? MATCH_PLAYER_CHROME_HEIGHT : 0,
   );
   const connectionQuality = useConnectionQuality();
 

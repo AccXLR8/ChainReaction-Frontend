@@ -4,6 +4,8 @@ import { BoardPanel, type BoardPanelProps } from './BoardPanel';
 import { LatencyIndicator, type LatencyQuality } from './LatencyIndicator';
 import { MatchSidebar, type MatchSidebarProps } from './MatchSidebar';
 import { BrandLockup } from '@/features/brand/BrandLockup';
+import { MatchPlayerCard } from './MatchPlayerCard';
+import { MATCH_PLAYER_CHROME_HEIGHT } from './match-layout';
 
 type GameScreenProps = {
   stage: 'game' | 'finished';
@@ -37,6 +39,8 @@ export function GameScreen({
 }: GameScreenProps) {
   const isFinished = stage === 'finished';
   const matchLabel = gameId ? `MATCH ${gameId.slice(0, 8).toUpperCase()}` : 'LIVE MATCH';
+  const ownSlot = sidebar.ownSlot ?? 0;
+  const opponentSlot = 1 - ownSlot;
 
   return (
     <main className={`shell game-shell ${isFinished ? 'is-finished' : ''}`} id="play">
@@ -69,9 +73,39 @@ export function GameScreen({
 
       <section
         className="game-layout"
-        style={{ '--board-stage-height': `${board.stageHeight}px` } as CSSProperties}
+        style={{
+          '--board-stage-height': `${board.stageHeight}px`,
+          '--board-stage-width': `${board.stageWidth}px`,
+          '--match-board-stack-height': `${board.stageHeight + MATCH_PLAYER_CHROME_HEIGHT}px`,
+        } as CSSProperties}
       >
-        <BoardPanel {...board} />
+        <div className="match-board-stack">
+          <MatchPlayerCard
+            slot={opponentSlot}
+            position="opponent"
+            name={sidebar.playerNames[opponentSlot] ?? 'Opponent'}
+            nationality={sidebar.playerNationalities[opponentSlot]}
+            clock={sidebar.playerClocks[opponentSlot]}
+            connected={sidebar.playerConnected[opponentSlot]}
+            color={sidebar.colorForSlot(opponentSlot)}
+            currentPlayer={sidebar.currentPlayer}
+            winner={sidebar.winner}
+            finished={isFinished}
+          />
+          <BoardPanel {...board} />
+          <MatchPlayerCard
+            slot={ownSlot}
+            position="you"
+            name={sidebar.playerNames[ownSlot] ?? user.username}
+            nationality={sidebar.playerNationalities[ownSlot]}
+            clock={sidebar.playerClocks[ownSlot]}
+            connected={sidebar.playerConnected[ownSlot]}
+            color={sidebar.colorForSlot(ownSlot)}
+            currentPlayer={sidebar.currentPlayer}
+            winner={sidebar.winner}
+            finished={isFinished}
+          />
+        </div>
         <MatchSidebar {...sidebar} />
       </section>
 

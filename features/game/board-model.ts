@@ -91,6 +91,7 @@ export function getCellSize(
   boardWidth: number,
   boardHeight: number,
   viewportHeight = 900,
+  reservedHeight = 0,
 ): number {
   const longestSide = Math.max(boardWidth, boardHeight);
   const availableWidth = Math.max(
@@ -101,10 +102,10 @@ export function getCellSize(
         ? (viewportWidth - 90) / 2
         : (viewportWidth - 136) / 2,
   );
-  // Keep cells within the viewport after reserving the fixed header and outer panel spacing.
+  // Fit the board after accounting for the fixed shell and any player tags around it.
   const availableHeight = Math.max(
     180,
-    viewportWidth < 700 ? viewportHeight * 0.61 - 48 : viewportHeight - 162,
+    (viewportWidth < 700 ? viewportHeight * 0.61 - 48 : viewportHeight - 162) - reservedHeight,
   );
   const boardEdge = Math.min(availableWidth, availableHeight);
 

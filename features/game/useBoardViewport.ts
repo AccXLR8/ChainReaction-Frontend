@@ -4,7 +4,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { DEFAULT_BOARD_SIZE, getCellSize } from './board-model';
 
 /** Keeps the rendered grid sized to the current viewport without changing its shape. */
-export function useBoardViewport(width: number, height: number) {
+export function useBoardViewport(
+  width: number,
+  height: number,
+  reservedHeight = 0,
+) {
   const [viewportWidth, setViewportWidth] = useState(1280);
   const [viewportHeight, setViewportHeight] = useState(900);
 
@@ -22,8 +26,8 @@ export function useBoardViewport(width: number, height: number) {
   const boardWidth = width || DEFAULT_BOARD_SIZE.width;
   const boardHeight = height || DEFAULT_BOARD_SIZE.height;
   const cellSize = useMemo(
-    () => getCellSize(viewportWidth, boardWidth, boardHeight, viewportHeight),
-    [viewportWidth, viewportHeight, boardWidth, boardHeight],
+    () => getCellSize(viewportWidth, boardWidth, boardHeight, viewportHeight, reservedHeight),
+    [viewportWidth, viewportHeight, boardWidth, boardHeight, reservedHeight],
   );
   const cellGap = 3;
 

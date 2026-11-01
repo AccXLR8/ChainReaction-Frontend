@@ -379,7 +379,6 @@ export function HomePage() {
     playerClocks: game.playerClocks,
     playerConnected: game.playerConnected,
     colorForSlot: game.colorForSlot,
-    playerRole: game.playerRole,
     onPlayAgain: () => void matchmaking.joinQueue(),
     onReturnToLobby: game.returnToLobby,
   };
