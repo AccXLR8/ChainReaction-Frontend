@@ -89,7 +89,7 @@ export function WelcomeScreen({
       />
 
       <section
-        className="play-stage"
+        className={`play-stage ${stage === 'queue' ? 'is-queueing' : ''}`}
         id="welcome"
         style={{ '--board-stage-height': `${previewBoard.stageHeight}px` } as CSSProperties}
       >

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { WelcomeScreen } from '@/features/auth/WelcomeScreen';
 import type { AppStage, AuthMode, AuthResponse, SessionUser } from '@/features/auth/types';
 import { GameScreen } from '@/features/game/GameScreen';
@@ -14,7 +14,8 @@ import {
   type OrbSkinCatalogItem,
 } from '@/features/game/orb-skins';
 import { useGameRuntime } from '@/features/game/useGameRuntime';
-import { LOBBY_PREVIEW_GAME } from '@/features/lobby/preview-game';
+import { createQueuePreviewGame, LOBBY_PREVIEW_GAME } from '@/features/lobby/preview-game';
+import { useBoardViewport } from '@/features/game/useBoardViewport';
 import {
   useMatchmakingRuntime,
   type MatchmakingSession,
@@ -83,6 +84,14 @@ export function HomePage() {
     onRequestSignIn: () => setAuthMode('login'),
     setErrorMessage,
   });
+
+  // The queue placeholder matches the selected queue's expected board dimensions.
+  const queueBoardSize = matchmaking.queueMode === 'mini' ? 6 : 8;
+  const queueGame = useMemo(
+    () => createQueuePreviewGame(queueBoardSize),
+    [queueBoardSize],
+  );
+  const queueViewport = useBoardViewport(queueBoardSize, queueBoardSize);
 
   // The catalog is optional at startup: a service outage leaves Classic available.
   useEffect(() => {
@@ -334,6 +343,26 @@ export function HomePage() {
     onPlay: () => undefined,
   };
 
+  const lobbyBoard: BoardPanelProps = stage === 'queue'
+    ? {
+        ...previewBoard,
+        game: queueGame,
+        cells: queueGame.board.cells,
+        busy: true,
+        winner: null,
+        isYourTurn: false,
+        socketStatus: 'searching',
+        notice: 'Waiting for a match…',
+        boardWidth: queueViewport.boardWidth,
+        boardHeight: queueViewport.boardHeight,
+        cellSize: queueViewport.cellSize,
+        cellGap: queueViewport.cellGap,
+        stageWidth: queueViewport.stageWidth,
+        stageHeight: queueViewport.stageHeight,
+        activeBoardColor: '#f8f6f0',
+      }
+    : previewBoard;
+
   if (!session || stage === 'lobby' || stage === 'queue') {
     return (
       <WelcomeScreen
@@ -349,7 +378,7 @@ export function HomePage() {
         queueBusy={matchmaking.queueBusy}
         queueAction={matchmaking.queueAction}
         notice={game.notice}
-        previewBoard={previewBoard}
+        previewBoard={lobbyBoard}
         onAuthModeChange={setAuthMode}
         onGoogleSignIn={(credential) => void googleAuthSubmit(credential)}
         onGoogleError={setAuthError}

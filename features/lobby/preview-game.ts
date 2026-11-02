@@ -31,3 +31,21 @@ export const LOBBY_PREVIEW_GAME: GameState = {
   turn_number: 8,
   status: { kind: 'active' },
 };
+
+/** Empty matchmaking placeholder: Mini uses 6×6; Standard and Ranked use 8×8. */
+export function createQueuePreviewGame(boardSize: 6 | 8): GameState {
+  return {
+    board: {
+      width: boardSize,
+      height: boardSize,
+      cells: Array.from({ length: boardSize * boardSize }, () => ({ owner: null, orb_count: 0 })),
+    },
+    players: [
+      { id: 0, eliminated: false, has_moved: false },
+      { id: 1, eliminated: false, has_moved: false },
+    ],
+    current_player_index: 0,
+    turn_number: 0,
+    status: { kind: 'active' },
+  };
+}

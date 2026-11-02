@@ -1,0 +1,11 @@
+/* During matchmaking the board is a neutral, empty size preview. */
+.play-stage.is-queueing .cell {
+  border-color: #f1f3ed;
+  box-shadow: none;
+  background: #050706;
+  opacity: 1;
+}
+
+.play-stage.is-queueing .critical {
+  display: none;
+}

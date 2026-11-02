@@ -88,7 +88,7 @@ export function AuthDialog({
               autoComplete="username"
               maxLength={mode === 'register' ? 24 : 64}
               minLength={3}
-              pattern={mode === 'register' ? '[A-Za-z0-9_-]{3,24}' : undefined}
+              pattern={mode === 'register' ? '[A-Za-z0-9_\\x2d]{3,24}' : undefined}
               required
               value={username}
               onChange={(event) => setUsername(event.target.value)}

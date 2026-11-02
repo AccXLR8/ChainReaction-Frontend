@@ -276,7 +276,7 @@ export function ProfilePanel({
                       autoComplete="nickname"
                       maxLength={24}
                       minLength={3}
-                      pattern="[A-Za-z0-9_-]{3,24}"
+                      pattern="[A-Za-z0-9_\x2d]{3,24}"
                       title="Use 3–24 ASCII letters, numbers, underscores, or hyphens."
                       value={editUsername}
                       onChange={(event) => setEditUsername(event.target.value)}
