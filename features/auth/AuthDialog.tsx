@@ -5,6 +5,7 @@ import type { FormEvent } from 'react';
 import type { AuthMode } from './types';
 import { NationalityPicker } from '@/features/nationality/NationalityPicker';
 import { GoogleSignInControl } from './GoogleSignInControl';
+import { isStrongPassword } from './password-validation';
 
 type AuthDialogProps = {
   mode: Exclude<AuthMode, null>;
@@ -13,7 +14,7 @@ type AuthDialogProps = {
   onModeChange: (mode: AuthMode) => void;
   onGoogleSignIn: (credential: string) => void;
   onGoogleError: (message: string) => void;
-  onManualAuth: (mode: 'login' | 'register', username: string, password: string, nationality: string) => void;
+  onManualAuth: (mode: 'login' | 'register', username: string, email: string, password: string, confirmPassword: string, nationality: string) => void;
 };
 
 /** Account creation and sign-in form, including optional registration nationality. */
@@ -27,12 +28,38 @@ export function AuthDialog({
   onManualAuth,
 }: AuthDialogProps) {
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [nationality, setNationality] = useState('global');
+  const [validationError, setValidationError] = useState('');
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onManualAuth(mode, username.trim(), password, nationality);
+    const normalizedUsername = username.trim();
+    if (mode === 'register') {
+      if (!/^[A-Za-z0-9_-]{3,24}$/.test(normalizedUsername)) {
+        setValidationError('Use 3–24 characters: ASCII letters, numbers, underscores, or hyphens.');
+        return;
+      }
+      if (!email.trim() || email.length > 320) {
+        setValidationError('Enter a valid email address (up to 320 characters).');
+        return;
+      }
+      if (!isStrongPassword(password)) {
+        setValidationError('Your password must meet all five requirements listed below.');
+        return;
+      }
+      if (password !== confirmPassword) {
+        setValidationError('Passwords do not match.');
+        return;
+      }
+    } else if (!normalizedUsername || normalizedUsername.length > 64 || password.length > 128) {
+      setValidationError('Enter a username (up to 64 characters) and password (up to 128 characters).');
+      return;
+    }
+    setValidationError('');
+    onManualAuth(mode, normalizedUsername, email.trim(), password, confirmPassword, nationality);
   };
 
   return (
@@ -59,25 +86,62 @@ export function AuthDialog({
             Player name
             <input
               autoComplete="username"
-              maxLength={64}
+              maxLength={mode === 'register' ? 24 : 64}
               minLength={3}
+              pattern={mode === 'register' ? '[A-Za-z0-9_-]{3,24}' : undefined}
               required
               value={username}
               onChange={(event) => setUsername(event.target.value)}
             />
           </label>
+          {mode === 'register' && (
+            <label>
+              Email address
+              <input
+                autoComplete="email"
+                maxLength={320}
+                required
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </label>
+          )}
           <label>
             Password
             <input
               autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
               maxLength={128}
-              minLength={6}
+              minLength={mode === 'register' ? 8 : 1}
               required
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
             />
           </label>
+          {mode === 'register' && (
+            <label>
+              Re-enter password
+              <input
+                autoComplete="new-password"
+                maxLength={128}
+                minLength={8}
+                required
+                type="password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+              />
+            </label>
+          )}
+          {mode === 'register' && (
+            <ul className="password-requirements" aria-label="Password requirements">
+              <li>At least 8 characters</li>
+              <li>At least one lowercase letter</li>
+              <li>At least one uppercase letter</li>
+              <li>At least one number</li>
+              <li>At least one symbol</li>
+            </ul>
+          )}
           {mode === 'register' && (
             <NationalityPicker
               id="registration-nationality"
@@ -98,6 +162,7 @@ export function AuthDialog({
             disabled={busy}
             onClick={() => {
               setPassword('');
+              setConfirmPassword('');
               onGoogleError('');
               onModeChange(mode === 'register' ? 'login' : 'register');
             }}
@@ -105,7 +170,7 @@ export function AuthDialog({
             {mode === 'register' ? 'Sign in' : 'Create account'}
           </button>
         </p>
-        {error && <div className="auth-error" role="alert">{error}</div>}
+        {(validationError || error) && <div className="auth-error" role="alert">{validationError || error}</div>}
         <button className="auth-back" type="button" onClick={() => onModeChange(null)}>Back to play</button>
       </section>
     </div>

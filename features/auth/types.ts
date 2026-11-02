@@ -4,6 +4,8 @@ export type SessionUser = {
   username: string;
   is_guest: boolean;
   nationality?: string | null;
+  email?: string | null;
+  email_verified?: boolean;
 };
 
 /** Successful response returned after Google authentication. */

@@ -223,7 +223,9 @@ export function HomePage() {
   const manualAuthSubmit = async (
     mode: 'login' | 'register',
     username: string,
+    email: string,
     password: string,
+    confirmPassword: string,
     nationality: string,
   ) => {
     if (authBusy) return;
@@ -232,7 +234,7 @@ export function HomePage() {
 
     try {
       const body = mode === 'register'
-        ? { username, password, nationality: normalizeNationality(nationality) }
+        ? { username, email, password, confirm_password: confirmPassword, nationality: normalizeNationality(nationality) }
         : { username, password };
       saveSession(await authRequest(mode, body));
     } catch (error) {
@@ -351,8 +353,8 @@ export function HomePage() {
         onAuthModeChange={setAuthMode}
         onGoogleSignIn={(credential) => void googleAuthSubmit(credential)}
         onGoogleError={setAuthError}
-        onManualAuth={(mode, username, password, nationality) =>
-          void manualAuthSubmit(mode, username, password, nationality)
+        onManualAuth={(mode, username, email, password, confirmPassword, nationality) =>
+          void manualAuthSubmit(mode, username, email, password, confirmPassword, nationality)
         }
         onSessionProfileUpdate={updateSessionProfile}
         onSessionExpired={handleSessionExpired}

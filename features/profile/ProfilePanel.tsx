@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, request } from '@/lib/api/client';
 import {
   getAchievementCatalog,
   getAvatars,
@@ -15,6 +15,7 @@ import type { SessionUser } from '@/features/auth/types';
 import { NationalityDisplay } from '@/features/nationality/NationalityDisplay';
 import { NationalityPicker } from '@/features/nationality/NationalityPicker';
 import { normalizeNationality } from '@/features/nationality/countries';
+import { isStrongPassword } from '@/features/auth/password-validation';
 
 type ProfilePanelProps = {
   token: string | null;
@@ -47,6 +48,11 @@ export function ProfilePanel({
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordBusy, setPasswordBusy] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const onExpiredRef = useRef(onSessionExpired);
   onExpiredRef.current = onSessionExpired;
 
@@ -165,6 +171,44 @@ export function ProfilePanel({
     }
   };
 
+  const changePassword = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!token || !currentPassword || !isStrongPassword(newPassword)) {
+      setPasswordError('Enter your current password and a new password that meets every requirement.');
+      setPasswordMessage('');
+      return;
+    }
+
+    setPasswordBusy(true);
+    setPasswordError('');
+    setPasswordMessage('');
+    try {
+      await request('/api/auth/change-password', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+      });
+      setCurrentPassword('');
+      setNewPassword('');
+      setPasswordMessage('Password changed. Your current session remains active.');
+    } catch (cause) {
+      const apiError = cause instanceof ApiError ? cause : null;
+      if (apiError?.status === 401) {
+        setPasswordError('Current password is incorrect, or your session has expired.');
+      } else if (apiError?.status === 422) {
+        setPasswordError(apiError.message || 'The new password does not meet the requirements.');
+      } else {
+        // Preserve backend rate-limit and service-unavailable details for the player.
+        setPasswordError(cause instanceof Error ? cause.message : 'Could not change your password.');
+      }
+    } finally {
+      setPasswordBusy(false);
+    }
+  };
+
   const achievements = profile?.achievements.length ? profile.achievements : achievementCatalog;
 
   return (
@@ -232,6 +276,8 @@ export function ProfilePanel({
                       autoComplete="nickname"
                       maxLength={24}
                       minLength={3}
+                      pattern="[A-Za-z0-9_-]{3,24}"
+                      title="Use 3–24 ASCII letters, numbers, underscores, or hyphens."
                       value={editUsername}
                       onChange={(event) => setEditUsername(event.target.value)}
                     />
@@ -268,6 +314,35 @@ export function ProfilePanel({
                     </button>
                   </div>
                 </form>
+              )}
+
+              {canEdit && !user?.is_guest && (
+                <section className="profile-section password-section">
+                  <div className="profile-section-title">
+                    <h3>Change password</h3>
+                    <span>SECURE YOUR ACCOUNT</span>
+                  </div>
+                  <form className="password-change-form" onSubmit={changePassword}>
+                    <label>
+                      Current password
+                      <input autoComplete="current-password" maxLength={128} required type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} />
+                    </label>
+                    <label>
+                      New password
+                      <input autoComplete="new-password" minLength={8} maxLength={128} required type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} />
+                    </label>
+                    <ul className="password-requirements">
+                      <li>At least 8 characters</li>
+                      <li>Lowercase and uppercase letters</li>
+                      <li>At least one number and one symbol</li>
+                    </ul>
+                    <button className="profile-save" type="submit" disabled={passwordBusy}>
+                      {passwordBusy ? 'Changing…' : 'Change password'}
+                    </button>
+                    {passwordError && <p className="profile-error" role="alert">{passwordError}</p>}
+                    {passwordMessage && <p className="profile-notice" role="status">{passwordMessage}</p>}
+                  </form>
+                </section>
               )}
 
               <section className="profile-section">
