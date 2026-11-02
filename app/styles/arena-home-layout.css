@@ -536,3 +536,170 @@
   .sidebar-account > span:last-child { display: block; max-width: 110px; }
 }
 
+/* Emerald arena finish: brighter edge light, with all glow kept in the site chrome. */
+.arena-home-shell {
+  background:
+    radial-gradient(ellipse at 100% 42%, #00ff4d30, transparent 35%),
+    radial-gradient(ellipse at 4% 57%, #00f45b22, transparent 32%),
+    radial-gradient(ellipse at 72% 100%, #00a83a18, transparent 36%),
+    #030704;
+}
+
+.home-sidebar {
+  position: relative;
+  overflow: hidden;
+  border-right-color: #187039;
+  background: linear-gradient(180deg, #010704 0%, #031b0b 52%, #010704 100%);
+}
+
+.home-sidebar::after {
+  position: absolute;
+  z-index: 0;
+  right: -235px;
+  bottom: 54px;
+  width: 490px;
+  height: 310px;
+  border: 2px solid #31ff67a6;
+  border-radius: 50%;
+  box-shadow: 0 0 20px #16ff5d9c, 0 0 54px #16ff5d70, inset 0 0 38px #16ff5d40;
+  content: '';
+  transform: rotate(-35deg);
+  pointer-events: none;
+}
+
+.home-sidebar > * { position: relative; z-index: 1; }
+
+.home-sidebar .home-nav a:hover,
+.home-sidebar .home-nav button:hover,
+.home-sidebar .home-nav a.is-active,
+.home-sidebar .home-nav button.is-active {
+  border-color: #5dff46;
+  background: linear-gradient(115deg, #55ff3d72, #00e85b60);
+  box-shadow: 0 0 12px #28ff64b8, 0 0 35px #18ff5578, inset 0 0 18px #39ff3b42;
+  color: #f3fff3;
+}
+
+.sidebar-nav-icon,
+.arena-breadcrumb i { color: #a4ff35; }
+
+.arena-topbar {
+  overflow: hidden;
+  border-bottom-color: #19743a;
+  background: linear-gradient(90deg, #010704, #04200d 68%, #010704);
+}
+
+.arena-topbar::after {
+  position: absolute;
+  top: -100px;
+  right: 4%;
+  width: 50%;
+  height: 165px;
+  border: 2px solid #37ff68a1;
+  border-radius: 50%;
+  box-shadow: 0 0 18px #22ff5b9c, 0 0 42px #22ff5b55;
+  content: '';
+  transform: rotate(-10deg);
+  pointer-events: none;
+}
+
+.arena-topbar > * { position: relative; z-index: 1; }
+
+.arena-home-shell .play-entry-panel {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid #35ff65;
+  background:
+    radial-gradient(ellipse at 50% 0, #0bff4c30, transparent 54%),
+    radial-gradient(ellipse at 100% 100%, #08b83d25, transparent 52%),
+    linear-gradient(155deg, #062112, #020805 75%);
+  box-shadow: 0 0 12px #1eff5ccc, 0 0 38px #10e94b78, inset 0 0 42px #0bff4c20;
+}
+
+.arena-home-shell .play-entry-panel::after {
+  position: absolute;
+  right: -8%;
+  bottom: -15%;
+  width: 78%;
+  height: 27%;
+  border: 2px solid #39ff687d;
+  border-radius: 50%;
+  box-shadow: 0 0 18px #28ff6399, 0 0 42px #28ff6352;
+  content: '';
+  transform: rotate(-18deg);
+  pointer-events: none;
+}
+
+.arena-home-shell .play-entry-panel > * { position: relative; z-index: 1; }
+
+.arena-home-shell .match-mode-card {
+  border-color: #176334;
+  background: linear-gradient(110deg, #0a2b17, #06190c 75%);
+  box-shadow: inset 0 1px #ffffff12, 0 0 16px #08ce4930;
+}
+
+.arena-home-shell .match-mode-card:hover {
+  border-color: #49ff6e;
+  background: linear-gradient(110deg, #0f381d, #08220f 75%);
+  box-shadow: 0 0 17px #13ff5978, inset 0 0 22px #16ff4e1d;
+}
+
+.arena-home-shell .quick-match-card {
+  border-color: #39ff6d;
+  background: linear-gradient(110deg, #0d351b, #07200f 80%);
+  box-shadow: inset 0 1px #caffd226, 0 0 19px #10ee4b48;
+}
+
+.arena-home-shell .match-mode-icon { color: #a4ff35; }
+.arena-home-shell .match-mode-badge { border-color: #5b815d; background: #051009; color: #c9ffc9; }
+.arena-home-shell .quick-match-card .match-mode-badge { border-color: #8cff55; color: #a4ff35; }
+.arena-home-shell .bot-match-card { border-color: #293d30; background: #0b120d; }
+.arena-home-shell .bot-match-card .match-mode-icon,
+.arena-home-shell .bot-match-card .match-mode-heading h2,
+.arena-home-shell .bot-match-card,
+.arena-home-shell .bot-match-card > p { color: #859087; }
+.arena-home-shell .bot-match-card .match-mode-badge { border-color: #34473a; color: #97a198; }
+.arena-home-shell .bot-match-card .welcome-play:disabled { border-color: #34473a; background: #111a13; color: #95a096; }
+.arena-home-shell .bot-match-card:hover { transform: none; border-color: #34473a; background: #0b120d; box-shadow: none; cursor: default; }
+
+.arena-home-shell .quick-match-card .welcome-play,
+.arena-home-shell .mini-match-card .welcome-play {
+  border-color: #a5ff42;
+  background: linear-gradient(180deg, #9bff22, #44ed37);
+  color: #061306;
+  box-shadow: 0 0 12px #57ff36b3, 0 0 28px #45f54178, inset 0 1px #e7ffc9;
+  font-weight: 850;
+}
+
+.arena-home-shell .quick-match-card .welcome-play:hover:not(:disabled),
+.arena-home-shell .mini-match-card .welcome-play:hover:not(:disabled) {
+  border-color: #d7ff90;
+  background: linear-gradient(180deg, #b2ff50, #5bff45);
+  box-shadow: 0 0 16px #57ff36d1, 0 0 36px #45f54196;
+}
+
+.home-sidebar-footer .service-pill {
+  border-color: #19723a;
+  background: #04190c;
+  box-shadow: 0 0 12px #11e9502b;
+}
+
+.sidebar-account {
+  border: 1px solid #12602d;
+  background: linear-gradient(115deg, #0d3219, #061a0d);
+  box-shadow: 0 0 16px #00d7433d;
+}
+
+.sidebar-account .user-avatar {
+  border-color: #a4ff35a0;
+  background: #a4ff3526;
+  box-shadow: 0 0 13px #a4ff3560;
+}
+
+.sidebar-account {
+  border-radius: 9px;
+  background: linear-gradient(115deg, #0d2718, #07170d);
+  box-shadow: 0 0 15px #00d7431a;
+}
+
+.sidebar-account:hover { color: #a4ff35; }
+
