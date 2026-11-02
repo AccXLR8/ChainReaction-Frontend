@@ -4,18 +4,19 @@ import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { ApiError, request } from '@/lib/api/client';
 import {
-  getAchievementCatalog,
   getAvatars,
   getMyProfile,
   getPublicProfile,
   updateMyProfile,
 } from '@/lib/api/profiles';
-import type { Achievement, Avatar, PlayerProfile } from './types';
+import type { Avatar, PlayerProfile } from './types';
 import type { SessionUser } from '@/features/auth/types';
 import { NationalityDisplay } from '@/features/nationality/NationalityDisplay';
 import { NationalityPicker } from '@/features/nationality/NationalityPicker';
 import { normalizeNationality } from '@/features/nationality/countries';
 import { isStrongPassword } from '@/features/auth/password-validation';
+import { getFriends, searchFriends, sendFriendRequest, respondToFriendRequest } from '@/lib/api/friends';
+import type { FriendDirectory, FriendSearchPlayer } from '@/lib/api/friends';
 
 type ProfilePanelProps = {
   token: string | null;
@@ -37,7 +38,10 @@ export function ProfilePanel({
 }: ProfilePanelProps) {
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
   const [avatars, setAvatars] = useState<Avatar[]>([]);
-  const [achievementCatalog, setAchievementCatalog] = useState<Achievement[]>([]);
+  const [friendDirectory, setFriendDirectory] = useState<FriendDirectory>({ friends: [], incoming_requests: [], outgoing_requests: [] });
+  const [friendSearch, setFriendSearch] = useState('');
+  const [friendResults, setFriendResults] = useState<FriendSearchPlayer[]>([]);
+  const [friendBusyId, setFriendBusyId] = useState('');
   const [lookup, setLookup] = useState('');
   const [editUsername, setEditUsername] = useState('');
   const [editAvatarId, setEditAvatarId] = useState<number | null>(null);
@@ -62,16 +66,13 @@ export function ProfilePanel({
     const loadPanel = async () => {
       setLoading(true);
       setError('');
-      const [avatarResult, achievementResult, profileResult] = await Promise.allSettled([
+      const [avatarResult, profileResult] = await Promise.allSettled([
         getAvatars(),
-        getAchievementCatalog(),
         token ? getMyProfile(token) : Promise.resolve(null),
       ]);
       if (!active) return;
 
       if (avatarResult.status === 'fulfilled') setAvatars(avatarResult.value);
-      if (achievementResult.status === 'fulfilled') setAchievementCatalog(achievementResult.value);
-
       if (profileResult.status === 'fulfilled' && profileResult.value) {
         setProfile(profileResult.value);
         setLookup(profileResult.value.username);
@@ -92,7 +93,58 @@ export function ProfilePanel({
     };
   }, [token]);
 
+  useEffect(() => {
+    if (!token || user?.is_guest) return;
+    getFriends(token).then(setFriendDirectory).catch((cause) => {
+      if (cause instanceof ApiError && cause.status === 401) onExpiredRef.current();
+      else setError(cause instanceof Error ? cause.message : 'Could not load your friends.');
+    });
+  }, [token, user?.is_guest]);
+
   const canEdit = Boolean(token && user && profile?.user_id === user.id);
+
+  const refreshFriends = async () => {
+    if (!token || user?.is_guest) return;
+    setFriendDirectory(await getFriends(token));
+  };
+
+  const searchFriendAccounts = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!token || !friendSearch.trim()) return;
+    setFriendBusyId('search');
+    setError('');
+    try {
+      const result = await searchFriends(token, friendSearch.trim());
+      setFriendResults(result.players);
+      if (!result.players.length) setNotice('No players found with that username.');
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not search players.');
+    } finally { setFriendBusyId(''); }
+  };
+
+  const requestFriend = async (username: string) => {
+    if (!token) return;
+    setFriendBusyId(username);
+    setError('');
+    setNotice('');
+    try {
+      await sendFriendRequest(token, username);
+      setNotice(`Friend request sent to ${username}.`);
+      setFriendResults((players) => players.filter((player) => player.username !== username));
+      await refreshFriends();
+    } catch (cause) { setError(cause instanceof Error ? cause.message : 'Could not send friend request.'); }
+    finally { setFriendBusyId(''); }
+  };
+
+  const handleFriendRequest = async (requestId: string, accept: boolean) => {
+    if (!token) return;
+    setFriendBusyId(requestId);
+    try {
+      await respondToFriendRequest(token, requestId, accept);
+      await refreshFriends();
+    } catch (cause) { setError(cause instanceof Error ? cause.message : 'Could not update friend request.'); }
+    finally { setFriendBusyId(''); }
+  };
 
   const handleLookup = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -209,11 +261,9 @@ export function ProfilePanel({
     }
   };
 
-  const achievements = profile?.achievements.length ? profile.achievements : achievementCatalog;
-
   return (
-    <div className="profile-backdrop" role="presentation">
-      <section className="profile-panel" role="dialog" aria-modal="true" aria-labelledby="profile-title">
+    <div className="profile-backdrop profile-page-backdrop">
+      <section className="profile-panel profile-page" aria-labelledby="profile-title">
         <header className="profile-panel-head">
           <div>
             <span className="eyebrow-mini">PLAYER ACCOUNT</span>
@@ -360,20 +410,22 @@ export function ProfilePanel({
                 </div>
               </section>
 
-              <section className="profile-section profile-achievements">
+              <section className="profile-section profile-friends">
                 <div className="profile-section-title">
-                  <h3>Achievements</h3>
-                  <span>{achievements.filter((achievement) => achievement.unlocked).length} UNLOCKED</span>
+                  <h3>Friends</h3>
+                  <span>{friendDirectory.friends.length} FRIENDS</span>
                 </div>
-                {achievements.length ? (
-                  <div className="achievement-grid">
-                    {achievements.map((achievement) => (
-                      <AchievementCard achievement={achievement} key={achievement.code} />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="profile-muted">Achievement badges will appear here as you play.</p>
-                )}
+                {canEdit && !user?.is_guest ? <>
+                  <form className="friend-search" onSubmit={searchFriendAccounts}>
+                    <label htmlFor="friend-search-input">Find players by username</label>
+                    <div><input id="friend-search-input" maxLength={64} value={friendSearch} onChange={(event) => setFriendSearch(event.target.value)} placeholder="Search a username" />
+                    <button className="profile-save" type="submit" disabled={friendBusyId === 'search' || !friendSearch.trim()}>{friendBusyId === 'search' ? 'Searching…' : 'Search'}</button></div>
+                  </form>
+                  {friendResults.map((player) => <div className="friend-row" key={player.user_id}><span>{player.username}</span><button className="profile-secondary" type="button" disabled={friendBusyId === player.username} onClick={() => void requestFriend(player.username)}>{friendBusyId === player.username ? 'Sending…' : 'Add friend'}</button></div>)}
+                  {friendDirectory.incoming_requests.map((friend) => <div className="friend-row" key={friend.request_id}><span>{friend.username} <small>sent you a request</small></span><div><button type="button" className="profile-save" disabled={friendBusyId === friend.request_id} onClick={() => void handleFriendRequest(friend.request_id, true)}>Accept</button><button type="button" className="profile-secondary" disabled={friendBusyId === friend.request_id} onClick={() => void handleFriendRequest(friend.request_id, false)}>Decline</button></div></div>)}
+                  {friendDirectory.outgoing_requests.map((friend) => <div className="friend-row" key={friend.request_id}><span>{friend.username} <small>request pending</small></span><button type="button" className="profile-secondary" disabled={friendBusyId === friend.request_id} onClick={() => void handleFriendRequest(friend.request_id, false)}>Cancel</button></div>)}
+                  {friendDirectory.friends.map((friend) => <div className="friend-row" key={friend.user_id}><span>{friend.username}</span><small>FRIEND</small></div>)}
+                </> : <p className="profile-muted">{user?.is_guest ? 'Sign in to search for and add friends.' : 'Friends are available on your own account page.'}</p>}
               </section>
             </>
           )}
@@ -392,19 +444,6 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
       <span>{label}</span>
       <strong>{value}</strong>
     </div>
-  );
-}
-
-function AchievementCard({ achievement }: { achievement: Achievement }) {
-  return (
-    <article className={`achievement-card ${achievement.unlocked ? 'is-unlocked' : 'is-locked'}`}>
-      <img src={achievement.badge_image_url} alt="" />
-      <div>
-        <h4>{achievement.name}</h4>
-        <p>{achievement.description}</p>
-        <small>{achievement.unlocked ? `EARNED ${formatDate(achievement.earned_at)}` : 'LOCKED'}</small>
-      </div>
-    </article>
   );
 }
 

@@ -62,6 +62,7 @@ export function MatchmakingPanel({
           <div className="match-mode-list">
             <MatchModeCard
               className="quick-match-card"
+              icon="⚡"
               kicker="CASUAL · UNRATED"
               title="Standard Match"
               badge="PLAY NOW"
@@ -72,6 +73,7 @@ export function MatchmakingPanel({
             />
             <MatchModeCard
               className="mini-match-card"
+              icon="◫"
               kicker="CASUAL · QUICKER ROUNDS"
               title="Mini Match"
               badge="PLAY NOW"
@@ -82,7 +84,19 @@ export function MatchmakingPanel({
               onClick={() => onFindMatch('mini')}
             />
             <MatchModeCard
+              className="bot-match-card"
+              icon="🤖"
+              kicker="TRAINING · IN DEVELOPMENT"
+              title="Play a bot"
+              badge="COMING SOON"
+              description="Practice your strategy against opponents with different play styles."
+              buttonLabel="In development"
+              buttonClass="bot-play"
+              disabled
+            />
+            <MatchModeCard
               className="ranked-match-card"
+              icon="♜"
               kicker="RATED · COMPETITIVE"
               title="Ranked Match"
               badge={rankedLocked ? 'SIGN-IN REQUIRED' : 'PLAY NOW'}
@@ -104,6 +118,7 @@ export function MatchmakingPanel({
 
 type MatchModeCardProps = {
   className: string;
+  icon: string;
   kicker: string;
   title: string;
   badge: string;
@@ -112,12 +127,13 @@ type MatchModeCardProps = {
   buttonClass?: string;
   buttonAriaLabel?: string;
   disabled: boolean;
-  onClick: () => void;
+  onClick?: () => void;
 };
 
 /** Repeated visual/card structure for each matchmaking queue. */
 function MatchModeCard({
   className,
+  icon,
   kicker,
   title,
   badge,
@@ -130,6 +146,7 @@ function MatchModeCard({
 }: MatchModeCardProps) {
   return (
     <article className={`match-mode-card ${className}`}>
+      <span className="match-mode-icon" aria-hidden="true">{icon}</span>
       <div className="match-mode-heading">
         <div>
           <span className="match-mode-kicker">{kicker}</span>

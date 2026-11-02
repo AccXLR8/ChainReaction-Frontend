@@ -16,6 +16,7 @@ import {
 import { useGameRuntime } from '@/features/game/useGameRuntime';
 import { createQueuePreviewGame, LOBBY_PREVIEW_GAME } from '@/features/lobby/preview-game';
 import { useBoardViewport } from '@/features/game/useBoardViewport';
+import { LOBBY_PLAYER_CHROME_HEIGHT } from '@/features/game/match-layout';
 import {
   useMatchmakingRuntime,
   type MatchmakingSession,
@@ -91,7 +92,7 @@ export function HomePage() {
     () => createQueuePreviewGame(queueBoardSize),
     [queueBoardSize],
   );
-  const queueViewport = useBoardViewport(queueBoardSize, queueBoardSize);
+  const queueViewport = useBoardViewport(queueBoardSize, queueBoardSize, LOBBY_PLAYER_CHROME_HEIGHT);
 
   // The catalog is optional at startup: a service outage leaves Classic available.
   useEffect(() => {

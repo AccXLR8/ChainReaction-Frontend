@@ -1,5 +1,4 @@
 import type { SessionUser } from '@/features/auth/types';
-import { NationalityDisplay } from '@/features/nationality/NationalityDisplay';
 import { BrandLockup } from '@/features/brand/BrandLockup';
 
 type WelcomeHeaderProps = {
@@ -28,34 +27,50 @@ export function WelcomeHeader({
   onSignIn,
   onSignOut,
 }: WelcomeHeaderProps) {
+  const playIsActive = !showRules && !showProfile && !showOrbSkins;
+
   return (
-    <header className="home-topbar">
-      <a className="brand home-brand" href="#welcome" aria-label="Superkritical home">
-        <BrandLockup />
-      </a>
-      <nav className="home-nav" aria-label="Main navigation">
-        <a className={!showRules ? 'is-active' : ''} href="#welcome" onClick={() => onShowRules(false)}>Play</a>
-        <button className={showRules ? 'is-active' : ''} onClick={() => { onShowOrbSkins(false); onShowRules(true); }}>How to play</button>
-        <button className={showProfile ? 'is-active' : ''} onClick={() => { onShowOrbSkins(false); onShowProfile(true); }}>Account</button>
-        <span className="nav-coming-soon">Leaderboard <small>SOON</small></span>
-        <span className="nav-coming-soon">Shop <small>SOON</small></span>
-        <button className={showOrbSkins ? 'is-active' : ''} onClick={() => { onShowProfile(false); onShowRules(false); onShowOrbSkins(true); }}>Skins</button>
-      </nav>
-      <div className="home-account-summary" id="account">
-        <span className={`service-pill service-${serviceStatus}`}>
-          <i /> {serviceStatus === 'ready' ? 'ARENA ONLINE' : serviceStatus.toUpperCase()}
-        </span>
-        {user ? (
-          <div className="top-player">
-            <span className="top-player-name">{user.username}</span>
-            <NationalityDisplay value={user.nationality} className="top-player-nationality" showName={false} />
-            {user.is_guest && <small>GUEST</small>}
-            <button onClick={onSignOut}>Sign out</button>
-          </div>
-        ) : (
-          <button className="nav-signin" onClick={onSignIn}>Sign in</button>
-        )}
-      </div>
-    </header>
+    <>
+      <aside className="home-sidebar">
+        <a className="brand home-brand" href="#welcome" aria-label="Superkritical home">
+          <BrandLockup />
+        </a>
+        <nav className="home-nav" aria-label="Main navigation">
+          <a aria-label="Play" title="Play" className={playIsActive ? 'is-active' : ''} href="#welcome" onClick={() => { onShowRules(false); onShowProfile(false); onShowOrbSkins(false); }}>
+            <span className="sidebar-nav-icon" aria-hidden="true">◈</span><span>Play</span>
+          </a>
+          <button aria-label="How to play" title="How to play" className={showRules ? 'is-active' : ''} onClick={() => { onShowProfile(false); onShowOrbSkins(false); onShowRules(true); }}>
+            <span className="sidebar-nav-icon" aria-hidden="true">⌘</span><span>How to play</span>
+          </button>
+          <button aria-label="Orb skins" title="Orb skins" className={showOrbSkins ? 'is-active' : ''} onClick={() => { onShowProfile(false); onShowRules(false); onShowOrbSkins(true); }}>
+            <span className="sidebar-nav-icon" aria-hidden="true">✳</span><span>Orb skins</span>
+          </button>
+          <span className="nav-coming-soon"><span className="sidebar-nav-icon" aria-hidden="true">▤</span><span>Leaderboard <small>SOON</small></span></span>
+          <span className="nav-coming-soon"><span className="sidebar-nav-icon" aria-hidden="true">◇</span><span>Shop <small>SOON</small></span></span>
+        </nav>
+        <div className="home-sidebar-footer">
+          {user && <button className="sidebar-account" aria-label={`Open ${user.username} account`} onClick={() => { onShowRules(false); onShowOrbSkins(false); onShowProfile(true); }}>
+            <span className="user-avatar" aria-hidden="true">{user.username.slice(0, 1).toUpperCase()}</span>
+            <span>{user.username}</span>
+          </button>}
+          {!user && <button className="sidebar-account sidebar-signin" onClick={onSignIn}>
+            <span className="user-avatar" aria-hidden="true">↗</span>
+            <span>Sign in</span>
+          </button>}
+          <span className={`service-pill service-${serviceStatus}`}><i />{serviceStatus === 'ready' ? 'ARENA ONLINE' : serviceStatus.toUpperCase()}</span>
+          <span>1V1 · REAL-TIME</span>
+        </div>
+      </aside>
+      <header className="home-topbar arena-topbar">
+        <div className="arena-breadcrumb"><span>PLAY</span><i>/</i> ONLINE ARENA</div>
+        <div className="home-account-summary" id="account">
+          {user ? (
+            <div className="top-player">
+              <button onClick={onSignOut}>Sign out</button>
+            </div>
+          ) : null}
+        </div>
+      </header>
+    </>
   );
 }

@@ -72,7 +72,7 @@ export function WelcomeScreen({
   const [showProfile, setShowProfile] = useState(false);
   const [showOrbSkins, setShowOrbSkins] = useState(false);
   return (
-    <main className={`welcome-shell ${authMode ? 'has-auth-form' : ''}`}>
+    <main className={`welcome-shell arena-home-shell ${authMode ? 'has-auth-form' : ''}`}>
       <div className="welcome-noise" />
 
       <WelcomeHeader
@@ -88,10 +88,13 @@ export function WelcomeScreen({
         onSignOut={onSignOut}
       />
 
-      <section
+      {!showProfile && <section
         className={`play-stage ${stage === 'queue' ? 'is-queueing' : ''}`}
         id="welcome"
-        style={{ '--board-stage-height': `${previewBoard.stageHeight}px` } as CSSProperties}
+        style={{
+          '--board-stage-height': `${previewBoard.stageHeight}px`,
+          '--board-stage-width': `${previewBoard.stageWidth}px`,
+        } as CSSProperties}
       >
         <MenuBoardPreview board={previewBoard} />
         <MatchmakingPanel
@@ -105,7 +108,7 @@ export function WelcomeScreen({
           onFindMatch={onFindMatch}
           onCancelSearch={onCancelSearch}
         />
-      </section>
+      </section>}
 
       {authMode && !user && (
         <AuthDialog
@@ -166,10 +169,10 @@ export function WelcomeScreen({
         </div>
       )}
 
-      <footer className="welcome-footer">
+      {!showProfile && <footer className="welcome-footer">
         <span>Superkritical <b>／</b> ONLINE ARENA</span>
         <span>THINK FAST. CHAIN FASTER.</span>
-      </footer>
+      </footer>}
     </main>
   );
 }

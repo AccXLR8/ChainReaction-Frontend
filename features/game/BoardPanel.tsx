@@ -60,6 +60,7 @@ export function BoardPanel({
   onPlay,
 }: BoardPanelProps) {
   const visibleCells = cells ?? game?.board.cells;
+  const isLobbyPreview = socketStatus === 'preview' || socketStatus === 'searching';
 
   return (
     <section className="board-panel">
@@ -73,6 +74,14 @@ export function BoardPanel({
           <span className="opponent-player"><i className="red-bg" /> {opponentPlayerName}</span>
         </div>
       </div>
+
+      {isLobbyPreview && (
+        <div className="lobby-player-strip opponent-strip">
+          <span className="lobby-player-avatar" aria-hidden="true">◉</span>
+          <div><small>{socketStatus === 'searching' ? 'MATCHMAKING' : 'OPPONENT'}</small><strong>{socketStatus === 'searching' ? 'Finding a rival' : opponentPlayerName}</strong></div>
+          <span className="lobby-player-detail">{socketStatus === 'searching' ? 'SEARCHING' : 'RED'}</span>
+        </div>
+      )}
 
       <div className="arena">
         {!game && (
@@ -196,6 +205,14 @@ export function BoardPanel({
           )}
         </div>
       </div>
+
+      {isLobbyPreview && (
+        <div className="lobby-player-strip own-strip">
+          <span className="lobby-player-avatar" aria-hidden="true">✳</span>
+          <div><small>YOU · GREEN</small><strong>{ownPlayerName}</strong></div>
+          <span className="lobby-player-detail">{socketStatus === 'searching' ? 'READY' : 'P1'}</span>
+        </div>
+      )}
 
       <div className="board-footer">
         <span>
