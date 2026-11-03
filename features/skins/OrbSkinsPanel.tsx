@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ApiError } from '@/lib/api/client';
 import {
   getMyProfile,
@@ -13,12 +13,12 @@ import { OrbCluster } from '@/features/game/OrbCluster';
 import { unlockOrbSkinAudio } from '@/features/game/orb-skin-audio';
 import { LOBBY_PREVIEW_GAME } from '@/features/lobby/preview-game';
 import { OrbSkinPreviewDialog } from '@/features/skins/OrbSkinPreviewDialog';
+import { createOrbSkinPreviewCatalog } from '@/features/skins/orb-skin-preview-catalog';
 import {
   DEFAULT_ORB_SKIN,
   DEFAULT_ORB_SKIN_ID,
   normalizeOrbSkinCatalog,
   normalizeSkinRarity,
-  SKIN_RARITIES,
   type OrbSkinCatalogItem,
   type SkinRarity,
 } from '@/features/game/orb-skins';
@@ -26,12 +26,35 @@ import {
 type SkinCategory = 'orbs' | 'boards';
 type RarityFilter = 'all' | SkinRarity;
 type SkinScope = 'owned' | 'all';
+type SkinSort = 'rarity' | 'newest' | 'alphabetical';
+type SkinView = 'grid' | 'list';
+
+const RARITY_DISPLAY_ORDER: SkinRarity[] = ['legendary', 'epic', 'rare', 'common'];
+const SKIN_FEATURE_ORDER = [
+  'auric-comet', 'cosmic-core', 'crimson-glass', 'void-prism', 'neon-circuit',
+  'cool-blue-glass', 'frosted-core', 'electric-halo', 'classic', 'matte-pearl', 'graphite', 'ivory-glow',
+];
 
 const RARITY_DETAILS: Record<SkinRarity, string> = {
-  common: 'Clear glass · Base skins',
-  rare: 'Cool blue glass',
-  epic: 'Crimson glass',
-  legendary: 'Gilded glass · Sparkling finish',
+  common: 'The original finishes',
+  rare: 'Cool, refined materials',
+  epic: 'Distinctive high energy looks',
+  legendary: 'Rare finishes with a signature impact',
+};
+
+const SKIN_DESCRIPTIONS: Record<string, string> = {
+  classic: 'The original, timeless look.',
+  'auric-comet': 'A radiant gilded finish with a sparkling collision.',
+  'cosmic-core': 'A celestial finish with a deep-space impact.',
+  'crimson-glass': 'A bold, fiery finish that hits hard.',
+  'void-prism': 'A shifting prism forged in the void.',
+  'neon-circuit': 'A luminous circuit pattern with a sharp digital pulse.',
+  'cool-blue-glass': 'A clean, cool finish for your arena.',
+  'frosted-core': 'A smooth, icy surface with a soft impact.',
+  'electric-halo': 'A charged finish wrapped in electric light.',
+  'matte-pearl': 'A quiet pearl finish with a soft sheen.',
+  graphite: 'A bold, neutral finish in deep graphite.',
+  'ivory-glow': 'A warm ivory surface with a gentle glow.',
 };
 
 type OrbSkinsPanelProps = {
@@ -51,11 +74,15 @@ export function OrbSkinsPanel({
   const [catalog, setCatalog] = useState<OrbSkinCatalogItem[]>([DEFAULT_ORB_SKIN]);
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
   const [skinCategory, setSkinCategory] = useState<SkinCategory>('orbs');
-  const [skinScope, setSkinScope] = useState<SkinScope>('owned');
+  const [skinScope, setSkinScope] = useState<SkinScope>('all');
   const [rarityFilter, setRarityFilter] = useState<RarityFilter>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortMode, setSortMode] = useState<SkinSort>('rarity');
+  const [skinView, setSkinView] = useState<SkinView>('grid');
   const [loading, setLoading] = useState(true);
   const [savingSkinId, setSavingSkinId] = useState<string | null>(null);
   const [previewSkin, setPreviewSkin] = useState<OrbSkinCatalogItem | null>(null);
+  const [localPreviewSkinIds, setLocalPreviewSkinIds] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const expiredHandler = useRef(onSessionExpired);
@@ -67,6 +94,7 @@ export function OrbSkinsPanel({
     const timeout = window.setTimeout(() => controller.abort(), 8_000);
 
     const loadSkins = async () => {
+      let usingLocalPreview = false;
       setLoading(true);
       setError('');
       const [catalogResult, profileResult] = await Promise.allSettled([
@@ -77,12 +105,37 @@ export function OrbSkinsPanel({
       window.clearTimeout(timeout);
 
       if (catalogResult.status === 'fulfilled') {
-        setCatalog(normalizeOrbSkinCatalog(catalogResult.value));
+        const serverCatalog = normalizeOrbSkinCatalog(catalogResult.value);
+        if (process.env.NODE_ENV === 'development') {
+          const previewCatalog = createOrbSkinPreviewCatalog();
+          const serverIds = new Set(serverCatalog.map((skin) => skin.id));
+          const localOnly = previewCatalog.filter((skin) => !serverIds.has(skin.id));
+          if (localOnly.length > 0) {
+            usingLocalPreview = true;
+            const serverById = new Map(serverCatalog.map((skin) => [skin.id, skin]));
+            setCatalog(previewCatalog.map((skin) => serverById.get(skin.id) ?? skin));
+            setLocalPreviewSkinIds(localOnly.map((skin) => skin.id));
+          } else {
+            setCatalog(serverCatalog);
+            setLocalPreviewSkinIds([]);
+          }
+        } else {
+          setCatalog(serverCatalog);
+          setLocalPreviewSkinIds([]);
+        }
       } else {
-        setCatalog([DEFAULT_ORB_SKIN]);
-        setError(catalogResult.reason instanceof DOMException && catalogResult.reason.name === 'AbortError'
-          ? 'The skin service did not respond. The classic orb is still available.'
-          : 'The skin catalog is unavailable. The classic orb remains equipped.');
+        if (process.env.NODE_ENV === 'development') {
+          usingLocalPreview = true;
+          const previewCatalog = createOrbSkinPreviewCatalog();
+          setCatalog(previewCatalog);
+          setLocalPreviewSkinIds(previewCatalog.filter((skin) => skin.id !== DEFAULT_ORB_SKIN_ID).map((skin) => skin.id));
+        } else {
+          setCatalog([DEFAULT_ORB_SKIN]);
+          setLocalPreviewSkinIds([]);
+          setError(catalogResult.reason instanceof DOMException && catalogResult.reason.name === 'AbortError'
+            ? 'The skin service did not respond. The classic orb is still available.'
+            : 'The skin catalog is unavailable. The classic orb remains equipped.');
+        }
       }
 
       if (profileResult.status === 'fulfilled' && profileResult.value) {
@@ -93,7 +146,7 @@ export function OrbSkinsPanel({
           expiredHandler.current();
           return;
         }
-        if (!(cause instanceof DOMException && cause.name === 'AbortError')) {
+        if (!(cause instanceof DOMException && cause.name === 'AbortError') && !usingLocalPreview) {
           setError(cause instanceof Error ? cause.message : 'Could not load your skin inventory.');
         }
       } else {
@@ -111,22 +164,36 @@ export function OrbSkinsPanel({
     };
   }, [token]);
 
-  const ownedIds = new Set([
-    ...(profile?.owned_orb_skin_ids ?? [DEFAULT_ORB_SKIN_ID]),
-  ]);
+  const previewOnlyIds = new Set(localPreviewSkinIds);
+  const ownedIds = new Set(
+    (profile?.owned_orb_skin_ids ?? [DEFAULT_ORB_SKIN_ID])
+      .filter((skinId) => !previewOnlyIds.has(skinId)),
+  );
   ownedIds.add(DEFAULT_ORB_SKIN_ID);
   const equippedSkinId = profile?.equipped_orb_skin_id ?? DEFAULT_ORB_SKIN_ID;
-  const equippedSkin = catalog.find((skin) => skin.id === equippedSkinId && ownedIds.has(skin.id));
+  const equippedSkin = catalog.find((skin) =>
+    skin.id === equippedSkinId && ownedIds.has(skin.id) && !previewOnlyIds.has(skin.id),
+  );
   const selectedSkinId = equippedSkin?.id ?? DEFAULT_ORB_SKIN_ID;
   const activeOrbSkin = catalog.find((skin) => skin.id === selectedSkinId) ?? DEFAULT_ORB_SKIN;
   const ownedOrbSkins = catalog.filter((skin) => ownedIds.has(skin.id));
-  const orbSkinsInView = skinScope === 'owned' ? ownedOrbSkins : catalog;
+  const orbSkinsInView = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    const matching = (skinScope === 'owned' ? ownedOrbSkins : catalog).filter((skin) => {
+      const matchesRarity = rarityFilter === 'all' || normalizeSkinRarity(skin.rarity) === rarityFilter;
+      const matchesSearch = !query || `${skin.name} ${SKIN_DESCRIPTIONS[skin.id] ?? ''}`.toLowerCase().includes(query);
+      return matchesRarity && matchesSearch;
+    });
+    if (sortMode === 'alphabetical') return matching.sort((a, b) => a.name.localeCompare(b.name));
+    matching.sort((a, b) => SKIN_FEATURE_ORDER.indexOf(a.id) - SKIN_FEATURE_ORDER.indexOf(b.id));
+    return sortMode === 'newest' ? matching.reverse() : matching;
+  }, [catalog, ownedOrbSkins, rarityFilter, searchQuery, skinScope, sortMode]);
   const collectionCount = skinCategory === 'orbs' ? ownedOrbSkins.length : 1;
   const catalogCount = skinCategory === 'orbs' ? catalog.length : 1;
-  const visibleRarities = SKIN_RARITIES.filter((rarity) => rarityFilter === 'all' || rarity === rarityFilter);
+  const visibleRarities = RARITY_DISPLAY_ORDER.filter((rarity) => rarityFilter === 'all' || rarity === rarityFilter);
 
   const equipSkin = async (skin: OrbSkinCatalogItem) => {
-    if (!token || !ownedIds.has(skin.id) || skin.id === selectedSkinId || savingSkinId) return;
+    if (!token || previewOnlyIds.has(skin.id) || !ownedIds.has(skin.id) || skin.id === selectedSkinId || savingSkinId) return;
 
     setSavingSkinId(skin.id);
     setError('');
@@ -148,14 +215,15 @@ export function OrbSkinsPanel({
     <section className={`orb-skins-panel arena-content-page skin-locker-page ${skinCategory === 'boards' ? 'is-board-view' : 'is-orb-view'}`} aria-labelledby="skins-title">
       <header className="orb-skins-header arena-page-header">
         <div className="skin-page-title-copy">
-          <span className="eyebrow-mini">ARENA LOCKER</span>
-          <h2 id="skins-title">Skin locker</h2>
-          <p>Set the look of your arena. Your orb finish brings its own collision sound into every match.</p>
+          <span className="eyebrow-mini">S K I N&nbsp;&nbsp; S H O P</span>
+          <h2 id="skins-title">Orb Skins</h2>
+          <p>Customize your arena with exclusive orb finishes. Each skin brings its own look and collision sound.</p>
         </div>
+        <div className="skin-hero-orb" aria-hidden="true"><OrbPreviewOrb skin={activeOrbSkin} /></div>
         <div className="skin-header-stats" aria-label="Collection summary">
           <span><strong>{collectionCount.toString().padStart(2, '0')}</strong> owned</span>
           <i aria-hidden="true" />
-          <span><strong>{catalogCount.toString().padStart(2, '0')}</strong> available</span>
+          <span><strong>{Math.max(0, catalogCount - collectionCount).toString().padStart(2, '0')}</strong> available</span>
         </div>
       </header>
 
@@ -176,35 +244,51 @@ export function OrbSkinsPanel({
             <button className={rarityFilter === 'all' ? 'is-selected' : ''} type="button" aria-pressed={rarityFilter === 'all'} onClick={() => setRarityFilter('all')}>
               <span className="rarity-dot rarity-dot-all" aria-hidden="true" /> All skins <small>{skinCategory === 'orbs' ? catalog.length : 1}</small>
             </button>
-            {SKIN_RARITIES.map((rarity) => (
+            {RARITY_DISPLAY_ORDER.map((rarity) => (
               <button className={`rarity-filter rarity-${rarity} ${rarityFilter === rarity ? 'is-selected' : ''}`} key={rarity} type="button" aria-pressed={rarityFilter === rarity} onClick={() => setRarityFilter(rarity)}>
-                <span className="rarity-dot" aria-hidden="true" /> {capitalize(rarity)}
+                <span className="rarity-dot" aria-hidden="true" /> {capitalize(rarity)} <small>{catalog.filter((skin) => normalizeSkinRarity(skin.rarity) === rarity).length}</small>
               </button>
             ))}
           </section>
+          <label className="skin-owned-toggle"><span>Owned only</span><input type="checkbox" checked={skinScope === 'owned'} onChange={(event) => setSkinScope(event.target.checked ? 'owned' : 'all')} /><i aria-hidden="true" /></label>
         </aside>
 
         <div className="skin-catalog-area" role="region" aria-label={`${skinCategory === 'orbs' ? 'Orb' : 'Board'} skin collection`} aria-live="polite">
           <div className="skin-catalog-toolbar">
             <div>
-              <span className="skin-catalog-kicker">{skinScope === 'owned' ? 'IN YOUR LOCKER' : 'BROWSE THE COLLECTION'}</span>
+              <span className="skin-catalog-kicker">{skinScope === 'owned' ? 'IN YOUR LOCKER' : 'SKIN COLLECTION'}</span>
               <h3>{skinScope === 'owned' ? 'Your skins' : 'All skins'}</h3>
             </div>
             <div className="skin-view-tabs" role="tablist" aria-label="Collection view">
-              <button className={skinScope === 'owned' ? 'is-selected' : ''} type="button" role="tab" aria-selected={skinScope === 'owned'} onClick={() => setSkinScope('owned')}>
-                <span className="skin-tab-icon" aria-hidden="true">◈</span>Your skins <small>{collectionCount}</small>
-              </button>
               <button className={skinScope === 'all' ? 'is-selected' : ''} type="button" role="tab" aria-selected={skinScope === 'all'} onClick={() => setSkinScope('all')}>
                 <span className="skin-tab-icon" aria-hidden="true">▦</span>All skins <small>{catalogCount}</small>
               </button>
+              <button className={skinScope === 'owned' ? 'is-selected' : ''} type="button" role="tab" aria-selected={skinScope === 'owned'} onClick={() => setSkinScope('owned')}>
+                <span className="skin-tab-icon" aria-hidden="true">◉</span>Your skins <small>{collectionCount}</small>
+              </button>
+              <button type="button" className="skin-collections-placeholder" disabled title="Collections are coming soon">Collections <small>SOON</small></button>
+            </div>
+            <div className="skin-catalog-tools">
+              <label className="skin-search"><span aria-hidden="true">⌕</span><input type="search" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search skins..." aria-label="Search skins" /></label>
+              <label className="skin-sort"><span className="sr-only">Sort skins</span><select value={sortMode} onChange={(event) => setSortMode(event.target.value as SkinSort)}><option value="rarity">Featured</option><option value="newest">Newest</option><option value="alphabetical">A to Z</option></select></label>
+              <div className="skin-view-toggle" aria-label="Skin layout">
+                <button type="button" className={skinView === 'grid' ? 'is-selected' : ''} onClick={() => setSkinView('grid')} aria-label="Grid view">▦</button>
+                <button type="button" className={skinView === 'list' ? 'is-selected' : ''} onClick={() => setSkinView('list')} aria-label="List view">☷</button>
+              </div>
             </div>
           </div>
 
           {loading && skinCategory === 'orbs' && <div className="skin-sync-status"><i />Syncing your collection</div>}
+          {localPreviewSkinIds.length > 0 && (
+            <div className="skin-local-preview-notice" role="status">
+              <strong>LOCAL PREVIEW</strong>
+              <span>{localPreviewSkinIds.length} skin{localPreviewSkinIds.length === 1 ? '' : 's'} shown for visual preview only. Apply the backend catalog migration to purchase or equip them.</span>
+            </div>
+          )}
           {error && <div className="orb-skins-message is-error" role="alert">{error}</div>}
           {notice && <div className="orb-skins-message" role="status">{notice}</div>}
 
-          <div className="skin-rarity-list">
+          <div className={`skin-rarity-list ${skinView === 'list' ? 'is-list-view' : ''}`}>
             {visibleRarities.map((rarity) => {
               const allOrbSkinsInRarity = skinCategory === 'orbs'
                 ? catalog.filter((skin) => normalizeSkinRarity(skin.rarity) === rarity)
@@ -222,13 +306,15 @@ export function OrbSkinsPanel({
                     <div className="skin-card-grid board-skin-grid"><BoardSkinCard orbSkin={activeOrbSkin} /></div>
                   ) : orbSkins.length > 0 ? (
                     <div className="skin-card-grid orb-skin-grid">
-                      {orbSkins.map((skin) => (
+                  {orbSkins.map((skin) => (
                         <OrbSkinCard
                           key={skin.id}
                           skin={skin}
                           equipped={skin.id === selectedSkinId}
                           owned={ownedIds.has(skin.id)}
+                          localPreviewOnly={localPreviewSkinIds.includes(skin.id)}
                           busy={savingSkinId === skin.id}
+                          description={SKIN_DESCRIPTIONS[skin.id] ?? 'A distinctive finish made for your arena.'}
                           onPreview={() => {
                             unlockOrbSkinAudio();
                             setPreviewSkin(skin);
@@ -258,8 +344,8 @@ export function OrbSkinsPanel({
         <OrbSkinPreviewDialog
           key={previewSkin.id}
           skin={previewSkin}
-          equipped={previewSkin.id === selectedSkinId}
-          owned={ownedIds.has(previewSkin.id)}
+          equipped={!previewOnlyIds.has(previewSkin.id) && previewSkin.id === selectedSkinId}
+          owned={!previewOnlyIds.has(previewSkin.id) && ownedIds.has(previewSkin.id)}
           unlocksThroughAchievements={(previewSkin.unlock_achievement_codes?.length ?? 0) > 0}
           token={token}
           busy={savingSkinId === previewSkin.id}
@@ -281,13 +367,17 @@ function OrbSkinCard({
   skin,
   equipped,
   owned,
+  localPreviewOnly,
   busy,
+  description,
   onPreview,
 }: {
   skin: OrbSkinCatalogItem;
   equipped: boolean;
   owned: boolean;
+  localPreviewOnly: boolean;
   busy: boolean;
+  description: string;
   onPreview: () => void;
 }) {
   const rarity = normalizeSkinRarity(skin.rarity);
@@ -295,7 +385,7 @@ function OrbSkinCard({
     <button
       className={`skin-card is-orb-skin rarity-${rarity} ${equipped ? 'is-equipped' : ''} ${busy ? 'is-saving' : ''}`}
       type="button"
-      aria-label={`Preview ${skin.name}, ${rarity} orb skin${owned ? equipped ? ', currently equipped' : ', owned' : ', not owned'}`}
+      aria-label={`Preview ${skin.name}, ${rarity} orb skin${localPreviewOnly ? ', local preview only' : owned ? equipped ? ', currently equipped' : ', owned' : ', not owned'}`}
       aria-haspopup="dialog"
       aria-busy={busy}
       onClick={onPreview}
@@ -303,6 +393,16 @@ function OrbSkinCard({
       {equipped && <span className="skin-selection-mark is-orb-mark" aria-hidden="true">✓</span>}
       <span className="skin-orb-gif-stage" aria-hidden="true">
         <OrbPreviewOrb skin={skin} />
+      </span>
+      <span className="skin-card-copy">
+        <strong>{skin.name}</strong>
+        <small className={`skin-rarity-pill rarity-${rarity}`}>{capitalize(rarity)}</small>
+        <span className="skin-card-description">{description}</span>
+        {localPreviewOnly ? <small className="skin-owned-badge is-preview-only">LOCAL PREVIEW</small> : owned ? <small className="skin-owned-badge">{equipped ? 'SELECTED · OWNED' : 'OWNED'}</small> : (
+          <small className="skin-owned-badge is-locked">
+            {skin.unlock_achievement_codes?.includes('RANKED_WIN_STREAK_20') ? '20 RANKED WINS' : skin.price_gems != null ? `${skin.price_gems.toLocaleString('en-IN')} GEMS` : 'LOCKED'}
+          </small>
+        )}
       </span>
     </button>
   );

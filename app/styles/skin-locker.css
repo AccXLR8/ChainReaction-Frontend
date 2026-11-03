@@ -760,3 +760,169 @@
 .skin-locker-page.is-orb-view .skin-rarity-heading { display: none; }
 .skin-locker-page.is-orb-view .skin-catalog-toolbar { padding-bottom: 8px; }
 .skin-locker-page.is-orb-view .skin-rarity-list { gap: 12px; padding-top: 0; }
+
+/* Orb catalog inspired by a game-store collection: clear rarity bands and readable cards. */
+.skin-locker-page.is-orb-view .orb-skins-header {
+  position: relative;
+  min-height: 128px;
+  align-items: center;
+  padding: 12px 6px 18px;
+  overflow: hidden;
+  border-bottom-color: #1b633a;
+  background:
+    radial-gradient(ellipse at 74% 70%, #00ef7522, transparent 25%),
+    radial-gradient(ellipse at 28% 10%, #00a84d20, transparent 50%);
+}
+.skin-page-title-copy { position: relative; z-index: 2; max-width: 600px; }
+.skin-locker-page.is-orb-view .skin-page-title-copy h2 { font-size: clamp(32px, 4vw, 50px); }
+.skin-locker-page.is-orb-view .skin-page-title-copy .eyebrow-mini { letter-spacing: .42em; color: #b7fbd0; }
+.skin-hero-orb {
+  position: absolute;
+  top: -34px;
+  right: clamp(160px, 27vw, 430px);
+  display: grid;
+  width: 190px;
+  height: 190px;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle, #03ff7b24, transparent 68%);
+  filter: drop-shadow(0 0 32px #08ee7952);
+  pointer-events: none;
+}
+.skin-hero-orb .skin-card-orb-stage,
+.skin-hero-orb .orbs { width: 138px; height: 138px; }
+.skin-header-stats { position: relative; z-index: 2; }
+.skin-owned-toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 4px; color: #d1ddd4; font: 650 11px Inter, Arial, sans-serif; cursor: pointer; }
+.skin-owned-toggle input { position: absolute; opacity: 0; }
+.skin-owned-toggle i { position: relative; width: 38px; height: 22px; border-radius: 99px; background: #48524b; transition: background 140ms ease; }
+.skin-owned-toggle i::after { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #d9e2dc; content: ''; transition: transform 140ms ease; }
+.skin-owned-toggle input:checked + i { background: #08a550; }
+.skin-owned-toggle input:checked + i::after { transform: translateX(16px); }
+.skin-owned-toggle input:focus-visible + i { outline: 2px solid #8fffac; outline-offset: 3px; }
+.skin-locker-page.is-orb-view .skin-locker-layout { grid-template-columns: minmax(200px, 220px) minmax(0, 1fr); gap: 20px; padding-top: 14px; }
+.skin-locker-page.is-orb-view .skin-filter-rail { gap: 14px; }
+.skin-locker-page.is-orb-view .skin-rarity-heading { display: flex; margin: 0 0 8px; }
+.skin-locker-page.is-orb-view .skin-rarity-list { gap: 15px; padding-top: 11px; }
+.skin-locker-page.is-orb-view .skin-rarity-heading h4 { font-size: 15px; letter-spacing: 0; text-transform: none; }
+.skin-locker-page.is-orb-view .skin-rarity-heading span { display: none; }
+.skin-locker-page.is-orb-view .skin-rarity-heading > small { display: none; }
+.skin-locker-page.is-orb-view .skin-card-grid.orb-skin-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 10px; }
+.skin-locker-page.is-orb-view .skin-card.is-orb-skin {
+  display: grid;
+  width: 100%;
+  min-height: 128px;
+  grid-template-columns: minmax(104px, 36%) minmax(0, 1fr);
+  align-items: center;
+  aspect-ratio: auto;
+  padding: 10px 13px;
+  border-radius: 12px;
+  isolation: isolate;
+}
+.skin-locker-page.is-orb-view .skin-card.is-orb-skin::after { z-index: 0; }
+.skin-locker-page.is-orb-view .skin-orb-gif-stage { position: relative; display: grid; width: 100%; height: 106px; place-items: center; inset: auto; background: radial-gradient(ellipse, var(--rarity-glow), transparent 68%); }
+.skin-locker-page.is-orb-view .skin-card-orb-stage,
+.skin-locker-page.is-orb-view .skin-card-orb-stage .orbs { width: 92px; height: 92px; }
+.skin-locker-page.is-orb-view .skin-card-copy { position: relative; z-index: 2; display: grid; justify-items: start; gap: 5px; min-width: 0; }
+.skin-card-copy > strong { color: #f4fff7; font: 750 15px/1.15 Inter, Arial, sans-serif; }
+.skin-rarity-pill { padding: 3px 9px; border: 1px solid var(--rarity-border); border-radius: 99px; background: #0005; color: var(--rarity-edge); font: 750 8px/1 Inter, Arial, sans-serif; text-transform: uppercase; }
+.skin-card-description { color: #d1ded5; font: 10px/1.4 Inter, Arial, sans-serif; }
+.skin-owned-badge { color: #89f6a8; font: 700 8px 'DM Mono', monospace; letter-spacing: .04em; }
+.skin-owned-badge.is-locked { color: var(--rarity-edge); }
+.skin-owned-badge.is-preview-only { color: #f6d17b; }
+.skin-local-preview-notice {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border: 1px solid #b98a3f77;
+  border-radius: 7px;
+  background: linear-gradient(90deg, #5d441d66, #30281366);
+  color: #f1e5cb;
+  font: 10px/1.35 Inter, Arial, sans-serif;
+}
+.skin-local-preview-notice strong {
+  flex: none;
+  color: #ffe39a;
+  font: 750 8px 'DM Mono', monospace;
+  letter-spacing: .08em;
+}
+.skin-selection-mark.is-orb-mark { top: 8px; left: auto; right: 8px; width: 24px; height: 24px; font-size: 13px; }
+.skin-catalog-toolbar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: 12px; row-gap: 9px; }
+.skin-view-tabs { grid-column: 2; justify-self: start; }
+.skin-collections-placeholder { color: #738278 !important; cursor: not-allowed !important; }
+.skin-collections-placeholder small { border: 0; color: #74847a; font: 7px 'DM Mono', monospace; }
+.skin-catalog-tools { display: flex; grid-column: 3; grid-row: 1; align-items: center; gap: 7px; }
+.skin-search,.skin-sort { display: flex; min-width: 0; height: 38px; align-items: center; gap: 7px; padding: 0 10px; border: 1px solid #345442; border-radius: 8px; background: #07140ed9; color: #9ab2a0; }
+.skin-search { width: clamp(150px, 17vw, 240px); }
+.skin-search input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: #f1fff4; font: 11px Inter, Arial, sans-serif; }
+.skin-search input::placeholder { color: #8da195; }
+.skin-sort select { max-width: 102px; border: 0; outline: 0; background: transparent; color: #e3eee6; font: 10px Inter, Arial, sans-serif; }
+.skin-sort option { background: #07140e; }
+.skin-view-toggle { display: flex; gap: 3px; padding: 3px; border: 1px solid #345442; border-radius: 8px; }
+.skin-view-toggle button { width: 29px; height: 29px; border: 0; border-radius: 5px; background: transparent; color: #aabaae; cursor: pointer; }
+.skin-view-toggle button.is-selected { background: #08733c; color: #f2fff5; }
+.skin-locker-page.is-orb-view .skin-rarity-list.is-list-view .skin-card-grid.orb-skin-grid { grid-template-columns: minmax(0, 1fr); }
+.skin-locker-page.is-orb-view .skin-rarity-list.is-list-view .skin-card.is-orb-skin { grid-template-columns: 104px minmax(0, 1fr); }
+
+/* Match the locker reference: broad featured cards, with denser lower tiers. */
+.skin-locker-page.is-orb-view .skin-rarity-section.rarity-legendary .skin-card-grid.orb-skin-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.skin-locker-page.is-orb-view .skin-rarity-section.rarity-epic .skin-card-grid.orb-skin-grid,
+.skin-locker-page.is-orb-view .skin-rarity-section.rarity-rare .skin-card-grid.orb-skin-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.skin-locker-page.is-orb-view .skin-rarity-section.rarity-common .skin-card-grid.orb-skin-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.skin-locker-page.is-orb-view .skin-rarity-list.is-list-view .skin-card-grid.orb-skin-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+.skin-locker-page.is-orb-view .skin-rarity-list.is-list-view .skin-card.is-orb-skin {
+  grid-template-columns: 104px minmax(0, 1fr);
+}
+.skin-locker-page.is-orb-view .skin-card.is-orb-skin {
+  min-height: 124px;
+  grid-template-columns: minmax(64px, 32%) minmax(0, 1fr);
+  padding: 9px 10px;
+}
+.skin-locker-page.is-orb-view .skin-orb-gif-stage { height: 100px; }
+.skin-locker-page.is-orb-view .skin-card-orb-stage,
+.skin-locker-page.is-orb-view .skin-card-orb-stage .orbs {
+  width: clamp(56px, 6vw, 92px);
+  height: clamp(56px, 6vw, 92px);
+}
+.skin-locker-page.is-orb-view .skin-card-copy > strong { font-size: clamp(12px, 1.1vw, 15px); }
+.skin-locker-page.is-orb-view .skin-card-description { font-size: 9px; }
+.skin-locker-page.is-orb-view .skin-card.is-equipped { outline-offset: 1px; }
+.skin-locker-page.is-orb-view .skin-card.is-orb-skin:focus-visible {
+  outline: 2px solid var(--rarity-edge);
+  outline-offset: 3px;
+}
+
+@media (max-width: 1180px) {
+  .skin-locker-page.is-orb-view .skin-rarity-section.rarity-common .skin-card-grid.orb-skin-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .skin-locker-page.is-orb-view .skin-rarity-section.rarity-epic .skin-card-grid.orb-skin-grid,
+  .skin-locker-page.is-orb-view .skin-rarity-section.rarity-rare .skin-card-grid.orb-skin-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .skin-locker-page.is-orb-view .skin-rarity-section:is(.rarity-legendary, .rarity-epic, .rarity-rare, .rarity-common) .skin-card-grid.orb-skin-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .skin-locker-page.is-orb-view .skin-card.is-orb-skin {
+    min-height: 118px;
+    grid-template-columns: minmax(82px, 31%) minmax(0, 1fr);
+  }
+  .skin-locker-page.is-orb-view .skin-card-orb-stage,
+  .skin-locker-page.is-orb-view .skin-card-orb-stage .orbs {
+    width: 82px;
+    height: 82px;
+  }
+}

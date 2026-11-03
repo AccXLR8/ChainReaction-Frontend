@@ -19,14 +19,6 @@ export function WelcomeHeader({
   onSignIn,
   onSignOut,
 }: WelcomeHeaderProps) {
-  const breadcrumb = {
-    play: ['PLAY', 'ONLINE ARENA'],
-    rules: ['LEARN', 'HOW TO PLAY'],
-    skins: ['CUSTOMIZE', 'SKINS'],
-    shop: ['SHOP', 'GEMS & SKINS'],
-    profile: ['ACCOUNT', 'PLAYER PROFILE'],
-  }[activeWindow];
-
   return (
     <>
       <aside className="home-sidebar">
@@ -41,6 +33,14 @@ export function WelcomeHeader({
         >
           <BrandLockup />
         </a>
+        <button
+          className="mobile-session-action"
+          onClick={user ? onSignOut : onSignIn}
+          aria-label={user ? 'Sign out' : 'Sign in'}
+          title={user ? 'Sign out' : 'Sign in'}
+        >
+          {user ? '↗' : '＋'}
+        </button>
         <nav className="home-nav" aria-label="Main navigation">
           <button aria-label="Play" title="Play" className={activeWindow === 'play' ? 'is-active' : ''} onClick={() => onNavigate('play')}>
             <span className="sidebar-nav-icon" aria-hidden="true">◈</span><span>Play</span>
@@ -65,20 +65,11 @@ export function WelcomeHeader({
             <span className="user-avatar" aria-hidden="true">↗</span>
             <span>Sign in</span>
           </button>}
+          {user && <button className="sidebar-signout" onClick={onSignOut}>Sign out</button>}
           <span className={`service-pill service-${serviceStatus}`}><i />{serviceStatus === 'ready' ? 'ARENA ONLINE' : serviceStatus.toUpperCase()}</span>
           <span>1V1 · REAL-TIME</span>
         </div>
       </aside>
-      <header className="home-topbar arena-topbar">
-        <div className="arena-breadcrumb"><span>{breadcrumb[0]}</span><i>/</i> {breadcrumb[1]}</div>
-        <div className="home-account-summary" id="account">
-          {user ? (
-            <div className="top-player">
-              <button onClick={onSignOut}>Sign out</button>
-            </div>
-          ) : null}
-        </div>
-      </header>
     </>
   );
 }

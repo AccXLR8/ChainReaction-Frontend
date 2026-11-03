@@ -137,8 +137,8 @@
   background: radial-gradient(
     circle,
     #fff 0 5%,
-    color-mix(in srgb, var(--owner) 86%, white) 12%,
-    color-mix(in srgb, var(--owner), transparent 36%) 35%,
+    color-mix(in srgb, var(--effect-color, var(--owner)) 86%, white) 12%,
+    color-mix(in srgb, var(--effect-color, var(--owner)), transparent 36%) 35%,
     transparent 72%
   );
   animation: burst-core 0.26s cubic-bezier(0.16, 0.8, 0.24, 1) both;
@@ -151,7 +151,7 @@
   border-radius: 50%;
   box-shadow:
     0 0 7px #fff,
-    0 0 18px var(--owner);
+    0 0 18px var(--effect-color, var(--owner));
   animation: burst-ring 0.26s cubic-bezier(0.12, 0.72, 0.2, 1) both;
 }
 .burst::after {
@@ -168,10 +168,10 @@
     12px 0 0 #fff,
     0 -12px 0 #fff,
     0 12px 0 #fff,
-    -9px -9px 0 var(--owner),
-    9px -9px 0 var(--owner),
-    -9px 9px 0 var(--owner),
-    9px 9px 0 var(--owner);
+    -9px -9px 0 var(--effect-color, var(--owner)),
+    9px -9px 0 var(--effect-color, var(--owner)),
+    -9px 9px 0 var(--effect-color, var(--owner)),
+    9px 9px 0 var(--effect-color, var(--owner));
   animation: burst-sparks 0.25s cubic-bezier(0.12, 0.7, 0.2, 1) both;
 }
 .cell.receive {
@@ -225,7 +225,7 @@
 /* Charge-up before a burst, and the pop when an orb lands. */
 .cell.charge {
   z-index: 4;
-  box-shadow: inset 0 0 0 1px var(--owner), 0 0 16px color-mix(in srgb, var(--owner), transparent 40%);
+  box-shadow: inset 0 0 0 1px var(--effect-color, var(--owner)), 0 0 16px color-mix(in srgb, var(--effect-color, var(--owner)), transparent 40%);
 }
 .cell.charge .orbs {
   animation: orb-charge 0.11s ease-in forwards;
@@ -242,7 +242,7 @@
   25% { translate: 1.5% -1.2%; }
   50% { translate: -1.5% 1.2%; }
   75% { translate: 1.2% 1.2%; }
-  100% { scale: 1.1; translate: 0 0; filter: brightness(1.7) drop-shadow(0 0 6px var(--owner)); }
+  100% { scale: 1.1; translate: 0 0; filter: brightness(1.7) drop-shadow(0 0 6px var(--effect-color, var(--owner))); }
 }
 @keyframes orb-land {
   0% { transform: scale(0.55); }
@@ -384,12 +384,12 @@ footer b {
 }
 @keyframes cell-arrival {
   0% {
-    box-shadow: inset 0 0 0 1px var(--owner);
+    box-shadow: inset 0 0 0 1px var(--effect-color, var(--owner));
   }
   45% {
     box-shadow:
-      inset 0 0 0 2px var(--owner),
-      0 0 18px color-mix(in srgb, var(--owner), transparent 25%);
+      inset 0 0 0 2px var(--effect-color, var(--owner)),
+      0 0 18px color-mix(in srgb, var(--effect-color, var(--owner)), transparent 25%);
   }
   100% {
     box-shadow: inset 0 0 0 1px transparent;

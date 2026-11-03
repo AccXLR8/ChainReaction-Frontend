@@ -2,7 +2,7 @@
 .arena-home-shell {
   display: grid;
   grid-template-columns: 218px minmax(0, 1fr);
-  grid-template-rows: 72px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   width: 100%;
   height: 100vh;
   height: 100dvh;
@@ -11,7 +11,7 @@
 }
 
 .arena-home-shell::before {
-  inset: 72px 0 0 218px;
+  inset: 0 0 0 218px;
 }
 
 .arena-home-shell > .welcome-noise {
@@ -145,6 +145,17 @@
 .sidebar-account > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sidebar-account .user-avatar { display: grid; width: 30px; height: 30px; flex: none; place-items: center; border: 1px solid #a4ff3545; border-radius: 7px; background: #a4ff3510; color: #b6ff67; }
 .sidebar-account:hover { color: #a4ff35; }
+.sidebar-signout {
+  justify-self: start;
+  padding: 2px 4px;
+  border: 0;
+  background: transparent;
+  color: #87958a;
+  font: 10px Inter, Arial, sans-serif;
+  cursor: pointer;
+}
+.sidebar-signout:hover { color: #f3fff3; }
+.mobile-session-action { display: none; }
 
 /* Lobby destinations share one fixed workspace and slide between each other. */
 .arena-window-viewport {
@@ -153,7 +164,7 @@
   min-width: 0;
   min-height: 0;
   grid-column: 2;
-  grid-row: 2;
+  grid-row: 1;
   overflow: hidden;
   isolation: isolate;
 }
@@ -323,11 +334,24 @@
 .profile-page .password-section { width: min(100%, 1120px); }
 
 @media (max-width: 1050px) and (min-width: 701px) {
-  .arena-window-viewport { grid-column: 2; grid-row: 2; }
+  .arena-window-viewport { grid-column: 2; grid-row: 1; }
 }
 
 @media (max-width: 700px) {
-  .arena-window-viewport { grid-column: 1; grid-row: 3; }
+  .arena-home-shell { grid-template-columns: minmax(0, 1fr); grid-template-rows: 56px minmax(0, 1fr); }
+  .arena-home-shell::before { inset: 56px 0 0; }
+  .home-sidebar { grid-column: 1; grid-row: 1; flex-direction: row; align-items: center; gap: 8px; padding: 4px 10px; border-right: 0; border-bottom: 1px solid #ffffff14; }
+  .home-sidebar .home-brand { width: auto; margin: 0; padding: 0; font-size: 16px; }
+  .home-sidebar .home-brand .brand-mark { font-size: 21px; }
+  .mobile-session-action { display: grid; width: 30px; height: 30px; flex: none; place-items: center; border: 1px solid #a4ff3545; border-radius: 7px; background: #a4ff3510; color: #b6ff67; font-size: 16px; }
+  .home-sidebar .home-nav { display: flex; min-width: 0; align-items: center; gap: 1px; margin-left: auto; }
+  .home-sidebar .home-nav button,
+  .home-sidebar .home-nav .nav-coming-soon { width: 34px; min-height: 38px; grid-template-columns: 1fr; justify-items: center; padding: 0; }
+  .home-sidebar .home-nav button > span:last-child,
+  .home-sidebar .home-nav .nav-coming-soon > span:last-child,
+  .home-sidebar-footer { display: none; }
+  .sidebar-nav-icon { width: 28px; height: 28px; font-size: 17px; }
+  .arena-window-viewport { grid-column: 1; grid-row: 2; }
   .arena-window-panel > .play-stage { grid-column: auto; grid-row: auto; }
   .arena-content-page,
   .orb-skins-panel.arena-content-page,
@@ -648,10 +672,10 @@
 @media (max-width: 700px) {
   .arena-home-shell {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: 56px 58px minmax(0, 1fr);
+    grid-template-rows: 56px minmax(0, 1fr);
   }
 
-  .arena-home-shell::before { inset: 114px 0 0; }
+  .arena-home-shell::before { inset: 56px 0 0; }
   .home-sidebar { grid-column: 1; grid-row: 1; flex-direction: row; align-items: center; gap: 10px; padding: 4px 10px; border-right: 0; border-bottom: 1px solid #ffffff14; }
   .home-sidebar .home-brand { width: auto; margin: 0; padding: 0; font-size: 16px; }
   .home-sidebar .home-brand .brand-mark { font-size: 21px; }
@@ -664,13 +688,7 @@
   .home-sidebar .home-nav .nav-coming-soon > span:last-child,
   .home-sidebar-footer { display: none; }
   .sidebar-nav-icon { width: 28px; height: 28px; font-size: 17px; }
-  .arena-topbar { grid-column: 1; grid-row: 2; padding: 0 12px; }
-  .arena-breadcrumb { font-size: 8px; }
-  .arena-topbar .top-player { gap: 5px; font-size: 10px; }
-  .arena-topbar .top-player-name { max-width: 80px; }
-  .arena-topbar .top-player button,
-  .arena-topbar .nav-signin { min-height: 32px; padding: 0 9px; font-size: 10px; }
-  .arena-home-shell .play-stage { grid-column: 1; grid-row: 3; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1.35fr) minmax(0, 1fr); grid-template-areas: 'board' 'entry'; gap: 8px; padding: 8px; }
+  .arena-home-shell .play-stage { grid-column: 1; grid-row: 2; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1.35fr) minmax(0, 1fr); grid-template-areas: 'board' 'entry'; gap: 8px; padding: 8px; }
   .arena-home-shell .play-stage > .board-panel { width: min(100%, calc(var(--board-stage-width) + 18px)); gap: 5px; }
   .lobby-player-strip { min-height: 36px; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 6px; padding: 2px 6px; }
   .lobby-player-avatar { width: 24px; height: 24px; font-size: 15px; }

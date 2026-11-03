@@ -1,7 +1,7 @@
 import type { CSSProperties, RefObject } from 'react';
 import type { Cell, GameState, ReactionEffects } from './types';
 import { OrbCluster } from './OrbCluster';
-import type { OrbSkinAppearance } from './orb-skins';
+import { resolveOrbSkinEffectColor, type OrbSkinAppearance } from './orb-skins';
 
 export type BoardPanelProps = {
   game: GameState | null;
@@ -120,6 +120,10 @@ export function BoardPanel({
                   const receiving = wave?.receive.find((item) => item.cell === index);
                   const orbSkin = cell.owner === null ? null : orbSkinForSlot(cell.owner);
                   const orbAssetKey = orbSkin?.assetKey ?? 'classic';
+                  const effectPlayer = bursting?.player ?? receiving?.player ?? cell.owner;
+                  const effectSkin = effectPlayer === null ? null : orbSkinForSlot(effectPlayer);
+                  const effectAssetKey = effectSkin?.assetKey ?? 'classic';
+                  const playerColor = effectPlayer === null ? 'transparent' : colorForSlot(effectPlayer);
                   const orbSide = cell.owner === null || ownSlot === null
                     ? 'self'
                     : cell.owner === ownSlot ? 'self' : 'opponent';
@@ -139,6 +143,7 @@ export function BoardPanel({
                           '--owner': cell.owner !== null
                             ? colorForSlot(cell.owner)
                             : bursting ? colorForSlot(bursting.player) : 'transparent',
+                          '--effect-color': resolveOrbSkinEffectColor(effectAssetKey, playerColor),
                         } as CSSProperties
                       }
                     >

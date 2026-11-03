@@ -52,8 +52,17 @@ export function OrbCluster({
       <span className="orb-cluster">
         <span className="orb-ring" key={visibleCount}>
           {Array.from({ length: visibleCount }, (_, orbIndex) => (
-            <span className="atom" key={orbIndex} style={{ '--orb-i': orbIndex } as CSSProperties}>
+            <span
+              className="atom"
+              key={orbIndex}
+              style={{
+                '--orb-i': orbIndex,
+                '--orb-delay': `${orbIndex * -0.7}s`,
+                '--orb-delay-fast': `${orbIndex * -1.1}s`,
+              } as CSSProperties}
+            >
               <OrbMaterial assetKey={assetKey} assets={assets} className="orb-spin-preview" />
+              <span className="orb-skin-effects" aria-hidden="true" />
               <span className="orb-owner-rim" />
             </span>
           ))}

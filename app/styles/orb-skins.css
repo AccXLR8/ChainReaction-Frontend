@@ -18,20 +18,20 @@
   border-radius: 50%;
   background: radial-gradient(
     circle at 30% 25%,
-    #fff 0%,
-    #ffffffd9 3%,
-    color-mix(in srgb, var(--owner) 78%, white) 11%,
-    var(--owner) 52%,
-    color-mix(in srgb, var(--owner) 56%, black) 100%
+    var(--orb-surface-highlight, #fff) 0%,
+    color-mix(in srgb, var(--orb-surface-highlight, #fff) 86%, transparent) 4%,
+    color-mix(in srgb, var(--orb-surface-color, var(--owner)) 78%, white) 11%,
+    var(--orb-surface-color, var(--owner)) 52%,
+    color-mix(in srgb, var(--orb-surface-shade, var(--owner)) 72%, black) 100%
   );
   box-shadow:
-    0 0 8px color-mix(in srgb, var(--owner), transparent 42%),
+    0 0 9px color-mix(in srgb, var(--orb-surface-glow, var(--owner)), transparent 42%),
     inset -2px -3px 5px #0008,
     inset 1px 1px 2px #ffffff80;
   isolation: isolate;
 }
 
-/* Auric Comet changes the orb material while leaving player identity on its separate rim. */
+/* Gilded Glass changes the orb material while player identity stays on its separate rim. */
 .orbs[data-orb-skin='auric-comet'],
 .flight[data-orb-skin='auric-comet'] {
   --owner: #ffd24a;
@@ -41,30 +41,40 @@
 .flight[data-orb-skin='auric-comet'] .orb-surface {
   background: radial-gradient(
     circle at 29% 23%,
-    #fffde2 0%,
-    #fff6a4 5%,
-    #ffe46b 15%,
-    #f9b91d 48%,
-    #bf6c08 82%,
-    #72400c 100%
+    #fffef0 0%,
+    #fff9bd 7%,
+    #ffeb80 18%,
+    #ffd338 50%,
+    #db8b0c 83%,
+    #8f5109 100%
   );
   box-shadow:
-    0 0 10px #ffd24a99,
-    0 0 22px #ffb71f59,
+    0 0 14px #ffe277c9,
+    0 0 28px #ffc52f85,
+    0 0 46px #ffae2445,
     inset -2px -3px 5px #4d270a99,
-    inset 1px 1px 2px #fff7c8cc;
+    inset 1px 1px 3px #fffbe0ed;
 }
 
 .orbs[data-orb-skin='auric-comet'] .orb-surface-texture,
 .flight[data-orb-skin='auric-comet'] .orb-surface-texture {
   mix-blend-mode: screen;
-  opacity: 0.52;
+  opacity: 0.68;
 }
 
 .orbs[data-orb-skin='auric-comet'] .orb-surface-detail,
 .flight[data-orb-skin='auric-comet'] .orb-surface-detail {
-  opacity: 0.8;
-  filter: drop-shadow(0 0 2px #fff0a8);
+  opacity: 0.94;
+  filter: drop-shadow(0 0 3px #fff5b8) drop-shadow(0 0 6px #ffc83e);
+}
+
+.flight[data-orb-skin='auric-comet'] .flight-body .orb-surface {
+  box-shadow:
+    0 0 15px #ffe277d9,
+    0 0 30px #ffc52f99,
+    0 0 48px #ffae2459,
+    inset -2px -3px 5px #4d270a99,
+    inset 1px 1px 3px #fffbe0ed;
 }
 
 .orb-surface-texture,
@@ -135,6 +145,257 @@
   border-radius: 50%;
   box-shadow: 0 0 5px #ff59648c, 0 0 10px #ff596433;
   pointer-events: none;
+}
+
+/* Signature effects are a separate layer so each skin can bring its own motion
+   without changing the shared orb body, cell rules, or reaction timing. */
+.orb-skin-effects {
+  position: absolute;
+  z-index: 3;
+  inset: -16%;
+  display: block;
+  overflow: visible;
+  border-radius: 50%;
+  color: var(--orb-surface-glow, var(--owner));
+  pointer-events: none;
+}
+
+.orb-skin-effects::before,
+.orb-skin-effects::after {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  content: '';
+  pointer-events: none;
+}
+.orb-skin-effects::before { animation-delay: var(--orb-delay, 0s); }
+.orb-skin-effects::after { animation-delay: var(--orb-delay-fast, 0s); }
+
+/* Gilded Glass — twin golden orbital bands and slow drifting glints. */
+.orbs[data-orb-skin='auric-comet'] .orb-skin-effects::before,
+.flight[data-orb-skin='auric-comet'] .orb-skin-effects::before {
+  inset: 24% -7%;
+  border: 1.5px solid #fff0a8;
+  box-shadow: 0 0 5px #fff4b9, 0 0 14px #ffc935;
+  transform: rotate(-28deg) scaleY(.48);
+  animation: orb-skin-orbit 5.2s linear infinite;
+}
+.orbs[data-orb-skin='auric-comet'] .orb-skin-effects::after,
+.flight[data-orb-skin='auric-comet'] .orb-skin-effects::after {
+  inset: 0;
+  background:
+    radial-gradient(circle at 11% 38%, #fff6bd 0 1px, transparent 2px),
+    radial-gradient(circle at 82% 16%, #ffe77d 0 1.5px, transparent 2.7px),
+    radial-gradient(circle at 88% 72%, #fffbd5 0 1px, transparent 2px),
+    radial-gradient(circle at 20% 84%, #ffd957 0 1px, transparent 2px);
+  filter: drop-shadow(0 0 3px #ffd64d);
+  animation: orb-skin-twinkle 1.8s ease-in-out infinite alternate;
+}
+
+/* Cosmic Core — a violet orbital ring with a tiny starfield. */
+.orbs[data-orb-skin='cosmic-core'] .orb-skin-effects::before,
+.flight[data-orb-skin='cosmic-core'] .orb-skin-effects::before {
+  inset: 26% -9%;
+  border: 1px solid #e7b6ff;
+  box-shadow: 0 0 6px #cb62ff, inset 0 0 6px #a748ff88;
+  transform: rotate(25deg) scaleY(.42);
+  animation: orb-skin-orbit 7s linear infinite reverse;
+}
+.orbs[data-orb-skin='cosmic-core'] .orb-skin-effects::after,
+.flight[data-orb-skin='cosmic-core'] .orb-skin-effects::after {
+  inset: 3%;
+  background:
+    radial-gradient(circle at 18% 33%, #fff 0 1px, transparent 2px),
+    radial-gradient(circle at 72% 22%, #f2d5ff 0 1px, transparent 2px),
+    radial-gradient(circle at 83% 63%, #fff 0 1px, transparent 2px),
+    radial-gradient(circle at 32% 81%, #d29aff 0 1px, transparent 2px);
+  filter: drop-shadow(0 0 3px #d181ff);
+  animation: orb-skin-twinkle 2.6s ease-in-out infinite alternate;
+}
+
+/* Crimson Glass — a hot orbit that sweeps around the red glass core. */
+.orbs[data-orb-skin='crimson-glass'] .orb-skin-effects::before,
+.flight[data-orb-skin='crimson-glass'] .orb-skin-effects::before {
+  inset: 18% -5%;
+  border: 1.5px solid #ff9b83;
+  box-shadow: 0 0 5px #ff543d, 0 0 14px #ff2e48;
+  transform: rotate(-42deg) scaleY(.34);
+  animation: orb-skin-orbit 3.4s linear infinite;
+}
+.orbs[data-orb-skin='crimson-glass'] .orb-skin-effects::after,
+.flight[data-orb-skin='crimson-glass'] .orb-skin-effects::after {
+  inset: 4%;
+  background: conic-gradient(from 15deg, transparent 0 42%, #ffb06b99 48%, #ff3b5077 53%, transparent 60% 100%);
+  -webkit-mask: radial-gradient(closest-side, transparent 67%, #000 73% 82%, transparent 88%);
+  mask: radial-gradient(closest-side, transparent 67%, #000 73% 82%, transparent 88%);
+  animation: orb-skin-orbit 2.7s linear infinite reverse;
+}
+
+/* Void Prism — translucent shifting facets, like a cut crystal catching light. */
+.orbs[data-orb-skin='void-prism'] .orb-skin-effects::before,
+.flight[data-orb-skin='void-prism'] .orb-skin-effects::before {
+  inset: 13%;
+  border-radius: 0;
+  background: conic-gradient(from 20deg, #8c5cff80, #46dfff55, #ff8dff88, #536bff66, #8c5cff80);
+  clip-path: polygon(50% 0, 92% 24%, 84% 75%, 50% 100%, 14% 77%, 7% 27%);
+  filter: drop-shadow(0 0 7px #9a75ff);
+  opacity: .74;
+  animation: orb-prism-turn 8s ease-in-out infinite alternate;
+}
+.orbs[data-orb-skin='void-prism'] .orb-skin-effects::after,
+.flight[data-orb-skin='void-prism'] .orb-skin-effects::after {
+  inset: 25%;
+  border-radius: 0;
+  background: linear-gradient(135deg, #fff 0 8%, #8eeaff99 9% 22%, transparent 23% 58%, #f2a3ff88 59% 72%, transparent 73%);
+  clip-path: polygon(50% 0, 100% 30%, 77% 100%, 17% 79%, 0 28%);
+  mix-blend-mode: screen;
+  animation: orb-prism-turn 5s ease-in-out infinite alternate-reverse;
+}
+
+/* Neon Circuit — glowing traces and a traveling scan pulse. */
+.orbs[data-orb-skin='neon-circuit'] .orb-skin-effects::before,
+.flight[data-orb-skin='neon-circuit'] .orb-skin-effects::before {
+  inset: 11%;
+  border-radius: 0;
+  background: repeating-conic-gradient(from 8deg, transparent 0 37deg, #54fff0dd 38deg 40deg, transparent 42deg 78deg, #e24dffbb 80deg 82deg, transparent 84deg 120deg);
+  -webkit-mask: radial-gradient(closest-side, transparent 58%, #000 63% 75%, transparent 82%);
+  mask: radial-gradient(closest-side, transparent 58%, #000 63% 75%, transparent 82%);
+  filter: drop-shadow(0 0 4px #19ffe7);
+  animation: orb-circuit-scan 3.4s linear infinite;
+}
+.orbs[data-orb-skin='neon-circuit'] .orb-skin-effects::after,
+.flight[data-orb-skin='neon-circuit'] .orb-skin-effects::after {
+  inset: 4%;
+  background: linear-gradient(125deg, transparent 35%, #b4fff455 48%, #fff 50%, #b4fff455 52%, transparent 65%);
+  mix-blend-mode: screen;
+  transform: translateX(-120%) rotate(15deg);
+  animation: orb-skin-scan 2.8s ease-in-out infinite;
+}
+
+/* Cool Blue Glass — clean paired aqua rings, moving at slightly different speeds. */
+.orbs[data-orb-skin='cool-blue-glass'] .orb-skin-effects::before,
+.flight[data-orb-skin='cool-blue-glass'] .orb-skin-effects::before {
+  inset: 24% -8%;
+  border: 1px solid #a7f2ff;
+  box-shadow: 0 0 7px #52d7ff, 0 0 17px #218eff;
+  transform: rotate(-32deg) scaleY(.4);
+  animation: orb-skin-orbit 6s linear infinite;
+}
+.orbs[data-orb-skin='cool-blue-glass'] .orb-skin-effects::after,
+.flight[data-orb-skin='cool-blue-glass'] .orb-skin-effects::after {
+  inset: 30% -6%;
+  border: 1px solid #5dbaff99;
+  transform: rotate(38deg) scaleY(.33);
+  animation: orb-skin-orbit 8s linear infinite reverse;
+}
+
+/* Frosted Core — slowly breathing ice rays with a crystalline edge. */
+.orbs[data-orb-skin='frosted-core'] .orb-skin-effects::before,
+.flight[data-orb-skin='frosted-core'] .orb-skin-effects::before {
+  inset: 7%;
+  background: repeating-conic-gradient(from 8deg, #e9fbff77 0 1deg, transparent 2deg 30deg);
+  -webkit-mask: radial-gradient(closest-side, transparent 50%, #000 73%, transparent 90%);
+  mask: radial-gradient(closest-side, transparent 50%, #000 73%, transparent 90%);
+  filter: drop-shadow(0 0 4px #a9edff);
+  animation: orb-ice-turn 16s linear infinite;
+}
+.orbs[data-orb-skin='frosted-core'] .orb-skin-effects::after,
+.flight[data-orb-skin='frosted-core'] .orb-skin-effects::after {
+  inset: 17%;
+  border: 1px solid #efffffcc;
+  box-shadow: inset 0 0 8px #e5fbff, 0 0 9px #a7eaff;
+  opacity: .48;
+  animation: orb-ice-breathe 2.8s ease-in-out infinite alternate;
+}
+
+/* Electric Halo — a charged blue corona with short intermittent flashes. */
+.orbs[data-orb-skin='electric-halo'] .orb-skin-effects::before,
+.flight[data-orb-skin='electric-halo'] .orb-skin-effects::before {
+  inset: 17%;
+  border: 2px solid #92faff;
+  box-shadow: 0 0 6px #6fefff, 0 0 17px #128cff, inset 0 0 8px #58e8ff;
+  animation: orb-electric-pulse 1.8s ease-in-out infinite;
+}
+.orbs[data-orb-skin='electric-halo'] .orb-skin-effects::after,
+.flight[data-orb-skin='electric-halo'] .orb-skin-effects::after {
+  inset: 2%;
+  background: conic-gradient(from 8deg, transparent 0 16%, #fff 17% 18%, #71eeff 19% 20%, transparent 21% 48%, #70cfff 49% 50%, transparent 52% 75%, #c0ffff 76% 77%, transparent 79% 100%);
+  -webkit-mask: radial-gradient(closest-side, transparent 61%, #000 64% 76%, transparent 79%);
+  mask: radial-gradient(closest-side, transparent 61%, #000 64% 76%, transparent 79%);
+  filter: drop-shadow(0 0 4px #2dbdff);
+  animation: orb-electric-flicker 2.2s steps(1, end) infinite;
+}
+
+/* Matte Pearl — understated moving sheen instead of a loud energy effect. */
+.orbs[data-orb-skin='matte-pearl'] .orb-skin-effects::before,
+.flight[data-orb-skin='matte-pearl'] .orb-skin-effects::before {
+  inset: 8% 21%;
+  background: linear-gradient(105deg, transparent 28%, #fff0 39%, #ffffff70 50%, #fff0 61%, transparent 72%);
+  filter: blur(1px);
+  transform: translateX(-60%) rotate(18deg);
+  animation: orb-skin-scan 4.8s ease-in-out infinite;
+}
+.orbs[data-orb-skin='matte-pearl'] .orb-skin-effects::after,
+.flight[data-orb-skin='matte-pearl'] .orb-skin-effects::after {
+  inset: 11%;
+  border: 1px solid #f1ffff55;
+  box-shadow: 0 0 5px #c8e9e566;
+  animation: orb-pearl-breathe 3.6s ease-in-out infinite alternate;
+}
+
+/* Graphite — a brushed-metal glint and subtle cool rim. */
+.orbs[data-orb-skin='graphite'] .orb-skin-effects::before,
+.flight[data-orb-skin='graphite'] .orb-skin-effects::before {
+  inset: 12%;
+  border: 1px solid #d1e0e866;
+  box-shadow: inset 0 0 7px #b6ccd044, 0 0 5px #8da2b366;
+  opacity: .62;
+  animation: orb-pearl-breathe 4s ease-in-out infinite alternate;
+}
+.orbs[data-orb-skin='graphite'] .orb-skin-effects::after,
+.flight[data-orb-skin='graphite'] .orb-skin-effects::after {
+  inset: 8% 24%;
+  background: linear-gradient(105deg, transparent 32%, #dce8f044 47%, #fff 50%, #dce8f044 53%, transparent 68%);
+  mix-blend-mode: screen;
+  animation: orb-skin-scan 5.6s ease-in-out infinite;
+}
+
+/* Ivory Glow — warm champagne halo and a few gentle glints. */
+.orbs[data-orb-skin='ivory-glow'] .orb-skin-effects::before,
+.flight[data-orb-skin='ivory-glow'] .orb-skin-effects::before {
+  inset: 12%;
+  border: 1px solid #ffe4aa;
+  box-shadow: 0 0 8px #ffe6ac, inset 0 0 8px #fff5d266;
+  animation: orb-pearl-breathe 3s ease-in-out infinite alternate;
+}
+.orbs[data-orb-skin='ivory-glow'] .orb-skin-effects::after,
+.flight[data-orb-skin='ivory-glow'] .orb-skin-effects::after {
+  inset: 2%;
+  background:
+    radial-gradient(circle at 15% 30%, #fff4c2 0 1px, transparent 2px),
+    radial-gradient(circle at 81% 29%, #ffe8a7 0 1px, transparent 2px),
+    radial-gradient(circle at 74% 79%, #fff 0 1px, transparent 2px);
+  filter: drop-shadow(0 0 4px #ffd878);
+  animation: orb-skin-twinkle 3s ease-in-out infinite alternate;
+}
+
+@keyframes orb-skin-orbit {
+  from { rotate: 0deg; }
+  to { rotate: 360deg; }
+}
+@keyframes orb-skin-twinkle { from { opacity: .35; } to { opacity: 1; } }
+@keyframes orb-prism-turn { from { transform: rotate(-8deg) scale(.9); opacity: .45; } to { transform: rotate(9deg) scale(1.04); opacity: .9; } }
+@keyframes orb-circuit-scan { from { transform: rotate(0); opacity: .55; } to { transform: rotate(360deg); opacity: .95; } }
+@keyframes orb-skin-scan { 0%, 15% { translate: -65% 0; opacity: 0; } 45% { opacity: .8; } 85%, 100% { translate: 65% 0; opacity: 0; } }
+@keyframes orb-ice-turn { to { transform: rotate(360deg); } }
+@keyframes orb-ice-breathe { from { transform: scale(.94); opacity: .32; } to { transform: scale(1.08); opacity: .82; } }
+@keyframes orb-electric-pulse { 0%, 100% { transform: scale(.92); opacity: .55; } 50% { transform: scale(1.08); opacity: 1; } }
+@keyframes orb-electric-flicker { 0%, 12%, 18%, 46%, 52%, 84%, 100% { opacity: .18; } 14%, 49%, 88% { opacity: 1; } }
+@keyframes orb-pearl-breathe { from { opacity: .25; } to { opacity: .75; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .orb-skin-effects::before,
+  .orb-skin-effects::after { animation: none !important; }
 }
 
 .orbs[data-orb-side='opponent'] .orb-owner-rim,

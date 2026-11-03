@@ -44,6 +44,40 @@ export type OrbSkinAppearance = {
   color: string;
 };
 
+type OrbSkinMaterial = { highlight: string; body: string; shade: string; glow: string };
+
+/** Surface palettes stay isolated from turn colors; unspecified skins inherit Classic. */
+const ORB_SKIN_MATERIALS: Record<string, OrbSkinMaterial> = {
+  'auric-comet': { highlight: '#fff9bd', body: '#ffd338', shade: '#8f5109', glow: '#ffd94f' },
+  'cosmic-core': { highlight: '#f2d4ff', body: '#a953ff', shade: '#310d70', glow: '#be62ff' },
+  'crimson-glass': { highlight: '#ffd0c9', body: '#ff475a', shade: '#680d1b', glow: '#ff3d53' },
+  'void-prism': { highlight: '#e4ccff', body: '#684bff', shade: '#171044', glow: '#8e6aff' },
+  'neon-circuit': { highlight: '#bdfff7', body: '#00d9c8', shade: '#034d57', glow: '#00f2de' },
+  'cool-blue-glass': { highlight: '#dcf8ff', body: '#36b9ff', shade: '#073c7b', glow: '#3bb8ff' },
+  'frosted-core': { highlight: '#ffffff', body: '#bcecff', shade: '#658da6', glow: '#b5edff' },
+  'electric-halo': { highlight: '#ddffff', body: '#1b8cff', shade: '#062c75', glow: '#2ca9ff' },
+  'matte-pearl': { highlight: '#ffffff', body: '#c8d2d0', shade: '#626d6d', glow: '#b1d4cf' },
+  graphite: { highlight: '#b7c2ca', body: '#27313b', shade: '#05080d', glow: '#70818e' },
+  'ivory-glow': { highlight: '#fffdf0', body: '#ead7b5', shade: '#806544', glow: '#ffe2a5' },
+};
+
+export function resolveOrbSkinEffectColor(assetKey: string, playerColor: string): string {
+  return ORB_SKIN_MATERIALS[assetKey]?.glow ?? playerColor;
+}
+
+/** Inline material variables also let the DOM-created transit orb use the same skin finish. */
+export function orbSkinMaterialVariables(assetKey: string): Record<string, string> {
+  const material = ORB_SKIN_MATERIALS[assetKey];
+  if (!material) return {};
+
+  return {
+    '--orb-surface-highlight': material.highlight,
+    '--orb-surface-color': material.body,
+    '--orb-surface-shade': material.shade,
+    '--orb-surface-glow': material.glow,
+  };
+}
+
 export const DEFAULT_ORB_SKIN: OrbSkinCatalogItem = {
   id: DEFAULT_ORB_SKIN_ID,
   name: 'Classic Orb',
@@ -207,5 +241,6 @@ export function orbSkinLayerStyle(assetKey: string, assets?: OrbSkinAssets): CSS
   return {
     '--orb-texture-image': images.textureImage,
     '--orb-detail-image': images.detailImage,
+    ...orbSkinMaterialVariables(assetKey),
   } as CSSProperties;
 }
