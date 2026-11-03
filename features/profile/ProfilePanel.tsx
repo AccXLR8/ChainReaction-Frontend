@@ -262,14 +262,13 @@ export function ProfilePanel({
   };
 
   return (
-    <div className="profile-backdrop profile-page-backdrop">
-      <section className="profile-panel profile-page" aria-labelledby="profile-title">
+      <section className="profile-panel profile-page arena-content-page" aria-labelledby="profile-title">
         <header className="profile-panel-head">
           <div>
             <span className="eyebrow-mini">PLAYER ACCOUNT</span>
             <h2 id="profile-title">Player profile</h2>
           </div>
-          <button className="rules-close" type="button" onClick={onClose} aria-label="Close profile">×</button>
+          <button className="rules-close" type="button" onClick={onClose} aria-label="Back to play">×</button>
         </header>
 
         <form className="profile-lookup" onSubmit={handleLookup}>
@@ -410,6 +409,30 @@ export function ProfilePanel({
                 </div>
               </section>
 
+              {profile.achievements.length > 0 && (
+                <section className="profile-section profile-achievements">
+                  <div className="profile-section-title">
+                    <h3>Achievements</h3>
+                    <span>{profile.achievements.filter((achievement) => achievement.unlocked).length} / {profile.achievements.length} UNLOCKED</span>
+                  </div>
+                  <div className="achievement-grid">
+                    {profile.achievements.map((achievement) => (
+                      <article className={`achievement-card ${achievement.unlocked ? '' : 'is-locked'}`} key={achievement.code}>
+                        <img src={achievement.badge_image_url} alt="" />
+                        <div>
+                          <h4>{achievement.name}</h4>
+                          <p>{achievement.description}</p>
+                          {achievement.orb_skin_reward_ids?.length ? (
+                            <small>{achievement.orb_skin_reward_ids.length} ORB SKIN REWARD{achievement.orb_skin_reward_ids.length === 1 ? '' : 'S'}</small>
+                          ) : null}
+                          {achievement.unlocked && achievement.earned_at && <small> · UNLOCKED {formatDate(achievement.earned_at)}</small>}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              )}
+
               <section className="profile-section profile-friends">
                 <div className="profile-section-title">
                   <h3>Friends</h3>
@@ -434,7 +457,6 @@ export function ProfilePanel({
           {notice && <div className="profile-notice" role="status">{notice}</div>}
         </div>
       </section>
-    </div>
   );
 }
 

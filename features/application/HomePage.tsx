@@ -207,11 +207,6 @@ export function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const createGuestForSkins = async () => {
-    if (session) return;
-    saveSession(await authRequest('guest'));
-  };
-
   const googleAuthSubmit = async (credential: string) => {
     if (authBusy) return;
     setAuthError('');
@@ -388,7 +383,6 @@ export function HomePage() {
         }
         onSessionProfileUpdate={updateSessionProfile}
         onSessionExpired={handleSessionExpired}
-        onCreateGuestForSkins={createGuestForSkins}
         onSkinEquipped={setEquippedOrbSkinId}
         onFindMatch={(mode) => void matchmaking.findMatch(mode)}
         onCancelSearch={() => void matchmaking.leaveQueue()}

@@ -1,17 +1,28 @@
 'use client';
 
 import { useState } from 'react';
-import type { CSSProperties } from 'react';
+import type { AnimationEvent as ReactAnimationEvent, CSSProperties } from 'react';
 import type { AppStage, AuthMode, SessionUser } from './types';
 import { HowToPlay } from './HowToPlay';
 import { AuthDialog } from './AuthDialog';
 import { ProfilePanel } from '@/features/profile/ProfilePanel';
 import { OrbSkinsPanel } from '@/features/skins/OrbSkinsPanel';
+import { ShopPanel } from '@/features/shop/ShopPanel';
 import { MenuBoardPreview } from './MenuBoardPreview';
 import type { BoardPanelProps } from '@/features/game/BoardPanel';
 import type { MatchmakingMode } from '@/features/matchmaking/api';
 import { WelcomeHeader } from '@/features/lobby/WelcomeHeader';
 import { MatchmakingPanel } from '@/features/matchmaking/MatchmakingPanel';
+
+type LobbyWindow = 'play' | 'rules' | 'profile' | 'skins' | 'shop';
+
+type WindowTransition = {
+  from: LobbyWindow;
+  to: LobbyWindow;
+  direction: 'left' | 'right';
+};
+
+const WINDOW_ORDER: LobbyWindow[] = ['play', 'rules', 'skins', 'shop', 'profile'];
 
 type WelcomeScreenProps = {
   authMode: AuthMode;
@@ -33,7 +44,6 @@ type WelcomeScreenProps = {
   onManualAuth: (mode: 'login' | 'register', username: string, email: string, password: string, confirmPassword: string, nationality: string) => void;
   onSessionProfileUpdate: (username: string, nationality: string) => void;
   onSessionExpired: () => void;
-  onCreateGuestForSkins: () => Promise<void>;
   onSkinEquipped: (skinId: string) => void;
   onFindMatch: (mode: MatchmakingMode) => void;
   onCancelSearch: () => void;
@@ -61,16 +71,154 @@ export function WelcomeScreen({
   onManualAuth,
   onSessionProfileUpdate,
   onSessionExpired,
-  onCreateGuestForSkins,
   onSkinEquipped,
   onFindMatch,
   onCancelSearch,
   onSignOut,
 }: WelcomeScreenProps) {
   const rankedLocked = !user || user.is_guest;
-  const [showRules, setShowRules] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
-  const [showOrbSkins, setShowOrbSkins] = useState(false);
+  const [activeWindow, setActiveWindow] = useState<LobbyWindow>('play');
+  const [windowTransition, setWindowTransition] = useState<WindowTransition | null>(null);
+
+  const navigateTo = (next: LobbyWindow) => {
+    if (windowTransition || next === activeWindow) return;
+    const direction = WINDOW_ORDER.indexOf(next) > WINDOW_ORDER.indexOf(activeWindow) ? 'left' : 'right';
+    setWindowTransition({ from: activeWindow, to: next, direction });
+  };
+
+  const finishWindowTransition = () => {
+    if (!windowTransition) return;
+    setActiveWindow(windowTransition.to);
+    setWindowTransition(null);
+  };
+
+  const renderWindow = (window: LobbyWindow) => {
+    const isTransitioning = windowTransition !== null;
+    const isIncoming = isTransitioning && window === windowTransition.to;
+    const isVisible = isTransitioning ? isIncoming : window === activeWindow;
+    const motionClass = windowTransition && window === windowTransition.from
+      ? `is-outgoing to-${windowTransition.direction}`
+      : windowTransition && window === windowTransition.to
+        ? `is-incoming from-${windowTransition.direction === 'left' ? 'right' : 'left'}`
+        : '';
+    const panelProps = {
+      className: `arena-window-panel ${motionClass}`.trim(),
+      'aria-hidden': !isVisible,
+      inert: !isVisible,
+      onAnimationEnd: isIncoming
+        ? (event: ReactAnimationEvent<HTMLDivElement>) => {
+            if (event.target === event.currentTarget) finishWindowTransition();
+          }
+        : undefined,
+    };
+    const renderSkinsWindow = () => (
+      <div key={window} {...panelProps}>
+        <OrbSkinsPanel
+          token={sessionToken}
+          onSessionExpired={() => {
+            navigateTo('play');
+            onSessionExpired();
+          }}
+          onSkinEquipped={onSkinEquipped}
+          onRequestSignIn={() => {
+            navigateTo('play');
+            onAuthModeChange('login');
+          }}
+        />
+      </div>
+    );
+    const renderShopWindow = () => (
+      <div key={window} {...panelProps}>
+        <ShopPanel
+          token={sessionToken}
+          isRegistered={Boolean(user && !user.is_guest)}
+          onSessionExpired={() => {
+            navigateTo('play');
+            onSessionExpired();
+          }}
+          onRequestSignIn={() => {
+            navigateTo('play');
+            onAuthModeChange('login');
+          }}
+        />
+      </div>
+    );
+
+    if (window === 'play') {
+      return (
+        <div key="play" {...panelProps}>
+          <section
+            className={`play-stage ${stage === 'queue' ? 'is-queueing' : ''}`}
+            id="welcome"
+            style={{
+              '--board-stage-height': `${previewBoard.stageHeight}px`,
+              '--board-stage-width': `${previewBoard.stageWidth}px`,
+            } as CSSProperties}
+          >
+            <MenuBoardPreview board={previewBoard} />
+            <MatchmakingPanel
+              stage={stage}
+              queueMode={queueMode}
+              queueBusy={queueBusy}
+              queueAction={queueAction}
+              notice={notice}
+              errorMessage={errorMessage}
+              rankedLocked={rankedLocked}
+              onFindMatch={onFindMatch}
+              onCancelSearch={onCancelSearch}
+            />
+          </section>
+        </div>
+      );
+    }
+
+    if (window === 'rules') {
+      return (
+        <div key="rules" {...panelProps}>
+          <section className="arena-content-page rules-page" aria-labelledby="how-to-play-title">
+            <header className="arena-page-header">
+              <div>
+                <span className="eyebrow-mini">LEARN THE ARENA</span>
+                <h1>How to play</h1>
+              </div>
+            </header>
+            <div className="arena-page-body rules-page-body">
+              <HowToPlay />
+            </div>
+          </section>
+        </div>
+      );
+    }
+
+    if (window === 'skins') {
+      return renderSkinsWindow();
+    }
+
+    if (window === 'shop') {
+      return renderShopWindow();
+    }
+
+    return (
+      <div key="profile" {...panelProps}>
+        <ProfilePanel
+          token={sessionToken}
+          user={user}
+          onClose={() => navigateTo('play')}
+          onRequestSignIn={() => {
+            navigateTo('play');
+            onAuthModeChange('login');
+          }}
+          onProfileUpdated={onSessionProfileUpdate}
+          onSessionExpired={() => {
+            navigateTo('play');
+            onSessionExpired();
+          }}
+        />
+      </div>
+    );
+  };
+
+  const windowForHeader = windowTransition?.to ?? activeWindow;
   return (
     <main className={`welcome-shell arena-home-shell ${authMode ? 'has-auth-form' : ''}`}>
       <div className="welcome-noise" />
@@ -78,39 +226,19 @@ export function WelcomeScreen({
       <WelcomeHeader
         serviceStatus={serviceStatus}
         user={user}
-        showRules={showRules}
-        showProfile={showProfile}
-        showOrbSkins={showOrbSkins}
-        onShowRules={setShowRules}
-        onShowProfile={setShowProfile}
-        onShowOrbSkins={setShowOrbSkins}
+        activeWindow={windowForHeader}
+        onNavigate={navigateTo}
         onSignIn={() => onAuthModeChange('login')}
         onSignOut={onSignOut}
       />
 
-      {!showProfile && <section
-        className={`play-stage ${stage === 'queue' ? 'is-queueing' : ''}`}
-        id="welcome"
-        style={{
-          '--board-stage-height': `${previewBoard.stageHeight}px`,
-          '--board-stage-width': `${previewBoard.stageWidth}px`,
-        } as CSSProperties}
-      >
-        <MenuBoardPreview board={previewBoard} />
-        <MatchmakingPanel
-          stage={stage}
-          queueMode={queueMode}
-          queueBusy={queueBusy}
-          queueAction={queueAction}
-          notice={notice}
-          errorMessage={errorMessage}
-          rankedLocked={rankedLocked}
-          onFindMatch={onFindMatch}
-          onCancelSearch={onCancelSearch}
-        />
-      </section>}
+      <section className="arena-window-viewport" aria-label="Arena pages">
+        {windowTransition
+          ? <>{renderWindow(windowTransition.from)}{renderWindow(windowTransition.to)}</>
+          : renderWindow(activeWindow)}
+      </section>
 
-      {authMode && !user && (
+      {authMode && (!user || user.is_guest) && (
         <AuthDialog
           mode={authMode}
           error={authError}
@@ -122,57 +250,10 @@ export function WelcomeScreen({
         />
       )}
 
-      {showProfile && (
-        <ProfilePanel
-          token={sessionToken}
-          user={user}
-          onClose={() => setShowProfile(false)}
-          onRequestSignIn={() => {
-            setShowProfile(false);
-            onAuthModeChange('login');
-          }}
-          onProfileUpdated={onSessionProfileUpdate}
-          onSessionExpired={() => {
-            setShowProfile(false);
-            onSessionExpired();
-          }}
-        />
-      )}
-
-      {showOrbSkins && (
-        <OrbSkinsPanel
-          token={sessionToken}
-          user={user}
-          onClose={() => setShowOrbSkins(false)}
-          onRequestSignIn={() => {
-            setShowOrbSkins(false);
-            onAuthModeChange('login');
-          }}
-          onCreateGuest={onCreateGuestForSkins}
-          onSessionExpired={() => {
-            setShowOrbSkins(false);
-            onSessionExpired();
-          }}
-          onSkinEquipped={onSkinEquipped}
-        />
-      )}
-
-      {showRules && (
-        <div className="rules-backdrop">
-          <section className="rules-modal" role="dialog" aria-modal="true" aria-label="How to play">
-            <div className="rules-modal-head">
-              <span className="eyebrow"><i /> LEARN THE ARENA</span>
-              <button className="rules-close" onClick={() => setShowRules(false)} aria-label="Close rules">×</button>
-            </div>
-            <HowToPlay />
-          </section>
-        </div>
-      )}
-
-      {!showProfile && <footer className="welcome-footer">
+      <footer className="welcome-footer">
         <span>Superkritical <b>／</b> ONLINE ARENA</span>
         <span>THINK FAST. CHAIN FASTER.</span>
-      </footer>}
+      </footer>
     </main>
   );
 }

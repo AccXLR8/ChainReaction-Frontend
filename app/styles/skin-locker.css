@@ -1,0 +1,762 @@
+/* Skin locker cards use rarity glass; these surfaces stay separate from the live board. */
+.skin-locker-page {
+  --skin-line: #277348;
+}
+
+.skin-locker-page .orb-skins-header h2 {
+  font-size: clamp(25px, 3vw, 38px);
+}
+
+.skin-locker-layout {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-columns: minmax(150px, 0.2fr) minmax(0, 1fr);
+  gap: clamp(12px, 1.5vw, 22px);
+  padding: 16px 0 12px;
+  overflow: hidden;
+}
+
+.skin-filter-rail {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  min-width: 0;
+  padding-right: 12px;
+  border-right: 1px solid #24724368;
+}
+
+.skin-filter-group {
+  display: grid;
+  gap: 5px;
+}
+
+.skin-filter-group h3 {
+  margin: 0 0 4px;
+  color: #a7c8ad;
+  font: 9px 'DM Mono', monospace;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.skin-filter-group > button {
+  display: flex;
+  min-width: 0;
+  min-height: 38px;
+  align-items: center;
+  gap: 9px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: #06130c88;
+  color: #b7c8ba;
+  cursor: pointer;
+  font: 650 11px Inter, Arial, sans-serif;
+  text-align: left;
+  transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
+}
+
+.skin-filter-group > button:hover,
+.skin-filter-group > button.is-selected {
+  border-color: #49e76d8f;
+  background: #0e361a;
+  color: #f4fff4;
+  box-shadow: inset 0 0 14px #29e84b12;
+}
+
+.skin-filter-group > button > span:first-child:not(.rarity-dot) {
+  width: 17px;
+  color: #93ff79;
+  text-align: center;
+}
+
+.skin-filter-group > button small {
+  margin-left: auto;
+  color: #86a58e;
+  font: 9px 'DM Mono', monospace;
+}
+
+.rarity-dot {
+  width: 9px;
+  height: 9px;
+  flex: none;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.rarity-dot-all { color: #e8f2ec; }
+.rarity-filter.rarity-common { --rarity-color: #eff7f3; }
+.rarity-filter.rarity-rare { --rarity-color: #83caff; }
+.rarity-filter.rarity-epic { --rarity-color: #ff7d85; }
+.rarity-filter.rarity-legendary { --rarity-color: #ffd56b; }
+.rarity-filter .rarity-dot { color: var(--rarity-color); }
+.rarity-filter.is-selected { border-color: color-mix(in srgb, var(--rarity-color) 70%, transparent); }
+
+.skin-catalog-area {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.skin-catalog-toolbar {
+  display: flex;
+  flex: none;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 1px 2px 12px;
+  border-bottom: 1px solid #24724368;
+}
+
+.skin-catalog-kicker {
+  color: #91c39b;
+  font: 8px 'DM Mono', monospace;
+  letter-spacing: .13em;
+}
+
+.skin-catalog-toolbar h3 {
+  margin: 4px 0 0;
+  color: #f2fff3;
+  font: 750 19px/1.15 Inter, Arial, sans-serif;
+  letter-spacing: -.04em;
+}
+
+.skin-count-pill {
+  padding: 6px 8px;
+  border: 1px solid #32744a;
+  border-radius: 999px;
+  background: #06180c;
+  color: #b6d5bc;
+  font: 8px 'DM Mono', monospace;
+  white-space: nowrap;
+}
+
+.skin-rarity-list {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  align-content: start;
+  gap: 15px;
+  overflow-y: auto;
+  padding: 12px 5px 8px 2px;
+  scrollbar-color: #237a3c #041009;
+}
+
+.skin-rarity-section { min-width: 0; }
+
+.skin-rarity-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.skin-rarity-heading h4 {
+  margin: 0;
+  color: #f3f6f4;
+  font: 800 11px Inter, Arial, sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.skin-rarity-heading span {
+  display: block;
+  margin-top: 3px;
+  color: #9bb2a0;
+  font: 9px Inter, Arial, sans-serif;
+}
+
+.skin-rarity-heading > small {
+  color: #94ab98;
+  font: 9px 'DM Mono', monospace;
+}
+
+.skin-rarity-section.rarity-common .skin-rarity-heading h4 { color: #eef6f2; }
+.skin-rarity-section.rarity-rare .skin-rarity-heading h4 { color: #8cd1ff; }
+.skin-rarity-section.rarity-epic .skin-rarity-heading h4 { color: #ff9299; }
+.skin-rarity-section.rarity-legendary .skin-rarity-heading h4 { color: #ffda78; }
+
+.skin-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  align-items: stretch;
+  gap: 9px;
+}
+
+.skin-card {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 185px;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--rarity-border);
+  border-radius: 9px;
+  background: var(--rarity-surface);
+  box-shadow: inset 0 1px #ffffff25, 0 7px 18px #0004;
+  backdrop-filter: blur(8px);
+  isolation: isolate;
+  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.skin-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--rarity-edge);
+  box-shadow: 0 0 17px var(--rarity-glow), 0 10px 22px #0005, inset 0 1px #ffffff44;
+}
+
+.skin-card.rarity-common {
+  --rarity-edge: #edf8f2;
+  --rarity-border: #d6eee0a6;
+  --rarity-surface: linear-gradient(145deg, #ffffff36, #c7f4de13 56%, #07190eaa);
+  --rarity-glow: #e6fff533;
+}
+
+.skin-card.rarity-rare {
+  --rarity-edge: #85d0ff;
+  --rarity-border: #59a8e7bb;
+  --rarity-surface: linear-gradient(145deg, #4aaeff4a, #143e7040 60%, #071324e8);
+  --rarity-glow: #55bfff52;
+}
+
+.skin-card.rarity-epic {
+  --rarity-edge: #ff7c84;
+  --rarity-border: #f16070c4;
+  --rarity-surface: linear-gradient(145deg, #ff48544d, #6d182948 60%, #1c080de8);
+  --rarity-glow: #ff4c5d59;
+}
+
+.skin-card.rarity-legendary {
+  --rarity-edge: #ffe184;
+  --rarity-border: #e0b845d1;
+  --rarity-surface: linear-gradient(145deg, #ffe57a48, #9b6a1b4a 60%, #241707ed);
+  --rarity-glow: #ffd44e65;
+}
+
+.skin-card.is-equipped { outline: 1px solid var(--rarity-edge); outline-offset: 2px; }
+
+.skin-selection-mark {
+  position: absolute;
+  z-index: 4;
+  top: 10px;
+  left: 10px;
+  display: grid;
+  width: 29px;
+  height: 29px;
+  place-items: center;
+  border: 1px solid var(--rarity-edge);
+  border-radius: 50%;
+  background: #04130be8;
+  color: var(--rarity-edge);
+  box-shadow: 0 0 15px var(--rarity-glow), inset 0 1px #ffffff2a;
+  font: 800 16px/1 Inter, Arial, sans-serif;
+}
+
+.skin-card.rarity-legendary::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 14% 15%, #fffbd9 0 1px, transparent 1.8px),
+    radial-gradient(circle at 82% 24%, #ffe99c 0 1px, transparent 1.9px),
+    radial-gradient(circle at 70% 66%, #fff5c2 0 1px, transparent 1.7px),
+    radial-gradient(circle at 24% 81%, #ffe99c 0 1px, transparent 1.8px);
+  animation: legendary-glint 2.8s ease-in-out infinite alternate;
+  content: '';
+  pointer-events: none;
+}
+
+@keyframes legendary-glint { from { opacity: .24; } to { opacity: .82; } }
+
+.skin-card.is-orb-skin {
+  display: block;
+  width: min(100%, 220px);
+  min-height: 0;
+  justify-self: start;
+  aspect-ratio: 1;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+}
+
+.skin-card.is-orb-skin:disabled { cursor: default; }
+.skin-card.is-orb-skin:disabled:not(.is-equipped):hover { transform: none; }
+
+.skin-shop-card-tag {
+  position: absolute;
+  z-index: 5;
+  right: 11px;
+  bottom: 11px;
+  left: 11px;
+  display: flex;
+  min-height: 29px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 9px;
+  border: 1px solid #53ed9480;
+  border-radius: 7px;
+  background: #04130de8;
+  color: #d8ffe6;
+  font: 750 10px/1 Inter, Arial, sans-serif;
+  letter-spacing: .045em;
+  text-align: center;
+  text-shadow: 0 1px #000;
+  backdrop-filter: blur(7px);
+}
+
+.skin-shop-card-tag.is-owned {
+  border-color: #a9d7be70;
+  color: #d5e5da;
+}
+
+.is-shop-view .skin-rarity-heading { display: none; }
+.is-shop-view .skin-rarity-list { gap: 12px; }
+
+.skin-orb-gif-stage {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: inherit;
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--rarity-glow), transparent 72%), #02080654 72%);
+  pointer-events: none;
+}
+
+.skin-selection-mark.is-orb-mark {
+  top: 14px;
+  left: 14px;
+  width: 34px;
+  height: 34px;
+  font-size: 18px;
+}
+
+.skin-empty-state {
+  margin: 0;
+  padding: 12px;
+  border: 1px dashed #49835d66;
+  border-radius: 7px;
+  background: #06150b72;
+  color: #8eaa96;
+  font-size: 10px;
+}
+
+.skin-rarity-section.rarity-rare .skin-empty-state { border-color: #4e98c966; background: #12345724; }
+.skin-rarity-section.rarity-epic .skin-empty-state { border-color: #ba4c5c66; background: #4a121a24; }
+.skin-rarity-section.rarity-legendary .skin-empty-state { border-color: #c69c3e7a; background: #573c1026; }
+
+.skin-locker-page .orb-skins-message { flex: none; margin: 7px 2px 0; }
+.skin-locker-page .orb-skins-footer { margin-top: 0; }
+
+@media (max-width: 1050px) and (min-width: 701px) {
+  .skin-locker-layout { grid-template-columns: 135px minmax(0, 1fr); gap: 10px; }
+  .skin-filter-rail { padding-right: 8px; }
+  .skin-card-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  .skin-card { min-height: 172px; }
+}
+
+@media (max-width: 700px) {
+  .skin-locker-page .orb-skins-header { padding-bottom: 10px; }
+  .skin-locker-layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 8px; padding: 9px 0 7px; }
+  .skin-filter-rail { grid-template-columns: 1fr; gap: 7px; padding: 0 0 7px; border-right: 0; border-bottom: 1px solid #24724368; }
+  .skin-filter-group { display: flex; min-width: 0; flex-wrap: wrap; align-items: center; gap: 4px; }
+  .skin-filter-group h3 { width: 100%; margin: 0 0 1px; font-size: 7px; }
+  .skin-filter-group > button { min-height: 27px; gap: 5px; padding: 0 7px; border-radius: 5px; font-size: 8px; }
+  .skin-filter-group > button small { font-size: 7px; }
+  .skin-filter-group > button > span:first-child:not(.rarity-dot) { width: 12px; }
+  .rarity-dot { width: 7px; height: 7px; }
+  .skin-catalog-toolbar { padding-bottom: 7px; }
+  .skin-catalog-toolbar h3 { font-size: 15px; }
+  .skin-rarity-list { gap: 10px; padding-top: 8px; }
+  .skin-rarity-heading { margin-bottom: 6px; }
+  .skin-rarity-heading h4 { font-size: 9px; }
+  .skin-rarity-heading span { font-size: 7px; }
+  .skin-card-grid { grid-template-columns: repeat(auto-fill, minmax(126px, 1fr)); gap: 7px; }
+  .skin-card { min-height: 160px; }
+  .skin-locker-page .orb-skins-footer { font-size: 6px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skin-card.rarity-legendary::after { animation: none; opacity: .45; }
+}
+
+/* Locker refinements: clear hierarchy, a real collection switcher, and breathing room. */
+.skin-locker-page .orb-skins-header {
+  align-items: end;
+  padding-bottom: 20px;
+}
+
+.skin-page-title-copy { min-width: 0; }
+.skin-locker-page .orb-skins-header h2 { font-size: clamp(30px, 3vw, 42px); }
+.skin-locker-page .skin-page-title-copy p {
+  max-width: 690px;
+  margin: 9px 0 0;
+  color: #c1d0c4;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.skin-header-stats {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border: 1px solid #34784a99;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #0d2817d9, #06120bd9);
+  color: #aec2b2;
+  font: 10px 'DM Mono', monospace;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.skin-header-stats strong { color: #e8ffec; font-size: 14px; }
+.skin-header-stats i { width: 1px; height: 19px; background: #3c6848; }
+
+.skin-locker-layout {
+  grid-template-columns: minmax(165px, .19fr) minmax(0, 1fr);
+  gap: clamp(15px, 1.8vw, 26px);
+  padding-top: 18px;
+  padding-bottom: 0;
+}
+
+.skin-filter-rail { gap: 16px; padding-right: 15px; }
+.skin-filter-group { gap: 7px; }
+.skin-filter-group h3 { margin-bottom: 5px; color: #a9c7ae; font-size: 10px; }
+.skin-filter-group > button {
+  min-height: 38px;
+  gap: 10px;
+  padding-inline: 11px;
+  border-radius: 7px;
+  color: #cad8cd;
+  font-size: 12px;
+}
+
+.skin-filter-group > button:hover,
+.skin-filter-group > button.is-selected {
+  border-color: #55ee8d9e;
+  background: linear-gradient(100deg, #0d3b21, #0a2114);
+  color: #f2fff5;
+  box-shadow: inset 3px 0 #43e982, 0 0 14px #2bee6410;
+}
+
+.skin-filter-group > button small { font-size: 10px; }
+.skin-filter-group h3 { letter-spacing: .14em; }
+.rarity-dot { width: 10px; height: 10px; }
+
+.skin-catalog-toolbar {
+  align-items: center;
+  padding: 3px 2px 13px;
+}
+
+.skin-catalog-kicker { font-size: 9px; }
+.skin-catalog-toolbar h3 { font-size: 23px; }
+
+.skin-view-tabs {
+  display: flex;
+  flex: none;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid #365a41;
+  border-radius: 9px;
+  background: #030a06b8;
+  box-shadow: inset 0 1px #ffffff0a;
+}
+
+.skin-view-tabs button {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #a9b9ac;
+  cursor: pointer;
+  font: 650 12px Inter, Arial, sans-serif;
+  white-space: nowrap;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+.skin-view-tabs button:hover { color: #effff2; background: #102419; }
+.skin-view-tabs button.is-selected {
+  border-color: #40d77888;
+  background: linear-gradient(110deg, #0d4824, #0c2b18);
+  color: #f3fff4;
+  box-shadow: 0 0 14px #21dc571c, inset 0 1px #c8ffd21c;
+}
+
+.skin-view-tabs .skin-tab-icon { color: #7cf89d; font-size: 14px; }
+.skin-view-tabs small {
+  display: grid;
+  min-width: 21px;
+  height: 20px;
+  place-items: center;
+  padding: 0 5px;
+  border: 1px solid #4d7057;
+  border-radius: 999px;
+  background: #06130a;
+  color: #b8d7bf;
+  font: 9px 'DM Mono', monospace;
+}
+
+.skin-view-tabs button.is-selected small { border-color: #3fbc67; background: #0d3119; color: #c9ffd2; }
+.skin-view-tabs button:focus-visible,
+.skin-empty-state button:focus-visible,
+.skin-filter-group > button:focus-visible { outline: 2px solid #8fffac; outline-offset: 2px; }
+
+.skin-sync-status {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 2px 0;
+  color: #b5c8b9;
+  font-size: 11px;
+}
+
+.skin-sync-status i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #64efa0;
+  box-shadow: 0 0 10px #4cf187;
+  animation: skin-sync-pulse 1.3s ease-in-out infinite alternate;
+}
+
+@keyframes skin-sync-pulse { to { opacity: .42; box-shadow: 0 0 3px #4cf187; } }
+
+.skin-locker-page .orb-skins-message {
+  width: fit-content;
+  max-width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #417b53;
+  border-radius: 7px;
+  background: #0b2716;
+  color: #c9f0d1;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.skin-locker-page .orb-skins-message.is-error {
+  border-color: #a56c3e88;
+  background: linear-gradient(100deg, #362514c9, #20190fbb);
+  color: #f0d3a3;
+}
+
+.skin-rarity-list { gap: 20px; padding: 15px 8px 10px 3px; }
+.skin-rarity-heading { margin-bottom: 10px; }
+.skin-rarity-heading h4 { font-size: 13px; }
+.skin-rarity-heading span { margin-top: 4px; color: #b5c8b9; font-size: 10px; }
+.skin-rarity-heading > small { font-size: 10px; }
+.skin-card-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+
+.skin-card {
+  min-height: 190px;
+  border-radius: 10px;
+}
+
+
+.skin-empty-state {
+  display: grid;
+  min-height: 82px;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  margin: 0;
+  padding: 12px 14px;
+  border-color: #b7cec14f;
+  border-radius: 9px;
+  background: linear-gradient(110deg, #ffffff0e, #bdebd407);
+  color: #c4d2c7;
+}
+
+.skin-empty-gem { display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid #e5f6ec44; border-radius: 8px; background: #ffffff0a; color: #eaf7ef; font-size: 19px; }
+.skin-empty-state strong { display: block; color: #e3eee6; font-size: 12px; }
+.skin-empty-state p { margin: 4px 0 0; color: #aabdb0; font-size: 10px; line-height: 1.4; }
+.skin-empty-state button { padding: 8px 10px; border: 1px solid #4cba71; border-radius: 6px; background: #0a3219; color: #caffe0; cursor: pointer; font: 650 10px Inter, Arial, sans-serif; }
+.skin-empty-state button:hover { background: #10552a; }
+
+.skin-locker-page .orb-skins-footer { font-size: 9px; }
+
+/* Give the square board preview enough height to stay fully visible in its window. */
+.skin-locker-page.is-board-view .skin-rarity-heading { display: none; }
+.skin-locker-page.is-board-view .skin-catalog-toolbar { padding-bottom: 8px; }
+.skin-locker-page.is-board-view .skin-rarity-list { gap: 12px; padding-top: 0; }
+.skin-locker-page .orb-skins-footer { display: none; }
+
+@media (max-width: 1050px) and (min-width: 701px) {
+  .skin-locker-layout { grid-template-columns: minmax(145px, .2fr) minmax(0, 1fr); gap: 12px; }
+  .skin-header-stats { gap: 8px; padding: 9px; font-size: 8px; }
+  .skin-card-grid { grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); }
+}
+
+@media (max-width: 700px) {
+  .skin-locker-page .orb-skins-header { align-items: flex-start; gap: 8px; }
+  .skin-locker-page .skin-page-title-copy p { max-width: 100%; font-size: 11px; }
+  .skin-header-stats { gap: 6px; padding: 7px; font-size: 7px; }
+  .skin-header-stats strong { font-size: 10px; }
+  .skin-locker-layout { grid-template-rows: auto minmax(0, 1fr); }
+  .skin-filter-rail { gap: 9px; }
+  .skin-filter-group h3 { font-size: 8px; }
+  .skin-filter-group > button { min-height: 31px; font-size: 10px; }
+  .skin-catalog-toolbar { align-items: flex-start; gap: 8px; }
+  .skin-catalog-toolbar h3 { font-size: 18px; }
+  .skin-view-tabs { max-width: 60%; }
+  .skin-view-tabs button { min-height: 32px; gap: 5px; padding: 0 7px; font-size: 9px; }
+  .skin-view-tabs small { min-width: 17px; height: 17px; font-size: 8px; }
+  .skin-card-grid { grid-template-columns: repeat(auto-fill, minmax(138px, 1fr)); }
+  .skin-card { min-height: 185px; }
+  .skin-empty-state { grid-template-columns: 26px minmax(0, 1fr); gap: 7px; padding: 8px; }
+  .skin-empty-gem { width: 25px; height: 25px; }
+  .skin-empty-state button { grid-column: 2; justify-self: start; }
+  .skin-rarity-heading h4 { font-size: 11px; }
+  .skin-rarity-heading span { font-size: 8px; }
+  .skin-locker-page .orb-skins-footer { font-size: 7px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skin-sync-status i { animation: none; }
+}
+
+/* The title tile shows the real board grid with no text layered over it. */
+.skin-card.is-board-skin {
+  display: block;
+  width: min(100%, 340px);
+  justify-self: start;
+  min-height: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  overflow: hidden;
+}
+
+.skin-selection-mark.is-board-mark {
+  top: auto;
+  right: auto;
+  bottom: 10px;
+  left: 10px;
+  width: 27px;
+  height: 27px;
+  transform: none;
+}
+
+.skin-card-grid.board-skin-grid {
+  grid-template-columns: minmax(0, min(100%, 340px));
+}
+
+.skin-board-surface {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  border-radius: inherit;
+  background: #050706;
+}
+
+.skin-board-surface.is-title-card { padding: 6px; }
+
+.skin-board-surface .board-panel {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.skin-board-surface .board-heading,
+.skin-board-surface .lobby-player-strip,
+.skin-board-surface .board-footer,
+.skin-board-surface .empty-arena { display: none !important; }
+
+.skin-board-surface .arena {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  align-items: stretch;
+  justify-content: stretch;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: #050706;
+  box-shadow: none;
+}
+
+.skin-board-surface .grid-stage {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+  max-height: 100%;
+  filter: none;
+}
+
+.skin-board-surface .grid-wrap {
+  width: 100%;
+  height: 100%;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.skin-board-surface .cell {
+  width: auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 3px;
+  background: linear-gradient(145deg, #07100a, #040805);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--active-color), transparent 82%);
+}
+
+.skin-board-surface .critical { top: 4px; right: 6px; color: #91b99e; font-size: clamp(8px, 1vw, 13px); opacity: .65; }
+.skin-board-surface .orb-flight-layer { display: none; }
+
+@media (max-width: 700px) {
+  .skin-board-surface.is-title-card { padding: 4px; }
+}
+
+/* Rarity glass remains visible as the frame around the authentic board surface. */
+.skin-card.is-board-skin {
+  border-color: #e8fff0a6;
+  background: linear-gradient(145deg, #ffffff36, #c7f4de13 56%, #07190eaa);
+}
+
+.skin-card.is-board-skin:hover { border-color: #edf8f2; }
+
+/*
+ * Keep the live BoardPanel renderer as the source of truth here. The preview
+ * hides match-only chrome and uses the lobby's sample position; gameplay is untouched.
+ */
+.skin-board-surface .board-panel,
+.skin-board-surface .arena,
+.skin-board-surface .grid-stage,
+.skin-board-surface .grid-wrap { animation: none; }
+
+/* Orb cards reserve a square stage for the skin's future animated preview. */
+.skin-card-grid.orb-skin-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 220px));
+  gap: 12px;
+}
+
+.skin-locker-page.is-orb-view .skin-rarity-heading { display: none; }
+.skin-locker-page.is-orb-view .skin-catalog-toolbar { padding-bottom: 8px; }
+.skin-locker-page.is-orb-view .skin-rarity-list { gap: 12px; padding-top: 0; }

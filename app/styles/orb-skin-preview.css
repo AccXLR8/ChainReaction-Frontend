@@ -1,0 +1,259 @@
+/* Locker cards use the shared in-game orb cluster and surface animation. */
+.skin-card-orb-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.skin-card-orb-stage > .orbs {
+  position: relative;
+  top: auto;
+  left: auto;
+  width: min(65%, 145px);
+  transform: none;
+  animation: none;
+}
+
+/* Compact preview window, rendered in a portal above the animated lobby panes. */
+.orb-preview-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  background: #020604df;
+  backdrop-filter: blur(10px);
+  animation: orb-preview-backdrop-in 160ms ease-out both;
+}
+
+@keyframes orb-preview-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.orb-preview-dialog {
+  --preview-accent: #37ec91;
+  position: relative;
+  display: flex;
+  width: min(580px, calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--preview-accent), #52645a 35%);
+  border-radius: 15px;
+  background:
+    radial-gradient(ellipse at 50% 45%, color-mix(in srgb, var(--preview-accent), transparent 93%), transparent 58%),
+    linear-gradient(140deg, #0d1711, #080d0a 58%, #050907);
+  box-shadow: 0 26px 80px #000d, 0 0 34px color-mix(in srgb, var(--preview-accent), transparent 91%), inset 0 1px #ffffff0b;
+  color: #edf8f0;
+}
+
+.orb-preview-dialog.rarity-rare { --preview-accent: #78caff; }
+.orb-preview-dialog.rarity-epic { --preview-accent: #ff737e; }
+.orb-preview-dialog.rarity-legendary { --preview-accent: #ffd36e; }
+
+.orb-preview-header {
+  display: flex;
+  min-height: 55px;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px 10px 18px;
+  border-bottom: 1px solid #b3d8bd19;
+}
+
+.orb-preview-header h2 {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: #f4fff7;
+  font: 750 18px/1.2 Inter, Arial, sans-serif;
+  letter-spacing: -.035em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.orb-preview-header-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 7px;
+}
+
+.orb-preview-close,
+.orb-preview-replay {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  border: 1px solid #78908062;
+  border-radius: 9px;
+  background: #142019;
+  color: #e7f5eb;
+  cursor: pointer;
+  font-size: 21px;
+  line-height: 1;
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+
+.orb-preview-close:hover,
+.orb-preview-replay:hover {
+  border-color: var(--preview-accent);
+  background: #1b2c21;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--preview-accent), transparent 82%);
+}
+
+.orb-preview-replay { color: var(--preview-accent); font-size: 23px; }
+
+.orb-preview-content {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px 13px;
+  overflow: auto;
+}
+
+/* BoardPanel keeps its normal 4×4 cells and real flight layer in this frame. */
+.orb-preview-board-wrap {
+  width: min(100%, 480px, calc(100dvh - 170px));
+  min-width: 0;
+  aspect-ratio: 1;
+  flex: none;
+}
+
+.orb-preview-board-wrap > .board-panel {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.orb-preview-board-wrap .board-heading,
+.orb-preview-board-wrap .lobby-player-strip,
+.orb-preview-board-wrap .board-footer,
+.orb-preview-board-wrap .empty-arena { display: none !important; }
+
+.orb-preview-board-wrap .arena {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: #030705;
+  box-shadow: inset 0 0 24px #000b;
+}
+
+.orb-preview-board-wrap .grid-stage {
+  max-width: 100%;
+  max-height: 100%;
+  filter: none;
+}
+
+.orb-preview-board-wrap .grid-wrap { grid-template-rows: repeat(4, var(--cell)); }
+
+.orb-preview-board-wrap .cell {
+  border-radius: 5px;
+  background: linear-gradient(145deg, #07100b, #030705 78%);
+  box-shadow: 0 0 7px color-mix(in srgb, var(--active-color), transparent 72%);
+}
+
+.orb-preview-board-wrap .cell.owned {
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--owner) 11%, transparent), #060b08);
+}
+
+.orb-preview-board-wrap .critical { color: #adc2b3b8; }
+
+.orb-preview-controls {
+  display: flex;
+  min-height: 36px;
+  flex: none;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.orb-preview-equip {
+  display: inline-flex;
+  min-width: 84px;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 13px;
+  border: 1px solid #4fe896;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #27d780, #16985a);
+  color: #04140a;
+  cursor: pointer;
+  font: 700 12px Inter, Arial, sans-serif;
+}
+
+.orb-preview-equip:hover:not(:disabled) { background: linear-gradient(135deg, #51f4a1, #21ba70); }
+.orb-preview-equip:disabled { cursor: wait; opacity: .7; }
+
+.orb-preview-equipped,
+.orb-preview-locked {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid #36895a8c;
+  border-radius: 50%;
+  background: #0d2115;
+  color: #94f0b7;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.orb-preview-locked { border-color: #777b6b66; background: #171914; color: #b8bdaf; }
+.orb-preview-locked:not(:empty) {
+  width: auto;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.orb-preview-purchase { min-width: 150px; }
+.orb-preview-purchase-error,
+.orb-preview-reward-note {
+  max-width: 420px;
+  margin: 0;
+  color: #b9c6bc;
+  font: 11px/1.4 Inter, Arial, sans-serif;
+  text-align: center;
+}
+.orb-preview-purchase-error { color: #ff8791; }
+
+.orb-preview-controls > button:focus-visible,
+.orb-preview-header-actions > button:focus-visible {
+  outline: 2px solid #d7ffe5;
+  outline-offset: 2px;
+}
+
+@media (max-width: 420px) {
+  .orb-preview-dialog { width: calc(100vw - 20px); max-height: calc(100dvh - 20px); }
+  .orb-preview-content { padding: 8px 10px 10px; }
+  .orb-preview-board-wrap { width: min(100%, calc(100dvh - 150px)); }
+}

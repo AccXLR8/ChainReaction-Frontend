@@ -31,6 +31,42 @@
   isolation: isolate;
 }
 
+/* Auric Comet changes the orb material while leaving player identity on its separate rim. */
+.orbs[data-orb-skin='auric-comet'],
+.flight[data-orb-skin='auric-comet'] {
+  --owner: #ffd24a;
+}
+
+.orbs[data-orb-skin='auric-comet'] .orb-surface,
+.flight[data-orb-skin='auric-comet'] .orb-surface {
+  background: radial-gradient(
+    circle at 29% 23%,
+    #fffde2 0%,
+    #fff6a4 5%,
+    #ffe46b 15%,
+    #f9b91d 48%,
+    #bf6c08 82%,
+    #72400c 100%
+  );
+  box-shadow:
+    0 0 10px #ffd24a99,
+    0 0 22px #ffb71f59,
+    inset -2px -3px 5px #4d270a99,
+    inset 1px 1px 2px #fff7c8cc;
+}
+
+.orbs[data-orb-skin='auric-comet'] .orb-surface-texture,
+.flight[data-orb-skin='auric-comet'] .orb-surface-texture {
+  mix-blend-mode: screen;
+  opacity: 0.52;
+}
+
+.orbs[data-orb-skin='auric-comet'] .orb-surface-detail,
+.flight[data-orb-skin='auric-comet'] .orb-surface-detail {
+  opacity: 0.8;
+  filter: drop-shadow(0 0 2px #fff0a8);
+}
+
 .orb-surface-texture,
 .orb-surface-detail {
   position: absolute;
@@ -233,68 +269,6 @@
   box-shadow: inset 0 1px 0 #74f3a412;
 }
 
-.orb-skin-preview {
-  position: relative;
-  width: 92px;
-  height: 68px;
-  overflow: hidden;
-  border: 1px solid #29342d;
-  border-radius: 5px;
-  background: radial-gradient(ellipse at center, #132019, #080b09 75%);
-}
-
-.orb-skin-preview-image {
-  position: absolute;
-  z-index: 2;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.orb-skin-preview-orb {
-  position: absolute;
-  left: 29px;
-  top: 16px;
-  width: 34px;
-  height: 34px;
-  filter: drop-shadow(0 0 6px #39e58c55);
-}
-
-.orb-skin-preview-orb .orb-surface {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at 30% 25%, #fff 0, #ffffffd9 5%, #a9ffd0 14%, #39e58c 52%, #12603b 100%);
-  box-shadow: inset -2px -3px 5px #0008, inset 1px 1px 2px #ffffff80;
-}
-
-.orb-skin-preview-orb .orb-surface-detail::before {
-  content: '';
-  position: absolute;
-  left: 20%;
-  top: 19%;
-  width: 24%;
-  height: 18%;
-  border-radius: 50%;
-  background: #ffffffd9;
-  box-shadow: 0 0 5px #fff8;
-}
-
-.orb-skin-preview-orb.small-one {
-  left: 17px;
-  top: 29px;
-  width: 25px;
-  height: 25px;
-}
-
-.orb-skin-preview-orb.small-two {
-  left: 50px;
-  top: 29px;
-  width: 25px;
-  height: 25px;
-}
-
 .orb-skin-copy {
   min-width: 0;
 }
@@ -427,26 +401,6 @@
     grid-template-columns: 68px minmax(0, 1fr) 82px;
     gap: 9px;
     padding: 9px;
-  }
-
-  .orb-skin-preview {
-    width: 64px;
-    height: 60px;
-  }
-
-  .orb-skin-preview-orb {
-    left: 18px;
-    top: 13px;
-  }
-
-  .orb-skin-preview-orb.small-one {
-    left: 8px;
-    top: 28px;
-  }
-
-  .orb-skin-preview-orb.small-two {
-    left: 36px;
-    top: 28px;
   }
 
   .orb-skin-copy h3 {

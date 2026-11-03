@@ -4,12 +4,8 @@ import { BrandLockup } from '@/features/brand/BrandLockup';
 type WelcomeHeaderProps = {
   serviceStatus: string;
   user: SessionUser | null;
-  showRules: boolean;
-  showProfile: boolean;
-  showOrbSkins: boolean;
-  onShowRules: (show: boolean) => void;
-  onShowProfile: (show: boolean) => void;
-  onShowOrbSkins: (show: boolean) => void;
+  activeWindow: 'play' | 'rules' | 'profile' | 'skins' | 'shop';
+  onNavigate: (window: 'play' | 'rules' | 'profile' | 'skins' | 'shop') => void;
   onSignIn: () => void;
   onSignOut: () => void;
 };
@@ -18,38 +14,50 @@ type WelcomeHeaderProps = {
 export function WelcomeHeader({
   serviceStatus,
   user,
-  showRules,
-  showProfile,
-  showOrbSkins,
-  onShowRules,
-  onShowProfile,
-  onShowOrbSkins,
+  activeWindow,
+  onNavigate,
   onSignIn,
   onSignOut,
 }: WelcomeHeaderProps) {
-  const playIsActive = !showRules && !showProfile && !showOrbSkins;
+  const breadcrumb = {
+    play: ['PLAY', 'ONLINE ARENA'],
+    rules: ['LEARN', 'HOW TO PLAY'],
+    skins: ['CUSTOMIZE', 'SKINS'],
+    shop: ['SHOP', 'GEMS & SKINS'],
+    profile: ['ACCOUNT', 'PLAYER PROFILE'],
+  }[activeWindow];
 
   return (
     <>
       <aside className="home-sidebar">
-        <a className="brand home-brand" href="#welcome" aria-label="Superkritical home">
+        <a
+          className="brand home-brand"
+          href="#welcome"
+          aria-label="Superkritical home"
+          onClick={(event) => {
+            event.preventDefault();
+            onNavigate('play');
+          }}
+        >
           <BrandLockup />
         </a>
         <nav className="home-nav" aria-label="Main navigation">
-          <a aria-label="Play" title="Play" className={playIsActive ? 'is-active' : ''} href="#welcome" onClick={() => { onShowRules(false); onShowProfile(false); onShowOrbSkins(false); }}>
+          <button aria-label="Play" title="Play" className={activeWindow === 'play' ? 'is-active' : ''} onClick={() => onNavigate('play')}>
             <span className="sidebar-nav-icon" aria-hidden="true">◈</span><span>Play</span>
-          </a>
-          <button aria-label="How to play" title="How to play" className={showRules ? 'is-active' : ''} onClick={() => { onShowProfile(false); onShowOrbSkins(false); onShowRules(true); }}>
+          </button>
+          <button aria-label="How to play" title="How to play" className={activeWindow === 'rules' ? 'is-active' : ''} onClick={() => onNavigate('rules')}>
             <span className="sidebar-nav-icon" aria-hidden="true">⌘</span><span>How to play</span>
           </button>
-          <button aria-label="Orb skins" title="Orb skins" className={showOrbSkins ? 'is-active' : ''} onClick={() => { onShowProfile(false); onShowRules(false); onShowOrbSkins(true); }}>
-            <span className="sidebar-nav-icon" aria-hidden="true">✳</span><span>Orb skins</span>
+          <button aria-label="Skins" title="Skins" className={activeWindow === 'skins' ? 'is-active' : ''} onClick={() => onNavigate('skins')}>
+            <span className="sidebar-nav-icon" aria-hidden="true">✳</span><span>Skins</span>
           </button>
           <span className="nav-coming-soon"><span className="sidebar-nav-icon" aria-hidden="true">▤</span><span>Leaderboard <small>SOON</small></span></span>
-          <span className="nav-coming-soon"><span className="sidebar-nav-icon" aria-hidden="true">◇</span><span>Shop <small>SOON</small></span></span>
+          <button aria-label="Shop" title="Shop" className={activeWindow === 'shop' ? 'is-active' : ''} onClick={() => onNavigate('shop')}>
+            <span className="sidebar-nav-icon" aria-hidden="true">◇</span><span>Shop</span>
+          </button>
         </nav>
         <div className="home-sidebar-footer">
-          {user && <button className="sidebar-account" aria-label={`Open ${user.username} account`} onClick={() => { onShowRules(false); onShowOrbSkins(false); onShowProfile(true); }}>
+          {user && <button className={`sidebar-account ${activeWindow === 'profile' ? 'is-active' : ''}`} aria-label={`Open ${user.username} account`} onClick={() => onNavigate('profile')}>
             <span className="user-avatar" aria-hidden="true">{user.username.slice(0, 1).toUpperCase()}</span>
             <span>{user.username}</span>
           </button>}
@@ -62,7 +70,7 @@ export function WelcomeHeader({
         </div>
       </aside>
       <header className="home-topbar arena-topbar">
-        <div className="arena-breadcrumb"><span>PLAY</span><i>/</i> ONLINE ARENA</div>
+        <div className="arena-breadcrumb"><span>{breadcrumb[0]}</span><i>/</i> {breadcrumb[1]}</div>
         <div className="home-account-summary" id="account">
           {user ? (
             <div className="top-player">

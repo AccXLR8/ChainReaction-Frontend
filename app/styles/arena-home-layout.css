@@ -146,6 +146,203 @@
 .sidebar-account .user-avatar { display: grid; width: 30px; height: 30px; flex: none; place-items: center; border: 1px solid #a4ff3545; border-radius: 7px; background: #a4ff3510; color: #b6ff67; }
 .sidebar-account:hover { color: #a4ff35; }
 
+/* Lobby destinations share one fixed workspace and slide between each other. */
+.arena-window-viewport {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  min-height: 0;
+  grid-column: 2;
+  grid-row: 2;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.arena-window-panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.arena-window-panel.is-outgoing { z-index: 1; pointer-events: none; }
+.arena-window-panel.is-incoming { z-index: 2; }
+
+.arena-window-panel.is-incoming.from-left { animation: arena-window-enter-from-left 460ms cubic-bezier(.22,.75,.22,1) both; }
+.arena-window-panel.is-incoming.from-right { animation: arena-window-enter-from-right 460ms cubic-bezier(.22,.75,.22,1) both; }
+.arena-window-panel.is-outgoing.to-left { animation: arena-window-leave-to-left 460ms cubic-bezier(.22,.75,.22,1) both; }
+.arena-window-panel.is-outgoing.to-right { animation: arena-window-leave-to-right 460ms cubic-bezier(.22,.75,.22,1) both; }
+
+@keyframes arena-window-enter-from-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes arena-window-enter-from-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes arena-window-leave-to-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+@keyframes arena-window-leave-to-right {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
+.arena-window-panel > .play-stage {
+  width: 100%;
+  height: 100%;
+  grid-column: auto;
+  grid-row: auto;
+}
+
+.arena-content-page {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  padding: clamp(18px, 2.4vw, 34px);
+  border: 1px solid #168044;
+  border-radius: 13px;
+  background:
+    radial-gradient(ellipse at 100% 0, #00e84a24, transparent 48%),
+    radial-gradient(ellipse at 0 100%, #00b83f14, transparent 45%),
+    linear-gradient(145deg, #06170c, #030906 72%);
+  box-shadow: 0 0 24px #06e95025, inset 0 0 42px #10e64c0d;
+  color: #eff8f0;
+}
+
+.arena-page-header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 0 17px;
+  border-bottom: 1px solid #27a45266;
+}
+
+.arena-page-header .eyebrow-mini,
+.arena-page-header > div > span {
+  color: #9bd9ad;
+  font: 9px 'DM Mono', monospace;
+  letter-spacing: .12em;
+}
+
+.arena-page-header h1,
+.arena-page-header h2 {
+  margin: 6px 0 0;
+  color: #f4fff5;
+  font: 800 clamp(23px, 2.8vw, 36px)/1.06 Inter, Arial, sans-serif;
+  letter-spacing: -.05em;
+}
+
+.arena-content-page .rules-close {
+  flex: none;
+  border-color: #267341;
+  background: #06220f;
+  color: #e6ffe9;
+}
+
+.arena-content-page .rules-close:hover {
+  border-color: #77ff68;
+  background: #0b3518;
+  color: #aaff65;
+}
+
+.rules-page-body {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  justify-content: center;
+  overflow-y: auto;
+  scrollbar-color: #1c8b45 #06110a;
+}
+
+.rules-page .how-to-play {
+  width: min(100%, 1100px);
+  padding: 20px 0 24px;
+}
+
+.rules-page .how-to-play > .eyebrow-mini { display: none; }
+.rules-page .how-to-play > h2 { margin: 0 0 8px; font-size: clamp(27px, 3vw, 40px); }
+.rules-page .how-to-intro { max-width: 640px; margin-bottom: 17px; }
+
+.orb-skins-panel.arena-content-page {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  padding: clamp(18px, 2.4vw, 34px);
+  border-color: #168044;
+  border-radius: 13px;
+  background:
+    radial-gradient(ellipse at 100% 0, #00e84a24, transparent 48%),
+    radial-gradient(ellipse at 0 100%, #00b83f14, transparent 45%),
+    linear-gradient(145deg, #06170c, #030906 72%);
+  box-shadow: 0 0 24px #06e95025, inset 0 0 42px #10e64c0d;
+}
+
+.orb-skins-panel .orb-skins-header { padding-bottom: 17px; border-bottom-color: #27a45266; }
+.orb-skins-panel .orb-skins-header h2 { font-size: clamp(23px, 2.8vw, 36px); }
+.orb-skins-panel .orb-skins-intro { margin: 16px 0; color: #bbd1c1; font-size: 13px; }
+.orb-skins-panel .orb-skins-content { width: min(100%, 1040px); align-self: center; }
+.orb-skins-panel .orb-skin-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); }
+.orb-skins-panel .orb-skin-card { border-color: #176334; background: linear-gradient(120deg, #092614, #06170c); }
+.orb-skins-panel .orb-skin-card.is-equipped { border-color: #59ea67; box-shadow: 0 0 16px #13dc4730, inset 0 0 16px #10e94c15; }
+.orb-skins-panel .orb-skins-footer { border-top-color: #27a45266; color: #95b29c; }
+
+.profile-panel.profile-page.arena-content-page {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  padding: clamp(18px, 2.4vw, 34px);
+  border-color: #168044;
+  border-radius: 13px;
+  background:
+    radial-gradient(ellipse at 100% 0, #00e84a24, transparent 48%),
+    radial-gradient(ellipse at 0 100%, #00b83f14, transparent 45%),
+    linear-gradient(145deg, #06170c, #030906 72%);
+  box-shadow: 0 0 24px #06e95025, inset 0 0 42px #10e64c0d;
+}
+
+.profile-page .profile-panel-head { position: static; flex: none; background: transparent; }
+.profile-page .profile-body { max-width: 1120px; overflow-y: auto; scrollbar-color: #1c8b45 #06110a; }
+.profile-page .profile-lookup,
+.profile-page .profile-identity,
+.profile-page .profile-section,
+.profile-page .profile-editor,
+.profile-page .password-section { width: min(100%, 1120px); }
+
+@media (max-width: 1050px) and (min-width: 701px) {
+  .arena-window-viewport { grid-column: 2; grid-row: 2; }
+}
+
+@media (max-width: 700px) {
+  .arena-window-viewport { grid-column: 1; grid-row: 3; }
+  .arena-window-panel > .play-stage { grid-column: auto; grid-row: auto; }
+  .arena-content-page,
+  .orb-skins-panel.arena-content-page,
+  .profile-panel.profile-page.arena-content-page { padding: 14px; border-radius: 8px; }
+  .arena-page-header { padding-bottom: 12px; }
+  .rules-page .how-to-play { padding: 14px 0 18px; }
+  .orb-skins-panel .orb-skin-list { grid-template-columns: minmax(0, 1fr); }
+  .orb-skins-panel .orb-skin-card { grid-template-columns: 64px minmax(0, 1fr) 82px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arena-window-panel.is-incoming,
+  .arena-window-panel.is-outgoing { animation-duration: 1ms; }
+}
+
 .arena-topbar {
   position: relative;
   z-index: 5;
@@ -702,4 +899,10 @@
 }
 
 .sidebar-account:hover { color: #a4ff35; }
+.sidebar-account.is-active {
+  border-color: #63f76c;
+  background: linear-gradient(115deg, #124b22, #092b15);
+  box-shadow: 0 0 18px #19ed504f, inset 0 0 14px #42ff3d21;
+  color: #f4fff4;
+}
 

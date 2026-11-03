@@ -1,6 +1,6 @@
 import type { CSSProperties, RefObject } from 'react';
 import type { Cell, GameState, ReactionEffects } from './types';
-import { OrbMaterial } from './OrbMaterial';
+import { OrbCluster } from './OrbCluster';
 import type { OrbSkinAppearance } from './orb-skins';
 
 export type BoardPanelProps = {
@@ -144,56 +144,14 @@ export function BoardPanel({
                     >
                       <span className="critical">{criticalMass}</span>
                       {cell.orb_count > 0 && (
-                        <span
-                          className={`orbs count-${cell.orb_count}`}
-                          data-orb-skin={orbAssetKey}
-                          data-orb-side={orbSide}
-                          style={
-                            {
-                              '--count': Math.min(cell.orb_count, 4),
-                              '--vibration-duration':
-                                criticalMass - cell.orb_count <= 1
-                                  ? '180ms'
-                                  : criticalMass - cell.orb_count === 2
-                                    ? '300ms'
-                                    : '650ms',
-                              '--spin-duration':
-                                criticalMass - cell.orb_count <= 1
-                                  ? '1.7s'
-                                  : criticalMass - cell.orb_count === 2
-                                    ? '2.9s'
-                                    : '4.4s',
-                              '--vibration-scale':
-                                criticalMass - cell.orb_count <= 1
-                                  ? '1.04'
-                                  : criticalMass - cell.orb_count === 2
-                                    ? '1.02'
-                                    : '1.008',
-                            } as CSSProperties
-                          }
-                        >
-                          <span className="orb-cluster">
-                            <span className="orb-ring" key={Math.min(cell.orb_count, 4)}>
-                              {Array.from(
-                                { length: Math.min(cell.orb_count, 4) },
-                                (_, orbIndex) => (
-                                  <span
-                                    className="atom"
-                                    key={orbIndex}
-                                    style={{ '--orb-i': orbIndex } as CSSProperties}
-                                  >
-                                    <OrbMaterial
-                                      assetKey={orbAssetKey}
-                                      assets={orbSkin?.assets}
-                                      className="orb-spin-preview"
-                                    />
-                                    <span className="orb-owner-rim" />
-                                  </span>
-                                ),
-                              )}
-                            </span>
-                          </span>
-                        </span>
+                        <OrbCluster
+                          count={cell.orb_count}
+                          assetKey={orbAssetKey}
+                          assets={orbSkin?.assets}
+                          ownerColor={cell.owner === null ? 'transparent' : colorForSlot(cell.owner)}
+                          side={orbSide}
+                          criticalMass={criticalMass}
+                        />
                       )}
                       {bursting && <span className="burst" />}
                     </button>

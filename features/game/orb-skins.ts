@@ -3,6 +3,9 @@ import type { CSSProperties } from 'react';
 export const DEFAULT_ORB_SKIN_ID = 'classic';
 export const DEFAULT_ORB_SKIN_ASSET_KEY = 'classic';
 
+export const SKIN_RARITIES = ['common', 'rare', 'epic', 'legendary'] as const;
+export type SkinRarity = (typeof SKIN_RARITIES)[number];
+
 export type OrbSkinCollisionSound = {
   url: string;
   mime_type: string;
@@ -20,6 +23,12 @@ export type OrbSkinAssets = {
 export type OrbSkinCatalogItem = {
   id: string;
   name: string;
+  /** New catalogs provide this; older catalogs and the base skin default to Common. */
+  rarity?: SkinRarity;
+  /** Price in the player's server-owned Gem wallet; null means this skin is not for sale. */
+  price_gems?: number | null;
+  /** Achievement codes that award this skin when earned. */
+  unlock_achievement_codes?: string[];
   /** Resolves this skin's visual and sound assets; no separate sound selection exists. */
   asset_key: string;
   preview_asset_key: string;
@@ -38,6 +47,7 @@ export type OrbSkinAppearance = {
 export const DEFAULT_ORB_SKIN: OrbSkinCatalogItem = {
   id: DEFAULT_ORB_SKIN_ID,
   name: 'Classic Orb',
+  rarity: 'common',
   asset_key: DEFAULT_ORB_SKIN_ASSET_KEY,
   preview_asset_key: DEFAULT_ORB_SKIN_ASSET_KEY,
   enabled: true,
@@ -48,6 +58,12 @@ export const DEFAULT_ORB_SKIN: OrbSkinCatalogItem = {
     },
   },
 };
+
+export function normalizeSkinRarity(value: unknown): SkinRarity {
+  if (typeof value !== 'string') return 'common';
+  const normalized = value.toLowerCase() as SkinRarity;
+  return SKIN_RARITIES.includes(normalized) ? normalized : 'common';
+}
 
 const isSafeSkinKey = (value: unknown): value is string =>
   typeof value === 'string' && /^[a-zA-Z0-9_-]{1,64}$/.test(value);
@@ -125,6 +141,13 @@ export function normalizeOrbSkinCatalog(value: unknown): OrbSkinCatalogItem[] {
     return [{
       id: skin.id,
       name: skin.name,
+      rarity: normalizeSkinRarity(skin.rarity),
+      price_gems: Number.isSafeInteger(skin.price_gems) && (skin.price_gems ?? 0) > 0
+        ? skin.price_gems
+        : null,
+      unlock_achievement_codes: Array.isArray(skin.unlock_achievement_codes)
+        ? skin.unlock_achievement_codes.filter((code): code is string => typeof code === 'string')
+        : [],
       asset_key: skin.asset_key,
       preview_asset_key: isSafeSkinKey(skin.preview_asset_key)
         ? skin.preview_asset_key

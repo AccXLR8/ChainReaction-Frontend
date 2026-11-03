@@ -1,0 +1,263 @@
+.shop-page {
+  gap: 0;
+}
+
+.shop-header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 2px 0 18px;
+  border-bottom: 1px solid #27a45266;
+}
+
+.shop-header .eyebrow-mini {
+  color: #9bd9ad;
+  font: 9px 'DM Mono', monospace;
+  letter-spacing: .14em;
+}
+
+.shop-header h1 {
+  margin: 6px 0 0;
+  color: #f4fff5;
+  font: 800 clamp(26px, 3vw, 38px)/1 Inter, Arial, sans-serif;
+}
+
+.shop-wallet {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px 7px 12px;
+  border: 1px solid #4cae6970;
+  border-radius: 10px;
+  background: linear-gradient(130deg, #0d2817, #08170d);
+  box-shadow: inset 0 0 18px #23e96c0c;
+}
+
+.shop-gem-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid #a4ff3547;
+  border-radius: 8px;
+  background: #a4ff3512;
+  color: #b7ff50;
+  font-size: 19px;
+  text-shadow: 0 0 12px #a4ff35b0;
+}
+
+.shop-wallet > span:nth-child(2) { display: grid; gap: 1px; min-width: 52px; }
+.shop-wallet strong { color: #f5fff5; font: 750 16px/1.1 Inter, sans-serif; }
+.shop-wallet small { color: #92ad98; font: 9px 'DM Mono', monospace; text-transform: uppercase; }
+
+.shop-wallet button,
+.shop-buy-button,
+.shop-gem-pack button {
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid #a4ff3590;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #b4ff41, #6de72c);
+  color: #061007;
+  font: 800 11px Inter, sans-serif;
+  cursor: pointer;
+  transition: filter 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+}
+
+.shop-wallet button:hover,
+.shop-buy-button:hover:not(:disabled),
+.shop-gem-pack button:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 0 16px #9cff3570;
+}
+
+.shop-content {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+  padding: clamp(18px, 2.2vw, 30px) 3px 5px;
+  scrollbar-color: #1c8b45 #06110a;
+}
+
+.shop-skin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  align-content: start;
+  gap: 16px;
+}
+
+.shop-skin-card {
+  --shop-rarity: #eaf4eb;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--shop-rarity) 38%, transparent);
+  border-radius: 12px;
+  background:
+    radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--shop-rarity) 15%, transparent), transparent 65%),
+    linear-gradient(155deg, #0c2114, #07120b 75%);
+  box-shadow: inset 0 0 30px color-mix(in srgb, var(--shop-rarity) 7%, transparent), 0 7px 22px #0004;
+}
+
+.shop-skin-card.rarity-rare { --shop-rarity: #79bdff; }
+.shop-skin-card.rarity-epic { --shop-rarity: #ff687c; }
+.shop-skin-card.rarity-legendary { --shop-rarity: #ffd36e; }
+.shop-skin-card.rarity-legendary[data-unlock='ranked-streak'] {
+  background:
+    radial-gradient(ellipse at 50% 22%, #ffd34e22, transparent 62%),
+    linear-gradient(155deg, #261b08, #100d08 75%);
+  box-shadow: inset 0 0 32px #ffca3b12, 0 7px 22px #0005;
+}
+
+.shop-skin-preview {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 154px;
+  place-items: center;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--shop-rarity) 25%, transparent);
+  background: transparent;
+  cursor: pointer;
+}
+
+.shop-skin-preview::before {
+  position: absolute;
+  width: 108px;
+  height: 108px;
+  border: 1px solid color-mix(in srgb, var(--shop-rarity) 25%, transparent);
+  border-radius: 50%;
+  content: '';
+  box-shadow: 0 0 35px color-mix(in srgb, var(--shop-rarity) 12%, transparent), inset 0 0 20px color-mix(in srgb, var(--shop-rarity) 8%, transparent);
+}
+
+.shop-skin-preview .orbs {
+  position: relative;
+  top: auto;
+  left: auto;
+  z-index: 1;
+  width: 112px;
+  height: 112px;
+  transform: none;
+}
+.shop-skin-preview .orb-cluster { width: 100%; height: 100%; }
+.shop-skin-preview .atom { width: 58%; left: 21%; top: 21%; }
+
+.shop-skin-rarity {
+  position: absolute;
+  right: 11px;
+  bottom: 10px;
+  color: var(--shop-rarity);
+  font: 8px 'DM Mono', monospace;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.shop-skin-info {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 11px 11px;
+}
+
+.shop-skin-info > div { min-width: 0; }
+.shop-skin-info h2 { overflow: hidden; margin: 0 0 5px; color: #eff8f0; font: 700 13px/1.2 Inter, sans-serif; text-overflow: ellipsis; white-space: nowrap; }
+.shop-skin-info span { color: #b8ff69; font: 10px 'DM Mono', monospace; }
+.shop-reward-mark {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  place-items: center;
+  border: 1px solid #a87519;
+  border-radius: 50%;
+  background: radial-gradient(circle, #6f4a11, #211806 72%);
+  color: #ffd76c !important;
+  font: 700 15px/1 Inter, sans-serif !important;
+  box-shadow: 0 0 15px #ffc64022;
+}
+.shop-reward-mark.is-unlocked { border-color: #42db8a; color: #76f1a8 !important; }
+.shop-buy-button { min-width: 62px; min-height: 33px; }
+.shop-buy-button:disabled,
+.shop-gem-pack button:disabled { cursor: wait; opacity: .7; }
+
+.shop-message {
+  flex: none;
+  margin: 11px 0 0;
+  padding: 9px 12px;
+  border: 1px solid #23834c;
+  border-radius: 7px;
+  background: #0b2114;
+  color: #afff79;
+  font: 12px Inter, sans-serif;
+}
+
+.shop-message.is-error { border-color: #b34d5a; background: #291217; color: #ff9ba4; }
+
+.shop-empty-state {
+  display: grid;
+  min-height: 220px;
+  align-content: center;
+  justify-items: center;
+  gap: 13px;
+  color: #a5bca9;
+  text-align: center;
+}
+
+.shop-empty-state p { margin: 0; font: 500 14px Inter, sans-serif; }
+.shop-loading-mark { color: #a4ff35; font-size: 30px; text-shadow: 0 0 20px #a4ff3580; }
+
+.shop-modal-backdrop {
+  position: fixed;
+  z-index: 1100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: #020704c9;
+  backdrop-filter: blur(7px);
+}
+
+.shop-gems-dialog {
+  width: min(100%, 400px);
+  max-height: min(80dvh, 560px);
+  overflow: auto;
+  padding: 18px;
+  border: 1px solid #39b766;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #0d2114, #050b07 80%);
+  box-shadow: 0 18px 70px #000b, 0 0 30px #29e96a24;
+  color: #f2fff3;
+}
+
+.shop-gems-dialog > header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.shop-gems-dialog h2 { margin: 0; font: 800 20px Inter, sans-serif; }
+.shop-gems-dialog > header button { width: 32px; height: 32px; border: 1px solid #718176; border-radius: 6px; background: transparent; color: #eff8f0; font-size: 22px; cursor: pointer; }
+.shop-gem-pack-list { display: grid; gap: 8px; }
+.shop-gem-pack { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 12px; border: 1px solid #355c40; border-radius: 8px; background: #0b1a10; }
+.shop-gem-pack > div { display: flex; align-items: baseline; gap: 6px; }
+.shop-gem-pack strong { color: #d5ff9c; font: 800 17px Inter, sans-serif; }
+.shop-gem-pack span { color: #9bb4a0; font: 11px 'DM Mono', monospace; }
+.shop-gem-pack button { min-width: 94px; }
+.shop-no-packs { margin: 18px 2px 6px; color: #a9bcae; font: 13px Inter, sans-serif; }
+
+@media (max-width: 700px) {
+  .shop-header { align-items: flex-start; padding-bottom: 12px; }
+  .shop-wallet { min-height: 46px; gap: 7px; padding: 5px 6px 5px 8px; }
+  .shop-wallet button { min-height: 32px; padding: 0 8px; font-size: 10px; }
+  .shop-skin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .shop-skin-preview { height: 125px; }
+  .shop-skin-info { align-items: flex-start; flex-direction: column; }
+  .shop-buy-button { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-wallet button, .shop-buy-button, .shop-gem-pack button { transition: none; }
+}

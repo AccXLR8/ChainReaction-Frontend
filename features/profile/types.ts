@@ -21,6 +21,7 @@ export type Achievement = {
   badge_image_url: string;
   earned_at: string | null;
   unlocked: boolean;
+  orb_skin_reward_ids?: string[];
 };
 
 export type PlayerProfile = {
